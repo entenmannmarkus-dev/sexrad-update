@@ -166,6 +166,11 @@
     font:700 min(11vh,8vw)/1.05 Georgia,serif;text-transform:uppercase;color:#f6e7c1;text-align:center;padding:0 4vw;
     text-shadow:0 4px 0 #3a070b,0 0 30px #000,0 0 10px #000;opacity:0;transition:opacity .3s}
   #tResult.show{opacity:1}
+  #tResult{flex-direction:column;gap:2vh}
+  #tResult.img{background:rgba(0,0,0,.72);font-size:min(7vh,5vw)}
+  #tImgBox{position:relative;overflow:hidden;border-radius:14px;border:2px solid #c9a24e;box-shadow:0 10px 40px #000;display:none;background:#000}
+  #tResult.img #tImgBox{display:block}
+  #tImgBox img,#tImgBox video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform-origin:50% 50%}
 
   /* ---------- Video-Zuschneider ---------- */
   #mimp{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:60;display:none;align-items:center;justify-content:center}
@@ -343,7 +348,7 @@
 </div>
 
 <div id="timerView">
-  <div id="tStage"><canvas id="tcv"></canvas><div id="tResult"></div></div>
+  <div id="tStage"><canvas id="tcv"></canvas><div id="tResult"><div id="tImgBox"></div><div id="tTxt"></div></div></div>
   <div id="tRail">
     <div id="tClock">01:00</div>
     <div class="trow"><button id="tMinus">−</button><button id="tPlus">+</button></div>
@@ -911,16 +916,37 @@ function pickWeighted(fields) {
   return ws.length - 1;
 }
 // Ziel wird vorher (gewichtet) gezogen, dann wird genau dorthin gedreht.
+/* Dreh-Algorithmus: jede Drehung bekommt ein anderes Verhalten
+   (Dauer, Umdrehungen, Auslauf, Überschwingen, Zögern), nie zweimal dasselbe hintereinander */
+const SPIN_PROFILES = [
+  {name:'klassik', dur:[0.9, 1.1], turns:[1.0, 1.2], ease:t => 1 - Math.pow(1 - t, 4)},
+  {name:'lang',    dur:[1.15, 1.35], turns:[1.3, 1.6], ease:t => 1 - Math.pow(1 - t, 3)},
+  {name:'zögern',  dur:[1.05, 1.3], turns:[0.9, 1.1], ease:t => 1 - Math.pow(1 - t, 5.5)},
+  {name:'schnell', dur:[0.75, 0.9], turns:[0.8, 1.0], ease:t => 1 - Math.pow(1 - t, 3.5)},
+  {name:'überschwingen', dur:[0.95, 1.15], turns:[1.0, 1.25], ease:t => 1 - Math.pow(1 - t, 4), over:[0.25, 0.55]},
+  {name:'zurückrollen', dur:[1.0, 1.2], turns:[1.0, 1.2], ease:t => 1 - Math.pow(1 - t, 4.5), over:[-0.45, -0.2]},
+];
+let lastProfile = -1;
+const rnd = (a, b) => a + Math.random() * (b - a);
+function pickProfile() {
+  let i; do { i = Math.floor(Math.random() * SPIN_PROFILES.length); } while (i === lastProfile && SPIN_PROFILES.length > 1);
+  lastProfile = i; return SPIN_PROFILES[i];
+}
 function spinAnim(w, redraw, secs) {
   return new Promise(res => {
-    const n = w.fields.length, seg = TAU / n, target = pickWeighted(w.fields), u = 0.15 + Math.random() * 0.7;
-    const rot0 = w.rot || 0;
+    const n = w.fields.length, seg = TAU / n, target = pickWeighted(w.fields), u = 0.12 + Math.random() * 0.76;
+    const P = pickProfile(), rot0 = w.rot || 0;
     let dd = (-(target + u) * seg - rot0) % TAU; if (dd < 0) dd += TAU;
-    const total = Math.max(3, Math.round(secs * 1.15)) * TAU + dd, dur = secs * 1000, t0 = performance.now();
+    const turns = Math.max(2, Math.round(secs * 1.15 * rnd(...P.turns)));
+    const total = turns * TAU + dd, dur = secs * 1000 * rnd(...P.dur), t0 = performance.now();
+    // Überschwingen/Zurückrollen: kurz über das Ziel hinaus (bzw. davor) und zurück – bleibt im Zielfeld
+    const ov = P.over ? rnd(...P.over) * seg * Math.min(u, 1 - u) * 1.6 : 0;
+    w._spinProfile = P.name;
     let last = segAt(w), lastTick = 0;
     const f = now => {
-      const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 4);
-      w.rot = rot0 + total * e;
+      const t = Math.min(1, (now - t0) / dur), e = P.ease(t);
+      const bump = ov && t > 0.7 ? ov * Math.sin(Math.PI * (t - 0.7) / 0.3) : 0;
+      w.rot = rot0 + total * e + bump;
       const s = segAt(w);
       if (s !== last) { last = s; if (now - lastTick > 28) { tick(); lastTick = now; } }
       redraw(now);
@@ -1075,8 +1101,15 @@ async function slotSpin() {
   const wl = vis.map(i => S.wheels[i]), secs = S.settings.spinSec;
   const targets = wl.map(w => pickWeighted(w.fields));
   const starts = wl.map(w => Math.round(w._reel || 0));
-  const ends = wl.map((w, k) => { const n = w.fields.length; let e = starts[k] + (Math.max(3, Math.round(secs * 1.4)) + k) * n; return e + (((targets[k] - e) % n) + n) % n; });
-  const durs = wl.map((_, k) => secs * 1000 * 0.6 + k * Math.min(500, secs * 1000 * 0.4 / Math.max(1, vis.length - 1)));
+  const ends = wl.map((w, k) => { const n = w.fields.length; let e = starts[k] + (Math.max(3, Math.round(secs * 1.4)) + Math.floor(Math.random() * 3)) * n; return e + (((targets[k] - e) % n) + n) % n; });
+  // Stopp-Reihenfolge und Tempo je Drehung zufällig: links→rechts, rechts→links, gemischt oder fast gleichzeitig
+  const nR = wl.length, orderMode = Math.floor(Math.random() * 4);
+  let order = wl.map((_, k) => k);
+  if (orderMode === 1) order.reverse(); else if (orderMode === 2) order.sort(() => Math.random() - 0.5);
+  const gap = orderMode === 3 ? rnd(60, 160) : Math.min(rnd(350, 650), secs * 1000 * 0.45 / Math.max(1, nR - 1));
+  const base = secs * 1000 * rnd(0.5, 0.75), rank = order.map((_, i) => order.indexOf(i));
+  const durs = wl.map((_, k) => base + rank[k] * gap + rnd(-80, 80));
+  const pows = wl.map(() => rnd(2.5, 4.5)), wob = wl.map(() => Math.random() < 0.5 ? rnd(0.04, 0.12) : 0);
   const total = Math.max(...durs), stopped = wl.map(() => false), last = wl.map(() => null);
   let lastTick = 0;
   SLOT.win = -1;
@@ -1087,8 +1120,8 @@ async function slotSpin() {
       wl.forEach((w, k) => {
         if (stopped[k]) return;
         const t = Math.min(1, el / durs[k]);
-        const e = t < 1 ? 1 - Math.pow(1 - t, 3) : 1;
-        w._reel = starts[k] + (ends[k] - starts[k]) * e + (t < 1 && t > 0.9 ? Math.sin((t - 0.9) * 31.4) * 0.06 : 0);
+        const e = t < 1 ? 1 - Math.pow(1 - t, pows[k]) : 1;
+        w._reel = starts[k] + (ends[k] - starts[k]) * e + (t < 1 && t > 0.88 && wob[k] ? Math.sin((t - 0.88) / 0.12 * Math.PI) * wob[k] : 0);
         const c = Math.round(w._reel);
         if (c !== last[k]) { last[k] = c; if (now - lastTick > 35) { tick(); lastTick = now; } }
         if (t >= 1) { stopped[k] = true; w._reel = targets[k]; stopSound(); }
@@ -1268,7 +1301,7 @@ async function timerRun() {
   const w = S.timer.wheel;
   while (alive()) {
     let rem = Math.max(1, Math.round(S.timer.seconds));
-    showClock(rem); $('#tResult').classList.remove('show'); w._hl = null; renderTimer();
+    showClock(rem); w._hl = null; renderTimer();   // Ergebnis (Bild + Text) bleibt bis zur nächsten Drehung stehen
     while (rem > 0 && alive()) {
       await sleep(1000); if (!alive()) break;
       rem--; showClock(rem);
@@ -1280,14 +1313,14 @@ async function timerRun() {
       T.flash = 0; renderTimer(); await sleep(170);
     }
     if (!alive()) break;
-    T.flash = 0;
+    T.flash = 0; timerResultHide();
     const res = await spinAnim(w, now => { T.flash = (Math.floor(now / 160) % 2) + 1; renderTimer(now); }, S.settings.spinSec);
     T.flash = 0; if (!alive()) break;
     stopSound(); await flashWin(w, res, renderTimer);
     const f = w.fields[res], line = resultLine(w, f, res);
     quizLog(f);
     toyPlay(f.toy);
-    $('#tResult').textContent = line; $('#tResult').classList.add('show');
+    await timerResultShow(f, line);
     if (S.timer.voice) await speak((S.timer.prefix ? S.timer.prefix + ' ' : '') + line);
     if (!alive()) break;
     await sleep(clamp(+S.timer.pause, 0, 120) * 1000);
@@ -1295,9 +1328,28 @@ async function timerRun() {
   }
   if (T.tok === tok) { T.run = false; T.flash = 0; wakeLock(false); updT(); }
 }
+// Ergebnis des Timer-Rads: Bild (mit Ausschnitt) und darunter die Beschreibung
+async function timerResultShow(f, line) {
+  const box = $('#tImgBox'), r = $('#tResult');
+  box.innerHTML = ''; r.classList.remove('img');
+  $('#tTxt').textContent = line;
+  if (f.media) {
+    const url = await mediaURL(f.media.id);
+    if (url) {
+      const ar = innerWidth / innerHeight;
+      box.style.aspectRatio = ar.toFixed(4); box.style.width = `min(86vw, ${(58 * ar).toFixed(1)}vh)`;
+      if (f.media.type === 'video') { const v = document.createElement('video'); v.src = url; v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+        v.addEventListener('loadedmetadata', () => { v.currentTime = +f.media.start || 0; v.play().catch(() => {}); }); box.appendChild(v); }
+      else { const im = new Image(); im.src = url; im.style.transform = cropCss(f.media.crop); box.appendChild(im); }
+      r.classList.add('img');
+    }
+  }
+  r.classList.add('show');
+}
+function timerResultHide() { const r = $('#tResult'); r.classList.remove('show', 'img'); $('#tImgBox').querySelectorAll('video').forEach(v => v.pause()); $('#tImgBox').innerHTML = ''; }
 function timerStop() { toyStop(); T.run = false; T.tok++; T.flash = 0; stopSpeech(); wakeLock(false); updT(); }
 function openTimer() {
-  closePanel(); $('#timerView').classList.add('show'); $('#tResult').classList.remove('show');
+  closePanel(); $('#timerView').classList.add('show'); timerResultHide();
   goFullscreen(); requestAnimationFrame(() => updT());
 }
 
@@ -1368,7 +1420,10 @@ function renderPanel() {
       <span class="sw" style="background:${segColor(PALETTES[tw.palette], i, tw.fields.length)}"></span>
       <input type="text" data-tf="${i}" data-tfp="text" value="${esc(f.text)}" placeholder="Ansage ${i + 1}">
       <input type="number" min="0" max="100" data-tf="${i}" data-tfp="weight" value="${f.weight}" title="Gewicht">
-      <button class="x" data-ta="del" data-tf="${i}">✕</button>${toyRow(`data-tf="${i}"`, f.toy)}</div>`).join('');
+      <button class="x" data-ta="del" data-tf="${i}">✕</button>
+      <div style="grid-column:1/-1;display:flex;gap:6px;align-items:center">${f.media
+        ? `<button class="medbtn" data-ta="media" data-tf="${i}">🖼 Bild ansehen / ändern</button><span class="hint">${esc(f.media.name || '')}</span><button class="x" data-ta="unmedia" data-tf="${i}">🗑</button>`
+        : `<button class="medbtn" data-ta="media" data-tf="${i}">🖼 Bild hinzufügen</button>`}</div>${toyRow(`data-tf="${i}"`, f.toy)}</div>`).join('');
   const palOpts = sel => Object.entries(PALETTES).map(([k, v]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${v.name}</option>`).join('');
 
   P.innerHTML = `
@@ -1624,6 +1679,8 @@ function initPanelEvents() {
     }
     if (b.dataset.ta) {
       const tw = S.timer.wheel;
+      if (b.dataset.ta === 'media') { openMediaDlg({kind:'timer', f:+b.dataset.tf}, true); return; }
+      if (b.dataset.ta === 'unmedia') { const tf = tw.fields[+b.dataset.tf], mid = tf.media && tf.media.id; tf.media = null; delMedia(mid); }
       if (b.dataset.ta === 'add' && tw.fields.length < T_MAX) tw.fields.push(newField());
       if (b.dataset.ta === 'del') {
         if (tw.fields.length <= T_MIN) { toast('Timer-Rad: mindestens ' + T_MIN + ' Felder'); return; }
@@ -1709,14 +1766,14 @@ function cropApply() {
   $('#mimpImg').style.transform = cropCss(c); $('#mZ').value = c.z; $('#mZL').textContent = Math.round(c.z * 100) + ' %';
 }
 function cropFrameSize() { const ar = innerWidth / innerHeight, fr = $('#mimpFrame'); fr.style.aspectRatio = ar.toFixed(4); fr.style.width = `min(100%, ${(52 * ar).toFixed(2)}vh)`; }
-const fieldOf = t => t.kind === 'joker' ? S.joker : S.wheels[t.w].fields[t.f];
+const fieldOf = t => t.kind === 'joker' ? S.joker : t.kind === 'timer' ? S.timer.wheel.fields[t.f] : S.wheels[t.w].fields[t.f];
 const fmtS = s => (+s || 0).toFixed(1) + ' s';
 function pickMedia(t) { openMediaDlg(t, true); }
 function openTrim(f) { openMediaDlg(f === S.joker ? {kind:'joker'} : {kind:'wheel', w:S.active, f:S.wheels[S.active].fields.indexOf(f)}, false); }
 async function openMediaDlg(t, pick) {
   closeMediaDlg(true);
   const f = fieldOf(t); MI.t = t; MI.f = f; MI.file = null; MI.loop = false;
-  $('#mimpT').textContent = t.kind === 'joker' ? 'Video / Foto für den JOKER'
+  $('#mimpT').textContent = t.kind === 'joker' ? 'Video / Foto für den JOKER' : t.kind === 'timer' ? `Bild für Timer-Feld ${t.f + 1}${f.text ? ': ' + f.text : ''}`
     : `Video / Foto für Feld ${t.f + 1}${f.text ? ': ' + f.text : ''}`;
   $('#mimp').classList.add('show');
   if (!f.media && pick) { $('#fileMedia').value = ''; $('#fileMedia').click(); }
@@ -2677,7 +2734,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110108;
+const APP_BUILD = 2026110109;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
