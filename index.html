@@ -473,6 +473,10 @@ function normalize(o) {
   s.joker.seqs = (Array.isArray(s.joker.seqs) ? s.joker.seqs : []).map(q => ({id:String(q.id || 'q' + uid()), name:String(q.name || 'Abfolge'),
     steps:(Array.isArray(q.steps) ? q.steps : []).map(st => ({t:String(st.t || 'w0'), n:clamp(Math.round(+st.n || 1), 1, 50)}))}));
   s.presets = (Array.isArray(o.presets) ? o.presets : []).map(normCard).filter(Boolean);
+  // Abläufe: gespeicherte Rad-Ketten mit Beispiel-Durchläufen (null = Beispiel noch nicht angelegt)
+  s.flows = Array.isArray(o.flows) ? o.flows.filter(x => x && Array.isArray(x.wheels) && x.wheels.length).map(x => ({id:String(x.id || 'f' + uid()),
+    name:String(x.name || 'Ablauf'), created:+x.created || Date.now(), wheels:x.wheels.slice(0, MAX_WHEELS).map((w, i) => normWheel(w, i)),
+    examples:(Array.isArray(x.examples) ? x.examples : []).filter(Array.isArray).map(e => e.map(String)).slice(0, 100)})) : null;
   s.snapshot = (o.snapshot && Array.isArray(o.snapshot.wheels))
     ? {active:+o.snapshot.active || 0, wheels:o.snapshot.wheels.map((w, i) => normWheel(w, i))} : null;
   if (!s.wheels.some(w => w.enabled)) s.wheels[0].enabled = true;
@@ -931,6 +935,7 @@ async function flashWin(w, idx, redraw) {
 }
 
 let busy = false;
+const LASTRUN = [];   // Ergebnisse des letzten Durchlaufs (für Abläufe)
 async function doSpin(idx, depth = 0, jockey = false) {
   if (busy) return;
   busy = true; ac(); setBusy(true); closePanel();
@@ -942,6 +947,8 @@ async function doSpin(idx, depth = 0, jockey = false) {
   stopSound();
   await flashWin(w, res, render);
   w.history = [resultLine(w, w.fields[res], res), ...(w.history || [])].slice(0, 5);
+  if (depth === 0) LASTRUN.length = 0;
+  LASTRUN.push(String(w.fields[res].text || resultLine(w, w.fields[res], res)).replace(/\n/g, ' '));
   quizLog(w.fields[res]);
   save();
   const next = await showResult(w, res, depth);
@@ -1421,6 +1428,24 @@ function renderPanel() {
     <button class="b" data-act="testVoice">🔊 Stimme testen</button>
     <button class="b pri" data-act="openTimer">⏱ Timer öffnen</button></details>
 
+  <details ${op('flows')} data-sec="flows"><summary>🔗 Abläufe (${(S.flows || []).length})</summary>
+    <div class="hint">Ein Ablauf ist eine Kette von Rädern (Feld → nächstes Rad). Speichere die aktuellen Räder als Ablauf, lade ihn später wieder und lege Beispiel-Durchläufe dazu ab.</div>
+    <div class="mrow" style="display:flex;gap:6px;margin:6px 0"><input id="flowName" placeholder="Name des Ablaufs" style="flex:1">
+      <button class="b pri" data-act="flowSave">＋ Aktuelle Räder speichern</button></div>
+    ${(S.flows || []).map((fl, i) => { const ps = flowPaths(fl.wheels), lim = 60;
+      return `<div class="flow" style="border:1px solid #3a3a3e;border-radius:10px;padding:8px;margin:6px 0">
+      <b style="color:#ffe08a">${esc(fl.name)}</b>
+      <div class="hint">${fl.wheels.map(w => esc(w.title)).join(' → ')} · ${ps.length} mögliche Varianten</div>
+      <div style="margin-top:4px"><button class="b" data-act="flowLoad" data-i="${i}">▶ Laden</button>
+        <button class="b" data-act="flowEx" data-i="${i}">💾 Letzten Durchlauf als Beispiel</button>
+        <button class="b" data-act="flowRnd" data-i="${i}">🎲 Zufalls-Beispiel</button>
+        <button class="b" data-act="flowDel" data-i="${i}">🗑</button></div>
+      <details style="margin-top:4px"><summary>Beispiele (${fl.examples.length})</summary>
+        ${fl.examples.map((e, j) => `<div class="hint" style="color:#ddd">${j + 1}. ${e.map(esc).join(' → ')} <button class="x" data-act="flowExDel" data-i="${i}" data-j="${j}">✕</button></div>`).join('') || '<div class="hint">Noch keine Beispiele – erst eine Runde drehen, dann „Letzten Durchlauf als Beispiel“.</div>'}</details>
+      <details style="margin-top:4px"><summary>Alle Varianten (${ps.length})</summary>
+        ${ps.slice(0, lim).map((e, j) => `<div class="hint" style="color:#ccc">${j + 1}. ${e.map(esc).join(' → ')}</div>`).join('')}${ps.length > lim ? `<div class="hint">… und ${ps.length - lim} weitere</div>` : ''}</details>
+      </div>`; }).join('')}</details>
+
   <details ${op('themen')} data-sec="themen"><summary>🎯 Themen-Räder</summary>
     <div class="hint">Lädt fertige Räder zu einem Thema. Im Rad-Modus laufen sie nacheinander (Stellung → Technik → Heftigkeit), im Slot-Modus alle auf einmal. „↩ VORHER“ holt deine alten Räder zurück.</div>
     ${THEMES.map((t, i) => `<button class="b" data-act="theme" data-t="${i}" style="margin:4px 6px 0 0">${t.icon} ${esc(t.name)}</button>`).join('')}</details>
@@ -1613,6 +1638,18 @@ function initPanelEvents() {
       case 'junmedia': { const mid = S.joker.media && S.joker.media.id; S.joker.media = null; delMedia(mid); save(); renderPanel(); break; }
       case 'openQuiz': openQuiz('a'); break;
       case 'theme': loadTheme(+b.dataset.t); break;
+      case 'flowSave': flowSave($('#flowName').value); break;
+      case 'flowLoad': { const fl = S.flows[+b.dataset.i]; if (fl) applyWheelSet(fl.name, fl.wheels.map(w => strip(w)), true, 'Ablauf'); break; }
+      case 'flowEx': { const fl = S.flows[+b.dataset.i]; if (!fl) break;
+        if (!LASTRUN.length) { toast('Erst eine Runde drehen, dann speichern'); break; }
+        fl.examples.unshift([...LASTRUN]); fl.examples = fl.examples.slice(0, 100); save(); renderPanel(); toast('Beispiel gespeichert: ' + LASTRUN.join(' → '), 4000); break; }
+      case 'flowRnd': { const fl = S.flows[+b.dataset.i]; if (!fl) break; const ps = flowPaths(fl.wheels); if (!ps.length) break;
+        const e = ps[Math.floor(Math.random() * ps.length)]; fl.examples.unshift(e); fl.examples = fl.examples.slice(0, 100); save(); renderPanel(); toast('Beispiel: ' + e.join(' → '), 4000); break; }
+      case 'flowExDel': { const fl = S.flows[+b.dataset.i]; if (fl) { fl.examples.splice(+b.dataset.j, 1); save(); renderPanel(); } break; }
+      case 'flowDel': { const fl = S.flows[+b.dataset.i];
+        if (b.dataset.arm) { S.flows.splice(+b.dataset.i, 1); save(); renderPanel(); toast('Ablauf gelöscht'); }
+        else { b.dataset.arm = 1; b.textContent = 'Nochmal = löschen'; setTimeout(() => { if (b.isConnected) { delete b.dataset.arm; b.textContent = '🗑'; } }, 3000); }
+        break; }
       case 'toyConnect': S.toy.enabled = true; save(); toyConnect(); renderPanel(); break;
       case 'toyScan': if (TOY.ws) { toySend('StartScanning'); toast('Suche Spielzeug …'); } else toast('Erst verbinden'); break;
       case 'toyTest': if (TOY.devices.size) toyPlay({lvl:50, sec:2, pat:'konstant'}); else toast('Kein Spielzeug verbunden'); break;
@@ -2373,41 +2410,96 @@ function renderQuiz() {
    ===================================================================== */
 const THEMES = [
   {name:'Blowjob', icon:'💋', wheels:[
-    {title:'Blowjob · Stellung', fields:[
-      'Rücken liegend\nHals gestreckt',
-      'Kniend vor ihm',
-      'Liegend zwischen\nseinen Füßen',
-      'Seitlich liegend']},
-    {title:'Blowjob · Technik', fields:[
-      'Ohne Hände',
-      'Deepthroat\nhandfrei',
-      'Mit Hand\nMund offen – Zunge raus',
-      'Nur Zunge & Lippen']},
-    {title:'Blowjob · Heftigkeit', stufe:true, fields:[
-      'Soft',
-      'Middle',
-      'Hard',
-      'Heavy Duty']},
+    {title:'Blowjob · Stellung', fields:['Rücken liegend\nHals gestreckt', 'Kniend vor ihm', 'Liegend zwischen\nseinen Füßen', 'Seitlich liegend']},
+    {title:'Blowjob · Technik', fields:['Ohne Hände', 'Deepthroat\nhandfrei', 'Mit Hand\nMund offen – Zunge raus', 'Nur Zunge & Lippen']},
+    {title:'Blowjob · Heftigkeit', stufe:true, fields:['Soft', 'Middle', 'Hard', 'Heavy Duty']},
+    {title:'Cumshot', fields:['In den Mund spritzen', 'Sperma im Mund lassen', 'Mund offen zeigen', 'Sperma gurgeln',
+      'In ein Glas spucken', 'Aus dem Glas trinken', 'Vom Löffel essen', 'Vom Teller auflecken']},
+  ]},
+  // Ablauf mit Bedingung: nur bei „2× abspringen“ geht es weiter
+  {name:'Abspritzen-Ablauf', icon:'💦', rad:true, wheels:[
+    {title:'Abspringen', fields:[{t:'1× abspringen', end:true}, '2× abspringen']},
+    {title:'Blasen · Stellung', fields:['Rücken liegend\nHals gestreckt', 'Kniend ohne Hände', 'Liegend zwischen\nseinen Füßen', 'Seitlich liegend']},
+    {title:'Abspritzen · Wohin', fields:['Ins Gesicht\nmit Hand', 'Ins Gesicht\nohne Hand', 'In den Mund\nmit Hand', 'In den Mund\nohne Hand']},
+    {title:'Sperma-Spiel', fields:['Gurgeln', 'Ablecken', 'Im Mund behalten', 'In ein Glas spucken', 'Aus dem Glas trinken',
+      'Mund offen zeigen', 'Vom Löffel essen']},
+  ]},
+  {name:'Spielzeug & Fesseln', icon:'⛓', hint:'Bei Knebel, Klebeband und Halsband vorher ein Stoppzeichen ohne Worte ausmachen. Gleitgel bereitlegen.', wheels:[
+    {title:'Spielzeug', fields:['Dildo', 'Glasdildo', 'Dildo mit\nSchwingfunktion', 'Analplug', 'Analdehner', 'Analhaken', 'Vibrator', 'Penisring']},
+    {title:'Fesseln', fields:['Handschellen', 'Hand- &\nFußfesseln', 'Hüftfesselgurt', 'Ans Bettgestell\ngefesselt', 'Bondagegestell',
+      'Liebesschaukel', 'Bondage-Tape', 'Halsband\nmit Kette']},
+    {title:'Mund & Augen', fields:['Augenbinde', 'Ballknebel', 'Ringknebel', 'Mundspreizer', 'Klebeband\nüber dem Mund', 'Frei']},
+    {title:'Heftigkeit', stufe:true, fields:['Soft', 'Middle', 'Hard', 'Heavy Duty']},
   ]},
 ];
-function loadTheme(ti) {
-  const t = THEMES[ti]; if (!t) return;
+// Feld eines Themas: Text oder {t, end:true} (= hier endet die Kette)
+const thText = x => typeof x === 'string' ? x : x.t;
+function themeWheels(t) {
+  return t.wheels.map((tw, k) => ({title:tw.title, fields:tw.fields.map((x, j) => ({text:thText(x),
+    next:(typeof x === 'object' && x.end) || k >= t.wheels.length - 1 ? -1 : k + 1,
+    toy:tw.stufe ? {lvl:STUFE_TOY[Math.min(4, j + 1)], sec:30, pat:j >= 2 ? 'steigernd' : 'welle', dev:''} : undefined}))}));
+}
+// alle möglichen Abläufe eines Themas (für Liste und Test)
+function themePaths(t) {
+  const W = themeWheels(t), out = [];
+  const walk = (k, acc) => W[k].fields.forEach(f => { const a = [...acc, f.text.replace(/\n/g, ' ')]; f.next >= 0 ? walk(f.next, a) : out.push(a); });
+  walk(0, []); return out;
+}
+// Räder-Satz auf die ersten Räder legen (Folge-Verweise zeigen auf die Position im Satz)
+function applyWheelSet(name, wheels, rad, kind = 'Thema', hint = '') {
   if (!S.snapshot) S.snapshot = {active:S.active, wheels:strip(S.wheels)};   // für ↩ VORHER
-  const used = t.wheels.map((tw, k) => {
+  const used = wheels.slice(0, MAX_WHEELS).map((tw, k) => {
     const old = S.wheels[k];
-    S.wheels[k] = normWheel({title:tw.title, unit:'', palette:old.palette, enabled:true, history:[],
-      fields:tw.fields.map(x => normField({text:x, next:k < t.wheels.length - 1 ? k + 1 : -1,
-        toy:tw.stufe ? {lvl:STUFE_TOY[Math.min(4, tw.fields.indexOf(x) + 1)], sec:30, pat:tw.fields.indexOf(x) >= 2 ? 'steigernd' : 'welle', dev:''} : undefined}))}, k);
+    S.wheels[k] = normWheel(Object.assign({unit:'', palette:old.palette}, tw, {enabled:true, history:[], rot:0, fields:tw.fields.map(f => normField(Object.assign({}, f)))}), k);
     return k;
   });
   S.wheels.forEach((w, i) => w.enabled = used.includes(i));
   S.active = 0;
-  const name = 'Thema ' + t.name;
-  const data = {active:0, slots:used.map(i => ({slot:i, wheel:strip(S.wheels[i])}))};
-  const ex = S.presets.find(c => c.kind === 'combo' && c.name === name);
-  if (ex) ex.data = data; else S.presets.push({id:'c' + uid(), name, kind:'combo', created:Date.now(), data});
+  if (rad && S.settings.mode !== 'rad') setMode('rad');   // Ketten mit Bedingung laufen nur im Rad-Modus richtig
+  if (kind === 'Thema') {
+    const cn = 'Thema ' + name, data = {active:0, slots:used.map(i => ({slot:i, wheel:strip(S.wheels[i])}))};
+    const ex = S.presets.find(c => c.kind === 'combo' && c.name === cn);
+    if (ex) ex.data = data; else S.presets.push({id:'c' + uid(), name:cn, kind:'combo', created:Date.now(), data});
+  }
   save(); render(); updateRail(); renderPanel();
-  toast(`Thema ${t.name}: ${used.length} Räder geladen · auch als Karte „${name}“ gespeichert`, 4500);
+  toast(`${kind} ${name}: ${used.length} Räder geladen${hint ? ' · ' + hint : ''}`, hint ? 7000 : 4500);
+}
+function loadTheme(ti) { const t = THEMES[ti]; if (t) applyWheelSet(t.name, themeWheels(t), t.rad, 'Thema', t.hint); }
+// alle Wege durch eine Rad-Kette (Start bei Rad 1, höchstens MAX_CHAIN Räder)
+function flowPaths(wheels, cap = 5000) {
+  const out = [];
+  const walk = (k, acc) => { if (out.length >= cap) return; const w = wheels[k]; if (!w) { out.push(acc); return; }
+    w.fields.forEach(f => { const a = [...acc, String(f.text || '').replace(/\n/g, ' ')];
+      (f.next >= 0 && f.next < wheels.length && a.length < MAX_CHAIN) ? walk(f.next, a) : (out.length < cap && out.push(a)); }); };
+  walk(0, []); return out;
+}
+function flowSave(name) {
+  const vis = visibleIdx(); if (!vis.length) return;
+  const map = new Map(vis.map((wi, k) => [wi, k]));
+  const wheels = vis.map(wi => { const w = strip(S.wheels[wi]); w.history = [];
+    w.fields.forEach(f => { f.next = map.has(f.next) ? map.get(f.next) : -1; }); return w; });
+  name = String(name || '').trim() || wheels.map(w => w.title).slice(0, 2).join(' → ');
+  S.flows = S.flows || [];
+  const ex = S.flows.find(f => f.name === name);
+  if (ex) ex.wheels = wheels.map((w, i) => normWheel(w, i));
+  else S.flows.unshift({id:'f' + uid(), name, created:Date.now(), wheels:wheels.map((w, i) => normWheel(w, i)), examples:[]});
+  openSecs.add('flows'); save(); renderPanel(); toast(`Ablauf „${name}“ gespeichert (${wheels.length} Räder)`);
+}
+// Beispiel-Ablauf einmalig anlegen (aus dem Test)
+function seedFlows() {
+  if (S.flows) return;
+  const t = THEMES.find(x => x.name === 'Abspritzen-Ablauf');
+  S.flows = [{id:'f' + uid(), name:'Abspritzen-Ablauf (Beispiel)', created:Date.now(),
+    wheels:themeWheels(t).map((w, i) => normWheel({title:w.title, enabled:true, fields:w.fields.map(f => normField(Object.assign({}, f)))}, i)),
+    examples:[
+      ['2× abspringen', 'Kniend ohne Hände', 'Ins Gesicht ohne Hand', 'Aus dem Glas trinken'],
+      ['1× abspringen'],
+      ['2× abspringen', 'Liegend zwischen seinen Füßen', 'Ins Gesicht ohne Hand', 'Aus dem Glas trinken'],
+      ['2× abspringen', 'Liegend zwischen seinen Füßen', 'In den Mund mit Hand', 'In ein Glas spucken'],
+      ['2× abspringen', 'Kniend ohne Hände', 'Ins Gesicht mit Hand', 'Aus dem Glas trinken'],
+      ['2× abspringen', 'Rücken liegend Hals gestreckt', 'In den Mund ohne Hand', 'Gurgeln'],
+      ['2× abspringen', 'Rücken liegend Hals gestreckt', 'Ins Gesicht mit Hand', 'In ein Glas spucken']]}];
+  save();
 }
 function quizApply() {
   if (!S.snapshot) S.snapshot = {active:S.active, wheels:strip(S.wheels)};
@@ -2585,7 +2677,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110106;
+const APP_BUILD = 2026110108;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -2642,7 +2734,8 @@ $('#updReset').onclick = e => { const b = e.currentTarget; if (!updNative()) ret
 // beim Start einmal still prüfen (nur Hinweis-Punkt am Knopf)
 setTimeout(() => { if (navigator.onLine !== false) updCheck(true); }, 4000);
 
-window.SexRad = window.FickRad = {drawWheel, newWheel, get state() { return S; }};
+seedFlows();
+window.SexRad = window.FickRad = {drawWheel, newWheel, THEMES, themePaths, loadTheme, flowPaths, flowSave, applyWheelSet, LASTRUN, get state() { return S; }};
 
 /* =====================================================================
    Abo über Google Play
