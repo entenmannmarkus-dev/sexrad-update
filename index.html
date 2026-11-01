@@ -1,0 +1,2703 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#050505">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SexRad">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>SexRad</title>
+<!--
+  SEXRAD – lokale Glücksrad-App (eine Datei, offline).
+  Installation als App (Vollbild ohne Browserleiste):
+   • Android/Samsung (Chrome oder Samsung Internet): Seite öffnen → Menü ⋮ → „App installieren“
+     bzw. „Zum Startbildschirm hinzufügen“. Danach über das Symbol starten.
+   • iOS/iPadOS (Safari): Teilen → „Zum Home-Bildschirm“.
+   Echte Installation (Vollbild, Offline-Cache) klappt nur, wenn die Dateien über https geladen werden
+   (z. B. GitHub Pages / Netlify Drop). Über file:// läuft die App auch, aber als normaler Browser-Tab.
+   Alle Felder liegen in localStorage, Fotos/Videos in IndexedDB – nur auf diesem Gerät.
+-->
+<style>
+  :root{
+    --bg:#050505; --rail:132px;
+    --cream:#ecdfc2; --red:#6a1016; --bronze:#a8844e; --metal1:#3c3c40; --metal2:#141416;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--cream);overflow:hidden;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  button{font:inherit;color:inherit;cursor:pointer}
+  input,select{font:inherit}
+
+  /* ---------- Bühne mit den Rädern (volle Höhe, kein Rand) ---------- */
+  #stage{position:fixed;left:0;top:0;bottom:0;right:var(--rail)}
+  #cv{width:100%;height:100%;display:block}
+
+  /* ---------- Rechte Leiste: Aktions-Buttons mittig rechts ---------- */
+  #rail{position:fixed;right:0;top:0;bottom:0;width:var(--rail);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:14px;padding-right:env(safe-area-inset-right)}
+  .spin{width:112px;height:112px;border-radius:50%;
+    background:radial-gradient(circle at 38% 30%,#d0343a 0,#8a1219 42%,#3d0408 100%);
+    border:7px solid #232326;
+    box-shadow:0 0 0 2px #6d5531,inset 0 4px 10px rgba(255,255,255,.25),inset 0 -8px 14px rgba(0,0,0,.6),0 10px 24px rgba(0,0,0,.8);
+    color:#f6e8c6;font-weight:800;font-size:17px;letter-spacing:1px;text-shadow:0 2px 0 #2a0204}
+  .spin:active{transform:scale(.96)}
+  .mbtn{width:112px;padding:11px 0;border-radius:12px;border:1px solid #4a4a4e;
+    background:linear-gradient(#3b3b3f,#141416);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 14px rgba(0,0,0,.7);
+    color:var(--cream);font-weight:700;font-size:14px;letter-spacing:.5px}
+  .mbtn.gold{color:#f2c45a;text-shadow:0 0 8px rgba(242,196,90,.5)}
+  .mbtn:active{transform:scale(.97)}
+  button:disabled{opacity:.4}
+  #wlabel{max-width:120px;font-size:12px;color:#a8988a;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Joker: eigenständig oben rechts */
+  #bJoker{position:fixed;top:14px;right:calc((var(--rail) - 96px)/2);width:96px;height:96px;border-radius:50%;z-index:32;
+    border:3px solid #2a2a2c;background:radial-gradient(circle at 40% 30%,#ffe9a0,#d9a52e 45%,#6b4a0e 100%);
+    box-shadow:0 0 0 2px #8c6a3c,0 0 22px rgba(255,200,80,.55),0 8px 18px rgba(0,0,0,.8);
+    color:#2a1600;font-size:34px;line-height:1;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    animation:jglow 1.6s ease-in-out infinite}
+  #bJoker span{font-size:13px;letter-spacing:1.5px;margin-top:2px}
+  #bJoker:active{transform:scale(.95)}
+  @keyframes jglow{50%{box-shadow:0 0 0 2px #d9b678,0 0 40px rgba(255,210,90,.95),0 8px 18px rgba(0,0,0,.8)}}
+  #gear{position:fixed;bottom:16px;right:calc((var(--rail) - 62px)/2);width:62px;height:62px;border-radius:50%;
+    border:1px solid #4a4a4e;background:radial-gradient(circle at 40% 30%,#4a4a4f,#121214);font-size:28px;
+    box-shadow:0 6px 16px rgba(0,0,0,.8);z-index:31}
+  #gear.on{box-shadow:0 0 0 2px var(--bronze),0 6px 16px rgba(0,0,0,.8)}
+
+  /* ---------- Update-Knopf + Dialog ---------- */
+  #bUpd{position:fixed;bottom:90px;right:calc((var(--rail) - 50px)/2);width:50px;height:50px;border-radius:50%;z-index:31;
+    border:1px solid #4a4a4e;background:radial-gradient(circle at 40% 30%,#3a3a3f,#121214);color:#f2c45a;font:800 22px system-ui;
+    box-shadow:0 6px 16px rgba(0,0,0,.8)}
+  #bUpd.new{border-color:#f2c45a;animation:jglow 1.6s ease-in-out infinite}
+  #bUpd.new::after{content:'';position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#e23a3a;border:2px solid #111}
+  #upd{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:70;display:none;align-items:center;justify-content:center}
+  #upd.show{display:flex}
+  #updBox{width:min(520px,92vw);background:#151517;border:1px solid #c9a24e;border-radius:14px;padding:16px 18px;color:#eee}
+  #updBox h3{font:700 20px Georgia,serif;color:#ffe08a;margin:0 0 8px}
+  #updBox p{margin:6px 0;line-height:1.4}
+  #updBox .uv{color:#c9b48a;font-size:13px}
+  #updNotes{white-space:pre-line;background:#0d0d0f;border:1px solid #333;border-radius:10px;padding:8px 10px;max-height:40vh;overflow:auto;display:none}
+  #updBox .ub{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+  #updBox button{padding:10px 16px;border-radius:10px;border:1px solid #c9a24e;background:#1e1712;color:#ffe08a;font:700 15px system-ui}
+  #updBox button.pri{background:linear-gradient(#d9a52e,#8a6312);color:#1a0f00}
+  /* ---------- Verwaltungs-Panel unten rechts (kein Vollbild) ---------- */
+  #panel{position:fixed;right:calc(var(--rail) + 6px);bottom:12px;width:min(480px,calc(100vw - var(--rail) - 24px));
+    max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:auto;-webkit-overflow-scrolling:touch;
+    background:rgba(16,16,18,.97);border:1px solid #3a3a3e;border-radius:14px;padding:6px 10px 12px;z-index:30;
+    box-shadow:0 12px 40px rgba(0,0,0,.9);display:none;-webkit-user-select:text;user-select:text}
+  #panel.open{display:block}
+  details{border-bottom:1px solid #2a2a2e;padding:4px 0}
+  summary{padding:10px 4px;font-weight:700;color:#f0e2c0;cursor:pointer;list-style:none}
+  summary::before{content:"▸ ";color:var(--bronze)}
+  details[open]>summary::before{content:"▾ "}
+  #panel label{display:block;font-size:12px;color:#a8988a;margin:6px 0}
+  #panel input[type=text],#panel input[type=number],#panel select{width:100%;padding:8px;border-radius:8px;border:1px solid #3a3a3e;
+    background:#0b0b0c;color:#f3e7cc;margin-top:3px}
+  #panel button.b{padding:9px 12px;border-radius:9px;border:1px solid #444;background:#232326;color:var(--cream);margin:4px 4px 4px 0}
+  #panel button.b.pri{background:#6a1016;border-color:#8c2a30}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:4px 0}
+  .wchip{display:flex;align-items:center;gap:6px;padding:7px;border:1px solid #333;border-radius:9px;background:#141416;font-size:13px;cursor:pointer;min-width:0}
+  .wchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wchip.on{border-color:var(--bronze);background:#2a1214}
+  .wchip input{width:20px;height:20px;flex:none;accent-color:#a8242c}
+  .frow{border:1px solid #2c2c30;border-radius:10px;padding:7px;margin:7px 0;background:#121214}
+  .frow.hl{border-color:var(--bronze)}
+  .ftop{display:grid;grid-template-columns:26px 62px 1fr 38px;gap:6px;align-items:center}
+  .ftop input{margin-top:0!important}
+  .sw{width:22px;height:22px;border-radius:50%;border:2px solid #000;box-shadow:0 0 0 1px var(--bronze);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+  .fsub{display:grid;grid-template-columns:76px 1fr;gap:6px;margin-top:6px;align-items:center}
+  .fsub input,.fsub select{margin-top:0!important;padding:6px!important}
+  .fmed{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12px;color:#a8988a}
+  .fmed button{padding:6px 9px;border-radius:8px;border:1px solid #444;background:#1d1d20;color:var(--cream);font-size:12px}
+  .x{height:36px;border-radius:8px;border:1px solid #4a2a2c;background:#2a1012;color:#e9a}
+  .hint{font-size:12px;color:#8d8073;line-height:1.45}
+  .chk{display:flex!important;align-items:center;gap:8px;font-size:14px!important;color:var(--cream)!important}
+  .chk input{width:20px;height:20px;accent-color:#a8242c}
+  input[type=range]{width:100%;accent-color:#a8242c}
+
+  /* ---------- Ergebnis-Anzeige (groß, über Foto/Video) ---------- */
+  #result{position:fixed;inset:0;background:#000;z-index:50;display:none}
+  #result.nomedia{background:rgba(0,0,0,.78)}
+  #result.show::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(circle at 45% 50%,rgba(255,244,200,1),rgba(255,190,70,.75) 35%,rgba(140,20,20,.35) 70%,transparent 90%);
+    animation:flashA 1s ease-out forwards}
+  @keyframes flashA{0%{opacity:1}25%{opacity:.85}100%{opacity:0}}
+  #result.show{display:block}
+  #rMedia{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  #rMedia video,#rMedia img{width:100%;height:100%;object-fit:contain}
+  #rText{position:absolute;left:0;right:var(--rail);top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    pointer-events:none;text-align:center;padding:4vh 3vw;font-family:Georgia,"Times New Roman",serif;font-weight:700;
+    color:#f6e7c1;text-shadow:0 3px 0 #3a070b,0 0 24px #000,0 0 6px #000;text-transform:uppercase}
+  #rNum{font-size:min(30vh,22vw);line-height:1}
+  #rTxt{white-space:pre-line;font-size:min(14vh,9vw);line-height:1.08;max-width:100%;word-wrap:break-word}
+  #rUnit{font-size:min(6vh,4vw);opacity:.9}
+  #rVctl{position:absolute;left:14px;right:calc(var(--rail) + 4px);bottom:14px;display:none;align-items:center;gap:10px;z-index:3;
+    padding:8px 12px;border-radius:14px;background:rgba(10,8,8,.72);border:1px solid #5a4520}
+  #result.hasvid #rVctl{display:flex}
+  #rVctl button{min-width:64px;height:48px;border-radius:12px;border:1px solid #c9a24e;background:#1e1712;color:#ffe08a;font:800 16px system-ui}
+  #rVctl input{flex:1;accent-color:#c9a24e;height:28px}
+  #rVctl b{color:#ffe08a;font:600 14px system-ui;min-width:96px;text-align:right}
+  #result.hasvid #rText{left:0;right:0;bottom:auto;justify-content:flex-start;align-items:center;text-align:center;padding:2vh 4vw 0;pointer-events:none}
+  #result.hasvid #rNum{font-size:min(14vh,10vw)}
+  #result.hasvid #rTxt{font-size:min(8vh,5.5vw)}
+  #result.hasvid #rUnit{font-size:min(4vh,3vw)}
+  #rBtns{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;width:calc(var(--rail) - 14px);align-items:center}
+  #rBtns .mbtn{width:100%}
+  #rNext{display:none}
+  @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+  #result.show #rText>*{animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+
+  /* ---------- Timer-Rad (Vollbild-Ansicht) ---------- */
+  #timerView{position:fixed;inset:0;background:var(--bg);z-index:40;display:none}
+  #timerView.show{display:block}
+  #tStage{position:absolute;left:0;top:0;bottom:0;right:var(--rail)}
+  #tcv{width:100%;height:100%;display:block}
+  #tRail{position:absolute;right:0;top:0;bottom:0;width:var(--rail);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+  #tClock{font:800 34px/1 ui-monospace,Menlo,monospace;color:#f2c45a;text-shadow:0 0 12px rgba(242,196,90,.4)}
+  #tClock.warn{color:#ff4d4d;text-shadow:0 0 14px #f00}
+  .trow{display:flex;gap:8px}
+  .trow button{width:52px;height:44px;border-radius:10px;border:1px solid #4a4a4e;background:linear-gradient(#3b3b3f,#141416);font-size:22px;font-weight:700}
+  #tResult{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;
+    font:700 min(11vh,8vw)/1.05 Georgia,serif;text-transform:uppercase;color:#f6e7c1;text-align:center;padding:0 4vw;
+    text-shadow:0 4px 0 #3a070b,0 0 30px #000,0 0 10px #000;opacity:0;transition:opacity .3s}
+  #tResult.show{opacity:1}
+
+  /* ---------- Video-Zuschneider ---------- */
+  #mimp{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:60;display:none;align-items:center;justify-content:center}
+  #mimp.show{display:flex}
+  #mimpBox{width:min(820px,94vw);max-height:96vh;overflow:auto;background:#151517;border:1px solid #c9a24e;border-radius:14px;padding:12px 14px}
+  #mimpBox .mt{font:700 18px Georgia,serif;color:#ffe08a;margin-bottom:8px}
+  #mimpView{background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:180px}
+  #mimpView video,#mimpView img{max-width:100%;max-height:48vh;display:block}
+  #mimpEmpty{color:#8a7a66;font-size:14px;display:flex;align-items:center;justify-content:center;height:180px}
+  .mrow{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .mrow input[type=range]{flex:1;min-width:160px;accent-color:#c9a24e}
+  .mrow b{color:#ffe08a;font-size:13px;min-width:56px}
+  .ml{color:#a8988a;font-size:13px;min-width:96px}
+  #mBar{position:relative;height:12px;margin-top:8px;border-radius:6px;background:#2a2a2e}
+  #mSel{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#8a1219,#c9a24e);border-radius:6px}
+  #mCur{position:absolute;top:-3px;bottom:-3px;width:3px;margin-left:-1px;background:#fff}
+  #mimpBox .b{padding:10px 14px;border-radius:9px;border:1px solid #444;background:#232326;color:var(--cream)}
+  #mimpBox .b.pri{background:#6a1016;border-color:#c9a24e}
+  #mimpBox .b.on{border-color:#ffe08a;color:#ffe08a}
+  .mbtns{margin-top:12px}
+  .medbtn{padding:9px 12px!important;border-radius:9px!important;border:1px solid #c9a24e!important;background:#2a1a0e!important;color:#ffe08a!important;font-size:13px!important;font-weight:700}
+
+  /* Dreh-Buttons unter den Rädern (ab 2 Rädern) */
+  #wbtns{position:absolute;inset:0;pointer-events:none}
+  .wctl{position:absolute;transform:translateX(-50%);display:flex;align-items:center;gap:10px;pointer-events:none}
+  .wspin{pointer-events:auto;flex:none;width:62px;height:62px;border-radius:50%;padding:0;
+    background:radial-gradient(circle at 38% 30%,#d0343a 0,#8a1219 42%,#3d0408 100%);border:5px solid #232326;
+    box-shadow:0 0 0 2px #6d5531,inset 0 3px 8px rgba(255,255,255,.25),inset 0 -6px 10px rgba(0,0,0,.6),0 8px 18px rgba(0,0,0,.8);
+    color:#f6e8c6;font-weight:800;font-size:10.5px;letter-spacing:.5px;text-shadow:0 2px 0 #2a0204}
+  .wspin.on{box-shadow:0 0 0 2px #e8c47a,0 0 16px rgba(232,196,122,.6),inset 0 3px 8px rgba(255,255,255,.25),0 8px 18px rgba(0,0,0,.8)}
+  .wspin:active{transform:scale(.95)}
+  /* Letzte 5 Ergebnisse im goldenen Rahmen */
+  .hist{pointer-events:none;display:flex;gap:0;align-items:center;min-height:34px;padding:4px 6px;border-radius:9px;
+    border:2px solid #c9a24e;background:linear-gradient(#1a140a,#0b0905);
+    box-shadow:0 0 0 1px #5a4520,inset 0 0 0 1px #f3d58a55,inset 0 2px 6px rgba(0,0,0,.8),0 4px 12px rgba(0,0,0,.7);
+    font:700 13px/1.1 Georgia,serif;color:#e9d6a6;text-transform:uppercase;overflow:hidden;white-space:nowrap}
+  .hist span{flex:0 1 auto;min-width:0;padding:2px 8px;overflow:hidden;text-overflow:ellipsis;opacity:.6;border-left:1px solid #5a4520}
+  .hist span:first-child{flex-shrink:0;border-left:0;opacity:1;color:#ffe08a;text-shadow:0 0 8px rgba(255,210,100,.6)}
+  .hist i{opacity:.4;font-style:normal;padding:0 8px}
+  /* Speicherkarten */
+  .card{border:1px solid #2c2c30;border-left:4px solid var(--bronze);border-radius:10px;padding:8px;margin:7px 0;background:#121214}
+  .card.combo{border-left-color:#a8242c}
+  .card b{color:#f0e2c0}
+  .card .meta{font-size:12px;color:#8d8073}
+  .card button{padding:7px 10px;border-radius:8px;border:1px solid #444;background:#1d1d20;color:var(--cream);font-size:12px;margin:5px 4px 0 0}
+  .card button.go{background:#6a1016;border-color:#8c2a30}
+  /* Vorlieben-Fragebogen */
+  #quiz{position:fixed;inset:0;background:#070607;z-index:45;display:none;flex-direction:column;-webkit-user-select:text;user-select:text}
+  #quiz.show{display:flex}
+  #paywall{position:fixed;inset:0;z-index:80;background:radial-gradient(ellipse at top,#2a0c10,#050505 70%);display:none;overflow:auto;color:#eee;padding:22px 24px 30px}
+  #paywall.show{display:block}
+  #paywall h1{font:700 36px Georgia,serif;color:#ffe08a;text-align:center;margin:4px 0;letter-spacing:2px}
+  #paywall .pwsub{text-align:center;color:#c9b48a;margin-bottom:16px}
+  .pwgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:980px;margin:0 auto}
+  .pwcard{border:2px solid #5a4520;border-radius:18px;padding:16px 18px;background:#120d0b}
+  .pwcard.pro{border-color:#c9a24e;box-shadow:0 0 30px rgba(201,162,78,.25)}
+  .pwcard.cur{outline:3px solid #6fd16f;outline-offset:3px}
+  .pwcard h2{font:700 24px Georgia,serif;color:#ffe08a;margin:0 0 8px}
+  .pwcard ul{margin:0 0 12px;padding:0;list-style:none;line-height:1.65;font-size:15px}
+  .pwcard li.no{opacity:.45}
+  .pwbuy{display:block;width:100%;margin:8px 0 0;padding:12px;border-radius:12px;border:1px solid #c9a24e;background:#6a1016;color:#fff;font-weight:700;font-size:17px}
+  .pwbuy.alt{background:#1e1712}
+  .pwbuy small{display:block;font-weight:400;opacity:.85;font-size:12px;margin-top:2px}
+  .pwwarn{max-width:980px;margin:0 auto 14px;padding:12px 16px;border:1px solid #ff6b6b;border-radius:12px;background:#2a0b0b;color:#ffd0d0}
+  .pwfoot{max-width:980px;margin:16px auto 0;color:#9a8a76;font-size:13px;text-align:center;line-height:1.6}
+  .pwtest{margin-top:10px;padding-top:10px;border-top:1px dashed #3a3020}
+  #pwClose{position:fixed;top:14px;right:14px;width:48px;height:48px;border-radius:50%;border:1px solid #c9a24e;background:#151110;color:#ffe08a;font-size:20px}
+  .lock{font-size:10px;background:#c9a24e;color:#000;border-radius:6px;padding:1px 5px;margin-left:4px;font-weight:800;vertical-align:middle}
+  #qHead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;border-bottom:2px solid #c9a24e;background:linear-gradient(#1a140a,#0b0905)}
+  #qHead .qt{font:700 20px Georgia,serif;color:#ffe08a;margin-right:auto;text-transform:uppercase}
+  .qtab{padding:10px 14px;border-radius:10px;border:1px solid #5a4520;background:#151110;color:#e9d6a6;font-weight:700}
+  .qtab.on{background:#6a1016;border-color:#c9a24e;color:#fff}
+  #qBody{flex:1;overflow:auto;padding:10px 18px 30px}
+  #qBody h3{font:700 18px Georgia,serif;color:#ffe08a;margin:18px 0 6px;text-transform:uppercase;border-bottom:1px solid #3a2e18;padding-bottom:4px}
+  .qrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:7px 4px;border-bottom:1px solid #1d1a16}
+  .qrow .qq{color:#efe3c6;font-size:15px}
+  .qrate{display:flex;gap:5px}
+  .qrate button{width:42px;height:40px;border-radius:9px;border:1px solid #3a3a3e;background:#141416;color:#cbbd9e;font-weight:800;font-size:16px}
+  .qrate button.on{color:#fff;border-color:#e8c47a}
+  .qrate button.on[data-v="1"]{background:#5a1010}.qrate button.on[data-v="2"]{background:#6a3a12}
+  .qrate button.on[data-v="3"]{background:#5a5a1a}.qrate button.on[data-v="4"]{background:#2f6a22}.qrate button.on[data-v="5"]{background:#0f7a3a}
+  .qlegend{font-size:13px;color:#a8988a;margin:8px 0;line-height:1.5}
+  .qprog{font-size:13px;color:#d9b678}
+  .qres{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+  .qlvl{display:inline-block;min-width:24px;padding:1px 5px;margin-left:6px;border-radius:6px;font:800 11px system-ui;text-align:center;vertical-align:middle;cursor:pointer;border:1px solid transparent}
+  .qlvl.l1{background:#1e3a5a;color:#cfe3ff}.qlvl.l2{background:#3a3a3e;color:#eee}.qlvl.l3{background:#7a3a10;color:#ffd9b0}.qlvl.l4{background:#7a0f1a;color:#ffd0d6;border-color:#ff6b7a}
+  .qstufe{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}
+  .qstufe button{padding:8px 14px;border-radius:10px;border:1px solid #3a3a3e;background:#141416;color:#cbbd9e;font-weight:700}
+  .qstufe button.on{background:#6a1016;border-color:#e8c47a;color:#fff}.qstufe button:disabled{opacity:.3}
+  .qchip{padding:5px 10px;border-radius:14px;border:1px solid #c9a24e;background:#1a140a;color:#ffe08a;font-size:13px}
+  .qchip small{opacity:.7;margin-left:4px}
+  .qmap{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:#a8988a}
+  .qmap select{padding:6px;border-radius:8px;background:#0b0b0c;color:#f3e7cc;border:1px solid #3a3a3e}
+  .qadd{display:flex;gap:6px;margin:6px 0 2px}
+  .qadd input{flex:1;padding:8px;border-radius:8px;border:1px solid #3a3a3e;background:#0b0b0c;color:#f3e7cc}
+  .qbtn{padding:11px 16px;border-radius:10px;border:1px solid #8c6a3c;background:#6a1016;color:#fff;font-weight:800;margin:8px 8px 0 0}
+  .qbtn.alt{background:#232326;color:#e9d6a6}
+  .qname,.qsel{padding:6px;border-radius:8px;background:#0b0b0c;color:#f3e7cc;border:1px solid #3a3a3e}
+  .qname{width:140px} .qsel{flex:1;min-width:0}
+  .qscore{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 12px}
+  .qbig{border:2px solid #c9a24e;border-radius:14px;padding:12px;text-align:center;background:radial-gradient(circle at 50% 0,#3a2a0e,#0b0905)}
+  .qbig b{display:block;font:700 34px Georgia,serif;color:#ffe08a;text-shadow:0 0 12px rgba(255,210,100,.4)}
+  .qbig span{font-size:12px;color:#c9b48a;text-transform:uppercase;letter-spacing:.5px}
+  .qbars{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin:6px 0}
+  .qbar{display:grid;grid-template-columns:130px 1fr 44px;gap:8px;align-items:center;font-size:13px;color:#e9d6a6}
+  .qbar i{height:10px;border-radius:5px;background:#1d1a16;overflow:hidden;border:1px solid #3a2e18}
+  .qbar em{display:block;height:100%;background:linear-gradient(90deg,#8a1219,#e2b85e)}
+  /* Joker: Abfolge wählen */
+  #jpick{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:55;display:none;align-items:center;justify-content:center}
+  #jpick.show{display:flex}
+  #jpickBox{width:min(560px,90vw);max-height:90vh;overflow:auto;padding:16px;border-radius:16px;border:2px solid #c9a24e;
+    background:linear-gradient(#1a140a,#0b0905);box-shadow:0 0 40px rgba(255,200,80,.35)}
+  #jpickBox .jt{font:700 22px Georgia,serif;color:#ffe08a;text-align:center;margin-bottom:12px;text-transform:uppercase}
+  .jbtn{display:block;width:100%;margin:8px 0;padding:14px;border-radius:12px;border:2px solid #8c6a3c;
+    background:radial-gradient(circle at 40% 30%,#ffe9a0,#d9a52e 55%,#6b4a0e);color:#2a1600;font:800 18px system-ui;text-align:left}
+  .jbtn small{display:block;font-weight:600;font-size:12px;opacity:.8}
+  /* Spielzeug */
+  .toyrow{grid-column:1/-1;display:flex;gap:6px;align-items:center;font-size:12px;color:#e6a3b8;margin-top:2px}
+  .toyrow input,.toyrow select{width:70px!important;margin-top:0!important;padding:6px!important}
+  .toyrow select{width:100px!important}
+  .toyrow{flex-wrap:wrap}
+  #bToyStop{position:fixed;top:14px;left:14px;z-index:70;display:none;padding:12px 16px;border-radius:12px;border:2px solid #ff4d4d;
+    background:linear-gradient(#5a0c10,#2a0306);color:#fff;font:800 14px system-ui;letter-spacing:1px;box-shadow:0 0 16px rgba(255,60,60,.5)}
+  #bToyStop.live{animation:toyLive 1s infinite}
+  @keyframes toyLive{50%{box-shadow:0 0 30px rgba(255,60,60,.95)}}
+  #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#222;border:1px solid var(--bronze);color:var(--cream);
+    padding:10px 16px;border-radius:10px;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none;max-width:80vw;text-align:center}
+  #toast.show{opacity:1}
+  #portrait{display:none}
+  @media (orientation:portrait){
+    #portrait{display:block;position:fixed;top:8px;left:50%;transform:translateX(-50%);font-size:13px;color:#a8988a;z-index:5;pointer-events:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"><canvas id="cv"></canvas><div id="wbtns"></div></div>
+
+<div id="rail">
+  <div id="wlabel"></div>
+  <button id="bSpin" class="spin">DREHEN</button>
+  <button id="bTimer" class="mbtn">⏱ TIMER</button>
+  <button id="bMode" class="mbtn gold">🎰 SLOT</button>
+  <button id="bUndo" class="mbtn" style="display:none">↩ VORHER</button>
+  <button id="bEnd" class="mbtn gold" style="display:none">🏁 SESSION<br>ENDE</button>
+</div>
+<button id="bJoker" title="Joker">★<span>JOKER</span></button>
+<button id="bUpd" title="Update laden">⟳</button>
+<button id="gear" title="Felder verwalten">⚙</button>
+<div id="upd"><div id="updBox">
+  <h3>⟳ App-Update</h3>
+  <p class="uv" id="updVer"></p>
+  <p id="updMsg">Suche nach neuer Version …</p>
+  <div id="updNotes"></div>
+  <div class="ub"><button id="updReset" style="display:none">Original-Version</button><button id="updClose">Schließen</button><button id="updGo" class="pri" style="display:none">Jetzt laden</button></div>
+</div></div>
+<div id="panel"></div>
+
+<div id="result">
+  <div id="rMedia"></div>
+  <div id="rText"><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div></div>
+  <div id="rVctl"><button id="rvBack" title="10 s zurück">⏪ 10</button><button id="rvPlay">❚❚</button><button id="rvFwd" title="10 s vor">10 ⏩</button>
+    <input id="rvPos" type="range" min="0" max="1" step="0.1" value="0"><b id="rvTime">0:00 / 0:00</b></div>
+  <div id="rBtns">
+    <button id="rNext" class="spin" style="font-size:14px">WEITER</button>
+    <button id="rClose" class="mbtn">✕ Schließen</button>
+    <button id="rStop" class="mbtn" style="display:none;color:#ff8a8a">■ Abfolge stoppen</button>
+  </div>
+</div>
+
+<div id="timerView">
+  <div id="tStage"><canvas id="tcv"></canvas><div id="tResult"></div></div>
+  <div id="tRail">
+    <div id="tClock">01:00</div>
+    <div class="trow"><button id="tMinus">−</button><button id="tPlus">+</button></div>
+    <button id="tStart" class="spin">START</button>
+    <button id="tClose" class="mbtn">✕ Zurück</button>
+  </div>
+</div>
+
+<div id="mimp"><div id="mimpBox">
+  <div id="mimpT" class="mt">Video / Foto</div>
+  <div id="mimpView"><div id="mimpEmpty">Noch kein Video oder Foto gewählt</div><video id="mimpVid" playsinline></video><img id="mimpImg" alt=""></div>
+  <div id="mimpVctl">
+    <div class="mrow"><button class="b" id="mPlay">▶</button><input id="mPos" type="range" min="0" max="1" step="0.05" value="0"><b id="mPosL">0.0 s / 0.0 s</b></div>
+    <div id="mBar"><i id="mSel"></i><em id="mCur"></em></div>
+    <div class="mrow"><span class="ml">Start <b id="mSL">0.0 s</b></span><input id="mS" type="range" min="0" max="1" step="0.05" value="0"><button class="b" id="mSetS">⏮ Start = jetzt</button></div>
+    <div class="mrow"><span class="ml">Stopp <b id="mEL">0.0 s</b></span><input id="mE" type="range" min="0" max="1" step="0.05" value="1"><button class="b" id="mSetE">⏭ Stopp = jetzt</button></div>
+    <div class="mrow"><span id="mLen" class="hint"></span><button class="b" id="mLoop">🔁 Ausschnitt abspielen</button></div>
+  </div>
+  <div class="mrow mbtns"><button class="b" id="mPick">📂 Video / Foto auswählen</button><button class="b pri" id="mOk">✔ Übernehmen</button>
+    <button class="b" id="mDel">🗑 Entfernen</button><button class="b" id="mCancel">Abbrechen</button></div>
+  <div class="hint" id="mInfo"></div>
+</div></div>
+
+<input id="fileMedia" type="file" accept="video/*,image/*" hidden>
+<input id="fileCard" type="file" accept=".json,.zip,application/json,application/zip" hidden>
+<input id="fileImport" type="file" accept=".json,.zip,application/json,application/zip" hidden>
+<div id="quiz">
+  <div id="qHead"></div>
+  <div id="qBody"></div>
+</div>
+<div id="jpick"><div id="jpickBox"><div class="jt">★ Joker – Abfolge wählen</div><div id="jpickList"></div><button class="mbtn" id="jpickX" style="width:100%">Abbrechen</button></div></div>
+<button id="bToyStop" title="Alle Spielzeuge sofort aus">■ NOT-AUS</button>
+<div id="paywall"></div>
+<div id="toast"></div>
+<div id="portrait">Für die beste Ansicht das Tablet quer halten</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Konstanten & Farbpaletten
+   ===================================================================== */
+const MAX_WHEELS = 12, MIN_FIELDS = 2, MAX_FIELDS = 20, MAX_CHAIN = 6;
+const T_MIN = 3, T_MAX = 9;
+const TOY_PATS = {konstant:'Konstant', puls:'Puls', welle:'Welle', steigernd:'Steigernd', zufall:'Zufall'};   // Timer-Rad: 3 bis 9 Felder
+const TAU = Math.PI * 2;
+const STORE_KEY = 'fickrad.v2';
+
+// a/b = abwechselnde Segmentfarben, c = Ausgleichsfarbe bei ungerader Feldzahl
+const PALETTES = {
+  klassik:  {name:'Klassik Rot / Creme',   a:'#6a1016', b:'#e6d8b8', c:'#8f5a2c'},
+  smaragd:  {name:'Smaragd / Gold',        a:'#0f4a3a', b:'#d9c27a', c:'#6a7a3a'},
+  amethyst: {name:'Amethyst / Rosé',       a:'#4b1a5e', b:'#efc9d6', c:'#8a4a78'},
+  petrol:   {name:'Petrol / Sand',         a:'#0e4752', b:'#e3d2ae', c:'#5b7a6e'},
+  onyx:     {name:'Onyx / Gold',           a:'#141414', b:'#c9a54e', c:'#5a4a2a'},
+  lava:     {name:'Lava / Orange',         a:'#7a1c06', b:'#f2a33a', c:'#b5501a'},
+  eis:      {name:'Mitternacht / Eis',     a:'#14214d', b:'#cfe3ef', c:'#5a6f96'},
+  neon:     {name:'Neon Pink / Schwarz',   a:'#0d0d0d', b:'#ff2f8e', c:'#7a1d55'},
+};
+
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* =====================================================================
+   Zustand (localStorage)
+   ===================================================================== */
+function newField(text = '') { return {num:'', text, weight:1, next:-1, card:null, media:null, toy:{lvl:0, sec:5, pat:'konstant', dev:''}}; }
+function newWheel(i) {
+  return {title:'Rad ' + (i + 1), unit:'', palette:'klassik', enabled:i === 0,
+          fields:Array.from({length:4}, () => newField()), rot:0, history:[]};
+}
+function defaultState() {
+  return {
+    active:0,
+    settings:{sound:true, spinSec:6, speakMain:false, autoNext:5, resultSec:3, mode:'rad', slotHist:[]},
+    toy:{enabled:false, url:'ws://127.0.0.1:12345', master:100},
+    quiz:{names:{a:'Er', b:'Sie'}, ans:{}, learn:{}, stufe:{}, stufeSel:0, lvlOv:{}, thr:2.5, map:{}, timer:true, custom:{}, session:null, fb:null, sessions:[]},   // Vorlieben-Fragebogen   // Sexspielzeug über Intiface Central
+    joker:{num:'', text:'JOKER', weight:1, next:-1, card:null, media:null, seqs:[]},   // seqs = gespeicherte Abfolgen   // eigenständiges Joker-Feld
+    presets:[],      // Speicherkarten: {id, name, kind:'single'|'combo', data}
+    snapshot:null,   // Räder vor dem Laden einer Karte (für ↩ VORHER)
+    wheels:Array.from({length:MAX_WHEELS}, (_, i) => newWheel(i)),
+    timer:{seconds:60, auto:true, voice:true, prefix:'', pause:5, pitch:0.3, rate:0.8,
+      wheel:{title:'Timer', unit:'', palette:'klassik', enabled:true, rot:0,
+        fields:[newField('in die Muschi'), newField('in Arsch'), newField('in den Mund')]}}
+  };
+}
+// Geladene/importierte Daten in eine saubere Struktur bringen
+function normField(f) {
+  f = Object.assign(newField(), f || {});
+  f.num = (f.num === '' || f.num == null || isNaN(+f.num)) ? '' : clamp(Math.round(+f.num), 0, 99);
+  f.text = String(f.text ?? '');
+  f.weight = clamp(+f.weight || 0, 0, 100);
+  f.next = Number.isInteger(+f.next) ? clamp(+f.next, -1, MAX_WHEELS - 1) : -1;
+  f.card = (typeof f.card === 'string' && f.card) ? f.card : null;
+  if (f.qid != null && typeof f.qid !== 'string') delete f.qid;
+  const t = f.toy || {};
+  f.toy = {lvl:clamp(Math.round(+t.lvl || 0), 0, 100), sec:clamp(+t.sec || 5, 0.5, 600), pat:TOY_PATS[t.pat] ? t.pat : 'konstant', dev:String(t.dev || '')};
+  if (f.media && !f.media.id) f.media = null;
+  return f;
+}
+function normWheel(w, i) {
+  const d = newWheel(i);
+  w = Object.assign(d, w || {});
+  if (!PALETTES[w.palette]) w.palette = 'klassik';
+  w.fields = (Array.isArray(w.fields) ? w.fields : []).slice(0, MAX_FIELDS).map(normField);
+  while (w.fields.length < MIN_FIELDS) w.fields.push(newField());
+  w.rot = +w.rot || 0;
+  w.history = (Array.isArray(w.history) ? w.history : []).map(String).slice(0, 5);
+  return w;
+}
+function normalize(o) {
+  const d = defaultState();
+  if (!o || typeof o !== 'object') return d;
+  const s = {active:clamp(+o.active || 0, 0, MAX_WHEELS - 1),
+             settings:Object.assign(d.settings, o.settings || {}), toy:Object.assign(d.toy, o.toy || {}), quiz:Object.assign(d.quiz, o.quiz || {}),
+             wheels:[], timer:Object.assign(d.timer, o.timer || {})};
+  for (let i = 0; i < MAX_WHEELS; i++) s.wheels.push(normWheel((o.wheels || [])[i], i));
+  s.timer.wheel = normWheel(s.timer.wheel, 0);
+  s.timer.wheel.fields = s.timer.wheel.fields.slice(0, T_MAX);
+  while (s.timer.wheel.fields.length < T_MIN) s.timer.wheel.fields.push(newField());
+  s.joker = normField(Object.assign({text:'JOKER'}, o.joker || {}));
+  s.joker.seqs = (Array.isArray(s.joker.seqs) ? s.joker.seqs : []).map(q => ({id:String(q.id || 'q' + uid()), name:String(q.name || 'Abfolge'),
+    steps:(Array.isArray(q.steps) ? q.steps : []).map(st => ({t:String(st.t || 'w0'), n:clamp(Math.round(+st.n || 1), 1, 50)}))}));
+  s.presets = (Array.isArray(o.presets) ? o.presets : []).map(normCard).filter(Boolean);
+  s.snapshot = (o.snapshot && Array.isArray(o.snapshot.wheels))
+    ? {active:+o.snapshot.active || 0, wheels:o.snapshot.wheels.map((w, i) => normWheel(w, i))} : null;
+  if (!s.wheels.some(w => w.enabled)) s.wheels[0].enabled = true;
+  if (!s.wheels[s.active].enabled) s.active = s.wheels.findIndex(w => w.enabled);
+  return s;
+}
+function normCard(c) {
+  if (!c || !c.data || (c.kind !== 'single' && c.kind !== 'combo')) return null;
+  const out = {id:String(c.id || 'c' + uid()), name:String(c.name || 'Karte'), kind:c.kind, created:+c.created || Date.now(), data:{}};
+  if (c.kind === 'single') { if (!c.data.wheel) return null; out.data.wheel = normWheel(c.data.wheel, 0); }
+  else {
+    const slots = (Array.isArray(c.data.slots) ? c.data.slots : []).filter(x => x && x.wheel && x.slot >= 0 && x.slot < MAX_WHEELS);
+    if (!slots.length) return null;
+    out.data = {active:+c.data.active || slots[0].slot, slots:slots.map(x => ({slot:+x.slot, wheel:normWheel(x.wheel, +x.slot)}))};
+  }
+  return out;
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const strip = o => JSON.parse(JSON.stringify(o, (k, v) => k[0] === '_' ? undefined : v));
+let S;
+try { S = normalize(JSON.parse(localStorage.getItem(STORE_KEY))); } catch (e) { S = defaultState(); }
+
+let saveT = 0;
+function save() {
+  clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    // Felder mit "_" (Laufzeit-Infos) nicht speichern
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(S, (k, v) => k[0] === '_' ? undefined : v)); }
+    catch (e) { toast('Speichern nicht möglich: ' + e.message); }
+  }, 250);
+}
+
+/* =====================================================================
+   Medien in IndexedDB (Fallback: nur im Arbeitsspeicher)
+   ===================================================================== */
+const DB = {
+  db:null, mem:new Map(),
+  open() {
+    return new Promise(res => {
+      try {
+        const r = indexedDB.open('fickrad-media', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('media');
+        r.onsuccess = () => { this.db = r.result; res(true); };
+        r.onerror = () => res(false);
+      } catch (e) { res(false); }
+    });
+  },
+  tx(mode, fn) {
+    return new Promise((res, rej) => {
+      const t = this.db.transaction('media', mode), st = t.objectStore('media');
+      const r = fn(st); t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error);
+    });
+  },
+  async put(id, blob) { if (!this.db) { this.mem.set(id, blob); return; } await this.tx('readwrite', s => s.put(blob, id)); },
+  async get(id) { if (!this.db) return this.mem.get(id) || null; return (await this.tx('readonly', s => s.get(id))) || null; },
+  async del(id) { urlCache.delete(id); if (!this.db) { this.mem.delete(id); return; } await this.tx('readwrite', s => s.delete(id)); },
+};
+const urlCache = new Map();
+async function mediaURL(id) {
+  if (urlCache.has(id)) return urlCache.get(id);
+  const b = await DB.get(id); if (!b) return null;
+  const u = URL.createObjectURL(b); urlCache.set(id, u); return u;
+}
+
+/* =====================================================================
+   Töne (WebAudio): Tick pro Feld, Stopp-Glocke, Timer-Piepen
+   ===================================================================== */
+let AC = null;
+function ac() {
+  if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(freq, dur, type, vol, t0 = 0, slideTo) {
+  const a = ac(); if (!a) return;
+  const t = a.currentTime + t0, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+function tick() { if (S.settings.sound) tone(2100, 0.035, 'square', 0.12, 0, 700); }
+function stopSound() {
+  if (!S.settings.sound) return;
+  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, 1.4, 'sine', 0.22, i * 0.07));
+}
+function beep(loud, dur = 0.22, f = 1000) { tone(f, dur, 'square', loud ? 0.5 : 0.18); }
+
+/* =====================================================================
+   Zeichnen: Hammerschlag-Metall, Ring, Spitze, Nabe, Segmente
+   ===================================================================== */
+function rng(seed) { let s = seed >>> 0 || 1; return () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; }; }
+
+/* Hammerschlag-Textur: dunkler Metallverlauf + viele kleine Dellen,
+   Licht kommt von oben (oben hell, unten dunkel). */
+function hammer(ctx, clipFn, box, R, seed, count, sample) {
+  ctx.save(); clipFn(ctx); ctx.clip();
+  const g = ctx.createLinearGradient(0, box.y, 0, box.y + box.h);
+  g.addColorStop(0, '#5c5c61'); g.addColorStop(0.42, '#2a2a2d'); g.addColorStop(1, '#09090a');
+  ctx.fillStyle = g; ctx.fillRect(box.x, box.y, box.w, box.h);
+  const r = rng(seed), s0 = R * 0.03;
+  for (let k = 0; k < count; k++) {
+    const [x, y] = sample ? sample(r) : [box.x + r() * box.w, box.y + r() * box.h];
+    const s = s0 * (0.45 + r() * 1.05);
+    const lt = clamp(1 - (y - box.y) / box.h, 0, 1);       // 1 = oben (mehr Licht)
+    // Schatten in der oberen Hälfte der Delle (vertieft)
+    let gr = ctx.createRadialGradient(x, y - s * 0.25, 0, x, y - s * 0.25, s);
+    gr.addColorStop(0, 'rgba(0,0,0,0.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y - s * 0.25, s, 0, TAU); ctx.fill();
+    // Lichtkante unten in der Delle
+    gr = ctx.createRadialGradient(x, y + s * 0.35, 0, x, y + s * 0.35, s * 0.8);
+    gr.addColorStop(0, `rgba(255,255,255,${0.05 + 0.22 * lt})`); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y + s * 0.35, s * 0.8, 0, TAU); ctx.fill();
+  }
+  // künstliche Beleuchtung von oben
+  const lg = ctx.createLinearGradient(0, box.y, 0, box.y + box.h);
+  lg.addColorStop(0, 'rgba(255,255,255,0.17)'); lg.addColorStop(0.5, 'rgba(255,255,255,0)'); lg.addColorStop(1, 'rgba(0,0,0,0.45)');
+  ctx.fillStyle = lg; ctx.fillRect(box.x, box.y, box.w, box.h);
+  ctx.restore();
+}
+function rivet(ctx, x, y, r) {
+  const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
+  g.addColorStop(0, '#d8d8d8'); g.addColorStop(0.35, '#6b6b6e'); g.addColorStop(1, '#101010');
+  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fillStyle = g; ctx.fill();
+  ctx.lineWidth = r * 0.25; ctx.strokeStyle = 'rgba(0,0,0,.65)'; ctx.stroke();
+}
+function bronzeGrad(ctx, y0, y1) {
+  const g = ctx.createLinearGradient(0, y0, 0, y1);
+  g.addColorStop(0, '#d9b678'); g.addColorStop(0.5, '#8c6a3c'); g.addColorStop(1, '#4a3518'); return g;
+}
+const RING_W = 0.095;   // Ringbreite relativ zum Radius
+const RIVETS = 16;
+
+let noiseCv = null;
+function noise() {
+  if (noiseCv) return noiseCv;
+  noiseCv = document.createElement('canvas'); noiseCv.width = noiseCv.height = 160;
+  const c = noiseCv.getContext('2d'), d = c.createImageData(160, 160), r = rng(99);
+  for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  c.putImageData(d, 0, 0); return noiseCv;
+}
+
+/* Drehender Teil: Segmente (ohne Text!) */
+function makeSegLayer(w, R) {
+  const ri = R * (1 - RING_W), size = Math.ceil(ri * 2) + 4, c = size / 2;
+  const cv = document.createElement('canvas'); cv.width = cv.height = size;
+  const x = cv.getContext('2d'), n = w.fields.length, seg = TAU / n, P = PALETTES[w.palette] || PALETTES.klassik;
+  for (let i = 0; i < n; i++) {
+    x.beginPath(); x.moveTo(c, c); x.arc(c, c, ri + 1, -Math.PI / 2 + i * seg, -Math.PI / 2 + (i + 1) * seg); x.closePath();
+    x.fillStyle = segColor(P, i, n); x.fill();
+  }
+  // leichte Papier/Filz-Struktur
+  x.save(); x.beginPath(); x.arc(c, c, ri + 1, 0, TAU); x.clip();
+  x.globalAlpha = 0.09; x.fillStyle = x.createPattern(noise(), 'repeat'); x.fillRect(0, 0, size, size);
+  x.globalAlpha = 1;
+  const g = x.createRadialGradient(c, c, R * 0.18, c, c, ri);
+  g.addColorStop(0, 'rgba(0,0,0,.25)'); g.addColorStop(0.3, 'rgba(0,0,0,0)'); g.addColorStop(0.85, 'rgba(0,0,0,.08)'); g.addColorStop(1, 'rgba(0,0,0,.45)');
+  x.fillStyle = g; x.fillRect(0, 0, size, size); x.restore();
+  // Trennlinien in Bronze
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + i * seg, ca = Math.cos(a), sa = Math.sin(a);
+    x.beginPath(); x.moveTo(c + ca * R * 0.19, c + sa * R * 0.19); x.lineTo(c + ca * ri, c + sa * ri);
+    x.lineWidth = R * 0.013; x.strokeStyle = 'rgba(0,0,0,.45)'; x.stroke();
+    x.lineWidth = R * 0.0065; x.strokeStyle = '#b8935a'; x.stroke();
+  }
+  return cv;
+}
+function segColor(P, i, n) { return (n % 2 === 1 && i === n - 1) ? P.c : (i % 2 ? P.b : P.a); }
+
+/* Fester Teil: Licht, Metallring, Nieten, Nabe, Anzeigespitze */
+function makeOverLayer(R) {
+  const S2 = Math.ceil(R * 2.16) + 4, c = S2 / 2, ri = R * (1 - RING_W);
+  const cv = document.createElement('canvas'); cv.width = cv.height = S2;
+  const x = cv.getContext('2d');
+  // Licht auf der Radfläche + Schatten unter dem Ring
+  x.save(); x.beginPath(); x.arc(c, c, ri, 0, TAU); x.clip();
+  let g = x.createLinearGradient(0, c - ri, 0, c + ri);
+  g.addColorStop(0, 'rgba(255,245,225,.13)'); g.addColorStop(0.45, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.32)');
+  x.fillStyle = g; x.fillRect(0, 0, S2, S2);
+  g = x.createRadialGradient(c, c, ri * 0.9, c, c, ri);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.55)');
+  x.fillStyle = g; x.fillRect(0, 0, S2, S2); x.restore();
+
+  // Ring mit Schlagschatten
+  const ringPath = p => { p.beginPath(); p.arc(c, c, R, 0, TAU); p.arc(c, c, ri, 0, TAU, true); };
+  x.save(); x.shadowColor = 'rgba(0,0,0,.85)'; x.shadowBlur = R * 0.05; x.shadowOffsetY = R * 0.012;
+  ringPath(x); x.fillStyle = '#111'; x.fill('evenodd'); x.restore();
+  const ringArea = TAU * (R + ri) / 2 * (R - ri);
+  hammer(x, p => { ringPath(p); }, {x:c - R, y:c - R, w:2 * R, h:2 * R}, R, 7, Math.round(ringArea / (R * R * 0.0009) * 1.4),
+    r => { const a = r() * TAU, rr = ri + r() * (R - ri); return [c + Math.cos(a) * rr, c + Math.sin(a) * rr]; });
+  // Kanten (3D-Fase)
+  x.lineWidth = R * 0.012; g = x.createLinearGradient(0, c - R, 0, c + R);
+  g.addColorStop(0, '#a3a3a8'); g.addColorStop(0.5, '#303033'); g.addColorStop(1, '#050505');
+  x.strokeStyle = g; x.beginPath(); x.arc(c, c, R - R * 0.006, 0, TAU); x.stroke();
+  x.lineWidth = R * 0.009; g = x.createLinearGradient(0, c - ri, 0, c + ri);
+  g.addColorStop(0, '#050505'); g.addColorStop(1, '#6a6a6e');
+  x.strokeStyle = g; x.beginPath(); x.arc(c, c, ri + R * 0.006, 0, TAU); x.stroke();
+  x.lineWidth = R * 0.007; x.strokeStyle = bronzeGrad(x, c - ri, c + ri);
+  x.beginPath(); x.arc(c, c, ri - R * 0.002, 0, TAU); x.stroke();
+  // Nieten
+  const rm = (R + ri) / 2;
+  for (let k = 0; k < RIVETS; k++) { const a = k / RIVETS * TAU + Math.PI / RIVETS; rivet(x, c + Math.cos(a) * rm, c + Math.sin(a) * rm, R * 0.017); }
+
+  // Nabe
+  const h = R * 0.2, hubPath = p => { p.beginPath(); p.arc(c, c, h, 0, TAU); };
+  x.save(); x.shadowColor = 'rgba(0,0,0,.85)'; x.shadowBlur = R * 0.05; x.shadowOffsetY = R * 0.012;
+  hubPath(x); x.fillStyle = '#111'; x.fill(); x.restore();
+  hammer(x, hubPath, {x:c - h, y:c - h, w:2 * h, h:2 * h}, R, 21, 260);
+  x.lineWidth = R * 0.008; x.strokeStyle = bronzeGrad(x, c - h, c + h); x.beginPath(); x.arc(c, c, h - R * 0.004, 0, TAU); x.stroke();
+  for (let k = 0; k < 4; k++) { const a = Math.PI / 4 + k * Math.PI / 2; rivet(x, c + Math.cos(a) * h * 0.8, c + Math.sin(a) * h * 0.8, R * 0.012); }
+  const h2 = h * 0.56;
+  x.save(); x.shadowColor = 'rgba(0,0,0,.8)'; x.shadowBlur = R * 0.02; x.shadowOffsetY = R * 0.006;
+  g = x.createLinearGradient(0, c - h2, 0, c + h2); g.addColorStop(0, '#5a5a5f'); g.addColorStop(1, '#0e0e10');
+  x.beginPath(); x.arc(c, c, h2, 0, TAU); x.fillStyle = g; x.fill(); x.restore();
+  x.lineWidth = R * 0.006; g = x.createLinearGradient(0, c - h2, 0, c + h2); g.addColorStop(0, '#9a9aa0'); g.addColorStop(1, '#000');
+  x.strokeStyle = g; x.beginPath(); x.arc(c, c, h2, 0, TAU); x.stroke();
+  const h3 = h * 0.32;
+  g = x.createRadialGradient(c - h3 * 0.35, c - h3 * 0.4, h3 * 0.05, c, c, h3);
+  g.addColorStop(0, '#f0f0f0'); g.addColorStop(0.3, '#808085'); g.addColorStop(1, '#141416');
+  x.beginPath(); x.arc(c, c, h3, 0, TAU); x.fillStyle = g; x.fill();
+
+  // Anzeigespitze (Dreieck oben)
+  const pw = R * 0.115, py0 = c - R * 1.05, py1 = c - R * 0.76;
+  const ptr = p => { p.beginPath(); p.moveTo(c - pw, py0); p.lineTo(c + pw, py0); p.lineTo(c, py1); p.closePath(); };
+  x.save(); x.shadowColor = 'rgba(0,0,0,.9)'; x.shadowBlur = R * 0.04; x.shadowOffsetY = R * 0.02;
+  ptr(x); x.fillStyle = '#111'; x.fill(); x.restore();
+  hammer(x, ptr, {x:c - pw, y:py0, w:2 * pw, h:py1 - py0}, R, 33, 150);
+  x.lineJoin = 'round'; x.lineWidth = R * 0.01; x.strokeStyle = bronzeGrad(x, py0, py1); ptr(x); x.stroke();
+  x.beginPath(); x.moveTo(c - pw * 0.6, py0 + R * 0.035); x.lineTo(c + pw * 0.6, py0 + R * 0.035); x.lineTo(c, py1 - R * 0.07); x.closePath();
+  x.lineWidth = R * 0.005; x.strokeStyle = 'rgba(176,140,85,.7)'; x.stroke();
+  x.beginPath(); x.moveTo(c - pw * 0.85, py0 + R * 0.008); x.lineTo(c + pw * 0.85, py0 + R * 0.008);
+  x.lineWidth = R * 0.006; x.strokeStyle = 'rgba(255,255,255,.35)'; x.stroke();
+  rivet(x, c, py1 - R * 0.045, R * 0.011);
+  return cv;
+}
+
+/* Namensschild: leicht gebogenes Metallband über dem Rad (gleiche Optik wie der Ring), Titel entlang des Bogens */
+function makePlate(R, title) {
+  const size = Math.ceil(R * 2.6) + 4, c = size / 2, span = 0.6, a0 = -Math.PI / 2 - span, a1 = -Math.PI / 2 + span;
+  const r0 = R * 1.075, r1 = R * 1.225, rm = (r0 + r1) / 2;
+  const cv = document.createElement('canvas'); cv.width = cv.height = size;
+  const x = cv.getContext('2d');
+  const path = p => { p.beginPath(); p.arc(c, c, r1, a0, a1); p.arc(c, c, r0, a1, a0, true); p.closePath(); };
+  x.save(); x.shadowColor = 'rgba(0,0,0,.85)'; x.shadowBlur = R * 0.04; x.shadowOffsetY = R * 0.012;
+  path(x); x.fillStyle = '#111'; x.fill(); x.restore();
+  const yTop = c - r1, yBot = c - r0 * Math.cos(span);
+  hammer(x, path, {x:c - r1, y:yTop, w:2 * r1, h:yBot - yTop}, R, 55, 260,
+    r => { const a = a0 + r() * (a1 - a0), rr = r0 + r() * (r1 - r0); return [c + Math.cos(a) * rr, c + Math.sin(a) * rr]; });
+  x.lineJoin = 'round'; x.lineWidth = R * 0.01; x.strokeStyle = bronzeGrad(x, yTop, yBot); path(x); x.stroke();
+  // Innenkante + Lichtkante oben
+  x.beginPath(); x.arc(c, c, r1 - R * 0.012, a0 + 0.02, a1 - 0.02); x.lineWidth = R * 0.005; x.strokeStyle = 'rgba(255,255,255,.28)'; x.stroke();
+  x.beginPath(); x.arc(c, c, r0 + R * 0.012, a0 + 0.02, a1 - 0.02); x.strokeStyle = 'rgba(176,140,85,.6)'; x.stroke();
+  [a0 + 0.045, a1 - 0.045].forEach(a => rivet(x, c + Math.cos(a) * rm, c + Math.sin(a) * rm, R * 0.014));
+  // Titel entlang des Bogens
+  const t = String(title || '').toUpperCase().trim();
+  if (t) {
+    let fs = (r1 - r0) * 0.58, sp = fs * 0.08;
+    const maxA = (a1 - a0) - 0.16;
+    const width = () => { x.font = `700 ${fs}px Georgia,"Times New Roman",serif`; return [...t].reduce((s, ch) => s + x.measureText(ch).width + sp, -sp); };
+    while (width() / rm > maxA && fs > 6) { fs *= 0.92; sp = fs * 0.08; }
+    const total = width() / rm; let acc = 0;
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    for (const ch of t) {
+      const w = x.measureText(ch).width, a = -Math.PI / 2 - total / 2 + (acc + w / 2) / rm;
+      x.save(); x.translate(c + Math.cos(a) * rm, c + Math.sin(a) * rm); x.rotate(a + Math.PI / 2);
+      x.fillStyle = '#1a0f05'; x.fillText(ch, 0, fs * 0.06);
+      const g = x.createLinearGradient(0, -fs / 2, 0, fs / 2); g.addColorStop(0, '#fff1c2'); g.addColorStop(0.5, '#e2b85e'); g.addColorStop(1, '#a87a2a');
+      x.fillStyle = g; x.fillText(ch, 0, 0); x.restore();
+      acc += w + sp;
+    }
+  }
+  return cv;
+}
+/* Zwischenspeicher für vorgerenderte Ebenen (teure Textur nur einmal pro Größe) */
+const layerCache = new Map();
+function cached(key, make) {
+  if (layerCache.has(key)) { const v = layerCache.get(key); layerCache.delete(key); layerCache.set(key, v); return v; }
+  const v = make(); layerCache.set(key, v);
+  while (layerCache.size > 30) layerCache.delete(layerCache.keys().next().value);
+  return v;
+}
+function drawBulbs(ctx, R, mode) {   // Jockey/Timer-Lichter auf den Nieten
+  const rm = R * (1 - RING_W / 2);
+  for (let k = 0; k < RIVETS; k++) {
+    const on = mode === 3 || (k + mode) % 2 === 0, a = k / RIVETS * TAU + Math.PI / RIVETS;
+    const x = Math.cos(a) * rm, y = Math.sin(a) * rm;
+    ctx.save(); ctx.shadowColor = on ? '#ffcc55' : 'transparent'; ctx.shadowBlur = on ? R * 0.06 : 0;
+    ctx.beginPath(); ctx.arc(x, y, R * 0.022, 0, TAU);
+    ctx.fillStyle = on ? '#ffe9a8' : '#5a1a10'; ctx.fill(); ctx.restore();
+  }
+}
+/* Ein Rad an Position (cx,cy) mit Radius R zeichnen */
+function drawWheel(ctx, w, cx, cy, R, o = {}) {
+  const Rc = Math.max(20, Math.round(o.cacheR || R)), sc = R / Rc;
+  const seg = cached(`s|${Rc}|${w.fields.length}|${w.palette}`, () => makeSegLayer(w, Rc));
+  const over = cached(`o|${Rc}`, () => makeOverLayer(Rc));
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc);
+  if (o.alpha != null) ctx.globalAlpha = o.alpha;
+  if (o.glow) {   // Hervorhebung des aktiven Rads (runder Schein, kein eckiger Hintergrund)
+    ctx.save(); ctx.shadowColor = o.glowColor || 'rgba(210,30,40,.95)'; ctx.shadowBlur = Rc * 0.16 * sc;
+    ctx.beginPath(); ctx.arc(0, 0, Rc * 0.985, 0, TAU); ctx.fillStyle = '#000'; ctx.fill(); ctx.restore();
+  }
+  ctx.save(); ctx.rotate(w.rot || 0); ctx.drawImage(seg, -seg.width / 2, -seg.height / 2);
+  const hl = o.hl ?? w._hl;
+  if (hl != null && hl >= 0 && hl < w.fields.length) {
+    const n = w.fields.length, s = TAU / n;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, Rc * (1 - RING_W), -Math.PI / 2 + hl * s, -Math.PI / 2 + (hl + 1) * s); ctx.closePath();
+    ctx.fillStyle = `rgba(255,236,180,${o.hlA ?? w._hlA ?? 0.35})`; ctx.fill();
+  }
+  ctx.restore();
+  ctx.drawImage(over, -over.width / 2, -over.height / 2);
+  if (o.title != null) { const pl = cached(`t|${Rc}|${o.title}`, () => makePlate(Rc, o.title)); ctx.drawImage(pl, -pl.width / 2, -pl.height / 2); }
+  if (o.bulbs) drawBulbs(ctx, Rc, o.bulbs);
+  ctx.restore();
+}
+
+/* =====================================================================
+   Layout: 1 Rad groß, 2 nebeneinander, ab 3/4 als Raster
+   ===================================================================== */
+function visibleIdx() { return S.wheels.map((w, i) => w.enabled ? i : -1).filter(i => i >= 0); }
+// Höhe: Namensschild ragt 1,23 R über die Mitte, Ring 1,0 R darunter
+const TOP_K = 1.23, H_K = 2.25;
+function fitR(cw, ch) { return Math.min(cw / 2.04, ch / H_K); }
+function gridLayout(n, W, H, btnH = 0) {
+  const bh = n > 1 ? btnH : btnH * 0.62;   // Platz unter dem Rad: Dreh-Button (ab 2 Rädern) + Ergebnisleiste
+  let best = null;
+  for (let cols = 1; cols <= n; cols++) {
+    const rows = Math.ceil(n / cols), R = fitR(W / cols, H / rows - bh);
+    if (!best || R > best.R + 0.5) best = {cols, rows, R};
+  }
+  const {cols, rows} = best, cw = W / cols, ch = H / rows, out = [];
+  const R = best.R * (n > 1 ? 0.95 : 1);
+  for (let i = 0; i < n; i++) {
+    const row = Math.floor(i / cols), inRow = row === rows - 1 ? n - row * cols : cols, col = i % cols;
+    const offX = (W - inRow * cw) / 2;
+    out.push({cx:offX + (col + 0.5) * cw, cy:row * ch + (ch - bh - H_K * R) / 2 + TOP_K * R, R});
+  }
+  return out;
+}
+function bigRect(W, H) { const R = fitR(W, H); return {cx:W / 2, cy:(H - H_K * R) / 2 + TOP_K * R, R}; }
+
+function sizeCanvas(cv) {
+  const r = cv.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.max(1, Math.round(r.width * d)), h = Math.max(1, Math.round(r.height * d));
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  return {W:w, H:h, d};
+}
+
+/* =====================================================================
+   Haupt-Darstellung
+   ===================================================================== */
+let focus = null;          // {idx, p:0..1, jockey} → Rad wird beim Drehen groß
+let editHL = null;         // Feld, das gerade in der Verwaltung bearbeitet wird
+let lastLayout = null;
+const easeIO = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+function render(now = performance.now()) {
+  const cv = $('#cv'), ctx = cv.getContext('2d'), {W, H, d} = sizeCanvas(cv);
+  ctx.clearRect(0, 0, W, H);
+  if (isSlot()) {
+    const L = drawSlot(ctx, W, H, d); lastLayout = null;
+    $('#bSpin').style.display = '';
+    placeSlotHist(L, d, W);
+    if (focus) {   // Joker / Folge-Rad: einzelnes Rad groß über der Slotmaschine
+      const p = easeIO(focus.p), big = bigRect(W, H);
+      ctx.fillStyle = `rgba(0,0,0,${0.8 * p})`; ctx.fillRect(0, 0, W, H);
+      drawWheel(ctx, S.wheels[focus.idx], big.cx, big.cy, big.R * (0.3 + 0.7 * p), {cacheR:big.R, alpha:p, glow:true,
+        glowColor:focus.jockey ? 'rgba(255,190,60,.95)' : undefined, bulbs:focus.jockey ? (Math.floor(now / 130) % 2) + 1 : 0, title:S.wheels[focus.idx].title});
+    }
+    return;
+  }
+  const vis = visibleIdx(), rects = gridLayout(vis.length, W, H, 74 * d), big = bigRect(W, H);
+  lastLayout = {vis, rects, d};
+  placeSpinButtons(vis, rects, d);
+  const p = focus ? easeIO(focus.p) : 0;
+  vis.forEach((wi, k) => {
+    if (focus && focus.idx === wi) return;
+    const r = rects[k];
+    drawWheel(ctx, S.wheels[wi], r.cx, r.cy, r.R, {
+      glow: vis.length > 1 && wi === S.active && !focus,
+      alpha: focus ? 1 - 0.85 * p : 1,
+      hl: wi === S.active && editHL != null ? editHL : undefined, hlA: 0.45, title: S.wheels[wi].title});
+  });
+  if (focus) {
+    const k = vis.indexOf(focus.idx), from = k >= 0 ? rects[k] : {cx:big.cx, cy:big.cy, R:big.R * 0.3};
+    const R = from.R + (big.R - from.R) * p;
+    drawWheel(ctx, S.wheels[focus.idx], from.cx + (big.cx - from.cx) * p, from.cy + (big.cy - from.cy) * p, R, {
+      cacheR: big.R, glow: focus.jockey || vis.length > 1,
+      glowColor: focus.jockey ? 'rgba(255,190,60,.95)' : undefined,
+      alpha: k >= 0 ? 1 : p,
+      bulbs: focus.jockey ? (Math.floor(now / 130) % 2) + 1 : 0, title: S.wheels[focus.idx].title});
+  }
+}
+/* Dreh-Button je Rad: ab 2 Rädern direkt unter dem Rad, bei 1 Rad rechts in der Leiste */
+function placeSpinButtons(vis, rects, d) {
+  const box = $('#wbtns'), multi = vis.length > 1;
+  $('#bSpin').style.display = multi ? 'none' : '';
+  box.style.visibility = focus ? 'hidden' : 'visible';
+  const key = multi + '#' + vis.map(i => i + ':' + (S.wheels[i].history || []).join('¦')).join('|');
+  if (box.dataset.key !== key) {
+    box.dataset.key = key;
+    box.innerHTML = vis.map(i => {
+      const h = S.wheels[i].history || [];
+      return `<div class="wctl">${multi ? `<button class="wspin" data-spin="${i}">DREHEN</button>` : ''}
+        <div class="hist">${h.length ? h.map(t => `<span>${esc(t)}</span>`).join('') : '<i>Letzte Ergebnisse</i>'}</div></div>`;
+    }).join('');
+  }
+  [...box.children].forEach((el, k) => {
+    const r = rects[k], b = el.querySelector('.wspin'), hist = el.querySelector('.hist');
+    el.style.left = (r.cx / d) + 'px'; el.style.top = ((r.cy + r.R) / d + 8) + 'px';
+    hist.style.maxWidth = Math.max(120, (2 * r.R / d) - (multi ? 72 : 0)) + 'px';
+    if (b) { b.classList.toggle('on', vis[k] === S.active); b.disabled = busy; }
+  });
+}
+function tween(ms, fn) {
+  return new Promise(res => {
+    const t0 = performance.now();
+    const f = now => { const t = Math.min(1, (now - t0) / ms); fn(t, now); t < 1 ? requestAnimationFrame(f) : res(); };
+    requestAnimationFrame(f);
+  });
+}
+
+/* =====================================================================
+   Drehen: gewichteter Zufall, Animation, Tick pro Feld
+   ===================================================================== */
+function segAt(w) { const n = w.fields.length; let a = (-(w.rot || 0)) % TAU; if (a < 0) a += TAU; return Math.floor(a / (TAU / n)) % n; }
+function pickWeighted(fields) {
+  const ws = fields.map(f => Math.max(0, +f.weight || 0)), tot = ws.reduce((a, b) => a + b, 0);
+  if (tot <= 0) return Math.floor(Math.random() * fields.length);
+  let r = Math.random() * tot;
+  for (let i = 0; i < ws.length; i++) { r -= ws[i]; if (r < 0) return i; }
+  return ws.length - 1;
+}
+// Ziel wird vorher (gewichtet) gezogen, dann wird genau dorthin gedreht.
+function spinAnim(w, redraw, secs) {
+  return new Promise(res => {
+    const n = w.fields.length, seg = TAU / n, target = pickWeighted(w.fields), u = 0.15 + Math.random() * 0.7;
+    const rot0 = w.rot || 0;
+    let dd = (-(target + u) * seg - rot0) % TAU; if (dd < 0) dd += TAU;
+    const total = Math.max(3, Math.round(secs * 1.15)) * TAU + dd, dur = secs * 1000, t0 = performance.now();
+    let last = segAt(w), lastTick = 0;
+    const f = now => {
+      const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 4);
+      w.rot = rot0 + total * e;
+      const s = segAt(w);
+      if (s !== last) { last = s; if (now - lastTick > 28) { tick(); lastTick = now; } }
+      redraw(now);
+      if (t < 1) requestAnimationFrame(f); else { w.rot %= TAU; res(target); }
+    };
+    requestAnimationFrame(f);
+  });
+}
+async function flashWin(w, idx, redraw) {
+  await tween(900, (t, now) => { w._hl = idx; w._hlA = 0.5 * Math.abs(Math.sin(t * Math.PI * 3)); redraw(now); });
+  w._hlA = 0.35; redraw();
+}
+
+let busy = false;
+async function doSpin(idx, depth = 0, jockey = false) {
+  if (busy) return;
+  busy = true; ac(); setBusy(true); closePanel();
+  S.active = idx; updateRail();
+  const w = S.wheels[idx], vis = visibleIdx();
+  const useFocus = jockey || isSlot() || vis.length > 1 || !vis.includes(idx);
+  if (useFocus) { focus = {idx, p:0, jockey}; await tween(450, (t, now) => { focus.p = t; render(now); }); }
+  const res = await spinAnim(w, render, S.settings.spinSec * (jockey ? 1.3 : 1));
+  stopSound();
+  await flashWin(w, res, render);
+  w.history = [resultLine(w, w.fields[res], res), ...(w.history || [])].slice(0, 5);
+  quizLog(w.fields[res]);
+  save();
+  const next = await showResult(w, res, depth);
+  w._hl = null;
+  if (useFocus) { await tween(350, (t, now) => { focus.p = 1 - t; render(now); }); focus = null; }
+  render(); busy = false; setBusy(false); renderPanel(); updateRail();
+  if (next) await runNext(next, depth + 1);   // Folge-Rad oder Speicherkarte (Kette)
+}
+async function runNext(t, depth) {
+  if (depth >= MAX_CHAIN) return;
+  if (t.card) await runCard(t.card, depth);
+  else if (t.wheel != null) await doSpin(t.wheel, depth);
+}
+
+/* =====================================================================
+   Slotmaschine: jede sichtbare Rad = eine Walze, gleiche Felder & Gewichte
+   ===================================================================== */
+const isSlot = () => S.settings.mode === 'slot';
+const SLOT = {bulbs:0, win:-1, winA:0};
+function rrect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function slotLayout(W, H, d, n) {
+  const histH = 64 * d, cab = {x:W * 0.025, y:H * 0.03, w:W * 0.95, h:H - H * 0.03 - histH};
+  const hh = Math.min(cab.h * 0.14, 90 * d), pad = Math.max(12 * d, cab.w * 0.025), gap = Math.max(8 * d, cab.w * 0.012);
+  const rows = n <= 6 ? 1 : 2, cols = Math.ceil(n / rows);
+  const inner = {x:cab.x + pad, y:cab.y + hh + pad * 0.6, w:cab.w - 2 * pad, h:cab.h - hh - pad * 1.6};
+  const rowH = (inner.h - (rows - 1) * gap) / rows;
+  let rw = (inner.w - (cols - 1) * gap) / cols;
+  const th = Math.min(rowH * 0.15, 34 * d);
+  const wh = rowH - th - 6 * d;
+  rw = Math.min(rw, wh * 1.25);                 // Walzen nicht zu breit
+  const reels = [];
+  for (let k = 0; k < n; k++) {
+    const row = Math.floor(k / cols), inRow = row === rows - 1 ? n - row * cols : cols, col = k % cols;
+    const totalW = inRow * rw + (inRow - 1) * gap, x0 = inner.x + (inner.w - totalW) / 2;
+    const y = inner.y + row * (rowH + gap);
+    reels.push({x:x0 + col * (rw + gap), ty:y, y:y + th + 6 * d, w:rw, h:wh, th});
+  }
+  return {cab, hh, reels, histY:cab.y + cab.h + 8 * d};
+}
+function fitText(ctx, txt, maxW, size, weight = 700) {
+  let s = size; ctx.font = `${weight} ${s}px Georgia, serif`;
+  while (s > 9 && ctx.measureText(txt).width > maxW) { s -= 1; ctx.font = `${weight} ${s}px Georgia, serif`; }
+  if (ctx.measureText(txt).width > maxW) { while (txt.length > 2 && ctx.measureText(txt + '…').width > maxW) txt = txt.slice(0, -1); txt += '…'; }
+  return txt;
+}
+function drawReel(ctx, w, r, d, win) {
+  const n = w.fields.length, P = PALETTES[w.palette] || PALETTES.klassik, ch = r.h / 3, pos = w._reel || 0;
+  // Titel über der Walze
+  ctx.save(); ctx.fillStyle = '#e9c77a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const tt = fitText(ctx, (w.title || '').toUpperCase(), r.w - 8 * d, Math.min(r.th * 0.62, 20 * d));
+  ctx.shadowColor = 'rgba(255,200,90,.5)'; ctx.shadowBlur = 6 * d; ctx.fillText(tt, r.x + r.w / 2, r.ty + r.th / 2); ctx.restore();
+  // Fenster
+  ctx.save(); rrect(ctx, r.x, r.y, r.w, r.h, 10 * d); ctx.clip();
+  const base = Math.round(pos);
+  for (let j = -2; j <= 2; j++) {
+    const idx = base + j, fi = ((idx % n) + n) % n, f = w.fields[fi];
+    const cy = r.y + r.h / 2 + (idx - pos) * ch;
+    const odd = n % 2 === 1 && fi === n - 1, bg = odd ? P.c : (fi % 2 ? P.b : P.a);
+    ctx.fillStyle = bg; ctx.fillRect(r.x, cy - ch / 2, r.w, ch);
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(r.x, cy + ch / 2 - 1.5 * d, r.w, 1.5 * d);
+    const light = !odd && fi % 2 === 1, ink = light ? '#2a0d0d' : '#f3e6c4';
+    ctx.fillStyle = ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const num = f.num !== '' && f.num != null ? String(f.num) : '', txt = f.text || (num ? '' : 'Feld ' + (fi + 1));
+    if (num && txt) {
+      ctx.fillText(fitText(ctx, num, r.w * 0.86, ch * 0.42, 800), r.x + r.w / 2, cy - ch * 0.15);
+      ctx.fillText(fitText(ctx, txt, r.w * 0.86, ch * 0.22), r.x + r.w / 2, cy + ch * 0.24);
+    } else ctx.fillText(fitText(ctx, num || txt, r.w * 0.86, ch * (num ? 0.5 : 0.3), num ? 800 : 700), r.x + r.w / 2, cy);
+    if (f.media) { ctx.font = `${ch * 0.16}px system-ui`; ctx.fillText(f.media.type === 'video' ? '🎬' : '📷', r.x + r.w - ch * 0.16, cy - ch * 0.33); }
+  }
+  // Rundung der Walze (oben/unten abgedunkelt)
+  const g = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+  g.addColorStop(0, 'rgba(0,0,0,.85)'); g.addColorStop(0.28, 'rgba(0,0,0,.12)'); g.addColorStop(0.5, 'rgba(255,255,255,.06)');
+  g.addColorStop(0.72, 'rgba(0,0,0,.12)'); g.addColorStop(1, 'rgba(0,0,0,.85)');
+  ctx.fillStyle = g; ctx.fillRect(r.x, r.y, r.w, r.h);
+  if (win) { ctx.fillStyle = `rgba(255,230,150,${SLOT.winA})`; ctx.fillRect(r.x, r.y + ch, r.w, ch); }
+  ctx.restore();
+  // Rahmen + Gewinnlinie
+  ctx.save(); rrect(ctx, r.x, r.y, r.w, r.h, 10 * d);
+  ctx.lineWidth = 4 * d; ctx.strokeStyle = '#6b6b70'; ctx.stroke(); ctx.lineWidth = 1.5 * d; ctx.strokeStyle = '#c9a24e'; ctx.stroke();
+  ctx.strokeStyle = win ? '#ffe08a' : 'rgba(220,40,50,.8)'; ctx.lineWidth = 2 * d;
+  ctx.beginPath(); ctx.moveTo(r.x, r.y + ch); ctx.lineTo(r.x + r.w, r.y + ch); ctx.moveTo(r.x, r.y + 2 * ch); ctx.lineTo(r.x + r.w, r.y + 2 * ch); ctx.stroke();
+  ctx.fillStyle = '#d8323a';
+  [[r.x - 1 * d, 1], [r.x + r.w + 1 * d, -1]].forEach(([x, s]) => { ctx.beginPath(); ctx.moveTo(x, r.y + r.h / 2 - 9 * d); ctx.lineTo(x + s * 11 * d, r.y + r.h / 2); ctx.lineTo(x, r.y + r.h / 2 + 9 * d); ctx.closePath(); ctx.fill(); });
+  ctx.restore();
+}
+function drawSlot(ctx, W, H, d) {
+  const vis = visibleIdx(), L = slotLayout(W, H, d, vis.length), c = L.cab;
+  // Gehäuse: dunkles Metall, goldene Kante
+  ctx.save(); rrect(ctx, c.x, c.y, c.w, c.h, 22 * d);
+  const g = ctx.createLinearGradient(0, c.y, 0, c.y + c.h);
+  g.addColorStop(0, '#3a0a0e'); g.addColorStop(0.12, '#1a1012'); g.addColorStop(0.85, '#0e0c0d'); g.addColorStop(1, '#2a0a0d');
+  ctx.fillStyle = g; ctx.shadowColor = 'rgba(200,30,40,.45)'; ctx.shadowBlur = 30 * d; ctx.fill(); ctx.shadowBlur = 0;
+  ctx.lineWidth = 6 * d; ctx.strokeStyle = '#4a4a4e'; ctx.stroke(); ctx.lineWidth = 2 * d; ctx.strokeStyle = '#c9a24e'; ctx.stroke();
+  // Kopf mit Schriftzug und Lichtern
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `800 ${L.hh * 0.5}px Georgia, serif`;
+  const tg = ctx.createLinearGradient(0, c.y, 0, c.y + L.hh); tg.addColorStop(0, '#fff2c0'); tg.addColorStop(0.5, '#e0a93a'); tg.addColorStop(1, '#8a5a12');
+  ctx.fillStyle = tg; ctx.shadowColor = 'rgba(255,190,70,.7)'; ctx.shadowBlur = 14 * d; ctx.fillText('SEXRAD', c.x + c.w / 2, c.y + L.hh * 0.56); ctx.shadowBlur = 0;
+  const nb = Math.max(10, Math.round(c.w / (34 * d)));
+  for (let i = 0; i < nb; i++) {
+    const on = SLOT.bulbs ? (i + SLOT.bulbs) % 2 === 0 : true, x = c.x + 24 * d + i * (c.w - 48 * d) / (nb - 1);
+    ctx.beginPath(); ctx.arc(x, c.y + 10 * d, 4.5 * d, 0, TAU); ctx.fillStyle = on ? '#ffe9a8' : '#5a1a10';
+    if (on) { ctx.shadowColor = '#ffcc55'; ctx.shadowBlur = 10 * d; } ctx.fill(); ctx.shadowBlur = 0;
+  }
+  ctx.restore();
+  vis.forEach((wi, k) => drawReel(ctx, S.wheels[wi], L.reels[k], d, SLOT.win >= 0));
+  return L;
+}
+function placeSlotHist(L, d, W) {
+  const box = $('#wbtns'), h = S.settings.slotHist || [];
+  const key = 'slot#' + h.join('¦');
+  if (box.dataset.key !== key) {
+    box.dataset.key = key;
+    box.innerHTML = `<div class="wctl"><div class="hist">${h.length ? h.map(t => `<span>${esc(t)}</span>`).join('') : '<i>Letzte Ergebnisse</i>'}</div></div>`;
+  }
+  const el = box.firstElementChild; if (!el) return;
+  el.style.left = (W / 2 / d) + 'px'; el.style.top = (L.histY / d) + 'px';
+  el.querySelector('.hist').style.maxWidth = (L.cab.w / d * 0.9) + 'px';
+  box.style.visibility = focus ? 'hidden' : 'visible';
+}
+async function slotSpin() {
+  if (busy) return;
+  const vis = visibleIdx(); if (!vis.length) return;
+  busy = true; ac(); setBusy(true); closePanel();
+  const wl = vis.map(i => S.wheels[i]), secs = S.settings.spinSec;
+  const targets = wl.map(w => pickWeighted(w.fields));
+  const starts = wl.map(w => Math.round(w._reel || 0));
+  const ends = wl.map((w, k) => { const n = w.fields.length; let e = starts[k] + (Math.max(3, Math.round(secs * 1.4)) + k) * n; return e + (((targets[k] - e) % n) + n) % n; });
+  const durs = wl.map((_, k) => secs * 1000 * 0.6 + k * Math.min(500, secs * 1000 * 0.4 / Math.max(1, vis.length - 1)));
+  const total = Math.max(...durs), stopped = wl.map(() => false), last = wl.map(() => null);
+  let lastTick = 0;
+  SLOT.win = -1;
+  await new Promise(res => {
+    const t0 = performance.now();
+    const f = now => {
+      const el = now - t0;
+      wl.forEach((w, k) => {
+        if (stopped[k]) return;
+        const t = Math.min(1, el / durs[k]);
+        const e = t < 1 ? 1 - Math.pow(1 - t, 3) : 1;
+        w._reel = starts[k] + (ends[k] - starts[k]) * e + (t < 1 && t > 0.9 ? Math.sin((t - 0.9) * 31.4) * 0.06 : 0);
+        const c = Math.round(w._reel);
+        if (c !== last[k]) { last[k] = c; if (now - lastTick > 35) { tick(); lastTick = now; } }
+        if (t >= 1) { stopped[k] = true; w._reel = targets[k]; stopSound(); }
+      });
+      SLOT.bulbs = (Math.floor(now / 140) % 2) + 1;
+      render(now);
+      el < total + 20 ? requestAnimationFrame(f) : res();
+    };
+    requestAnimationFrame(f);
+  });
+  SLOT.bulbs = 0; SLOT.win = 1;
+  await tween(900, (t, now) => { SLOT.winA = 0.45 * Math.abs(Math.sin(t * Math.PI * 3)); render(now); });
+  SLOT.winA = 0.25; render();
+  const lines = wl.map((w, k) => { const f = w.fields[targets[k]], l = resultLine(w, f, targets[k]); w.history = [l, ...(w.history || [])].slice(0, 5); quizLog(f); return l; });
+  const fs = wl.map((w, k) => w.fields[targets[k]]);
+  S.settings.slotHist = [lines.join(' · '), ...(S.settings.slotHist || [])].slice(0, 5);
+  save();
+  const act = fs.find(f => f.card || f.next >= 0) || {};
+  const toy = fs.filter(f => f.toy && +f.toy.lvl > 0).sort((a, b) => b.toy.lvl - a.toy.lvl)[0];
+  const combo = {num:'', text:lines.join('\n'), media:(fs.find(f => f.media) || {}).media || null,
+    toy:toy ? toy.toy : {lvl:0, sec:5, pat:'konstant', dev:''}, _fs:lines.length > 3 ? `min(${Math.floor(60 / lines.length)}vh, 7vw)` : '', card:act.card || null, next:act.card ? -1 : (act.next ?? -1)};
+  const next = await showResult({unit:''}, 0, 0, combo);
+  SLOT.win = -1; render(); busy = false; setBusy(false); renderPanel(); updateRail();
+  if (next) await runNext(next, 1);
+}
+function setMode(m) {
+  S.settings.mode = m; save();
+  $('#wbtns').dataset.key = '';
+  updateRail(); render(); renderPanel();
+  toast(m === 'slot' ? '🎰 Slotmaschine – jedes Rad ist eine Walze' : '🎡 Glücksrad', 2200);
+}
+
+/* =====================================================================
+   Ergebnis groß anzeigen (über Foto/Video)
+   ===================================================================== */
+function resultLine(w, f, i) {
+  return [f.num !== '' ? f.num : '', f.text, w.unit].filter(Boolean).join(' ') || ('Feld ' + (i + 1));
+}
+function showResult(w, i, depth, fieldOverride) {
+  return new Promise(async resolve => {
+    const f = fieldOverride || w.fields[i], box = $('#rMedia');
+    box.innerHTML = '';
+    $('#rNum').textContent = f.num !== '' ? f.num : '';
+    $('#rTxt').textContent = f.text || (f.num === '' ? 'Feld ' + (i + 1) : '');
+    $('#rTxt').style.fontSize = f._fs || '';
+    $('#rUnit').textContent = w.unit || '';
+    const nx = $('#rNext');
+    const card = f.card ? S.presets.find(c => c.id === f.card) : null;
+    const target = depth >= MAX_CHAIN - 1 ? null
+      : card ? {card:card.id} : (f.next >= 0 && f.next < MAX_WHEELS ? {wheel:f.next} : null);
+    const label = !target ? '' : card ? ('KARTE<br><small>' + esc(card.name) + '</small>')
+      : ('WEITER<br><small>' + esc(S.wheels[f.next].title || 'Rad ' + (f.next + 1)) + '</small>');
+    nx.style.display = target ? 'block' : 'none';
+    nx.innerHTML = label;
+    // Folge automatisch starten (Countdown auf dem Button)
+    let left = +S.settings.autoNext || 0, autoT = 0;
+    const startCountdown = () => {
+      if (!(target && left > 0)) return;
+      const upd = () => { nx.innerHTML = label + '<br><small>(' + left + ')</small>'; };
+      upd(); clearInterval(autoT);
+      autoT = setInterval(() => { left--; if (left <= 0) done(target); else upd(); }, 1000);
+    };
+    const hasVideo = f.media && f.media.type === 'video';
+    if (!hasVideo) startCountdown();
+    // Video läuft bis zum Ende (Ausschnitt einmal ganz), danach Folge-Aktion bzw. Schließen
+    const videoDone = () => {
+      if (target) { if (left > 0) startCountdown(); }
+      else { const rs = +S.settings.resultSec || 0; if (rs > 0) { clearTimeout(autoT); autoT = setTimeout(() => done(null), 2000); } }
+    };
+    $('#result').classList.toggle('nomedia', !f.media);
+    void $('#result').offsetWidth;
+    $('#result').classList.add('show');
+    $('#result').classList.remove('hasvid');
+    let vid = null;
+    if (f.media) {
+      const url = await mediaURL(f.media.id);
+      if (url && f.media.type === 'video') {
+        const v = vid = document.createElement('video');
+        v.src = url; v.playsInline = true; v.autoplay = true; v.setAttribute('playsinline', ''); v.loop = false;
+        const st = +f.media.start || 0;
+        const endAt = () => { const en = +f.media.end || 0; return en > st ? en : (v.duration || 0); };
+        const mm = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+        const upd = () => { const d = endAt() - st; $('#rvPos').max = Math.max(0.1, d).toFixed(1); $('#rvPos').value = Math.max(0, v.currentTime - st);
+          $('#rvTime').textContent = mm(v.currentTime - st) + ' / ' + mm(d); $('#rvPlay').textContent = v.paused ? '▶' : '❚❚'; };
+        let finished = false;
+        const fin = () => { if (finished) return; finished = true; v.pause(); upd(); videoDone(); };
+        v.addEventListener('loadedmetadata', () => { v.currentTime = st; upd(); v.play().catch(() => { v.muted = true; v.play().catch(() => {}); }); });
+        v.addEventListener('timeupdate', () => { upd(); if (endAt() > 0 && v.currentTime >= endAt() - 0.05) fin(); });
+        v.addEventListener('ended', fin);
+        v.addEventListener('play', () => { finished = false; upd(); });
+        v.addEventListener('pause', upd);
+        const seek = s => { const wasFin = finished; clearInterval(autoT); clearTimeout(autoT); if (target) nx.innerHTML = label;
+          v.currentTime = clamp(s, st, Math.max(st, endAt() - 0.3)); finished = false; if (wasFin) v.play().catch(() => {}); upd(); };
+        $('#rvBack').onclick = () => seek(v.currentTime - 10);
+        $('#rvFwd').onclick = () => seek(v.currentTime + 10);
+        $('#rvPlay').onclick = () => { if (v.paused) { if (finished || v.currentTime >= endAt() - 0.1) seek(st); clearInterval(autoT); clearTimeout(autoT); v.play().catch(() => {}); } else v.pause(); };
+        $('#rvPos').oninput = () => seek(st + +$('#rvPos').value);
+        box.appendChild(v);
+        $('#result').classList.add('hasvid');
+      } else if (url) { const im = new Image(); im.src = url; box.appendChild(im); }
+    }
+    toyPlay(f.toy);
+    if (S.settings.speakMain) speak(resultLine(w, f, i));
+    function done(next) {
+      clearInterval(autoT); clearTimeout(autoT);
+      $('#result').classList.remove('show', 'hasvid'); box.querySelectorAll('video').forEach(x => x.pause()); box.innerHTML = '';
+      nx.onclick = $('#rClose').onclick = null;
+      stopSpeech();
+      resolve(next);
+    }
+    nx.onclick = () => done(target);
+    $('#rStop').style.display = SEQ.run ? 'block' : 'none';
+    $('#rStop').onclick = () => { SEQ.abort = true; toyStop(); done(null); };
+    // ohne Video/Folge: kurz groß aufleuchten, dann zurück zum Rad
+    const rs = +S.settings.resultSec || 0;
+    if (!target && !f.media && rs > 0) autoT = setTimeout(() => done(null), rs * 1000);
+    $('#rClose').onclick = () => done(null);
+  });
+}
+
+/* =====================================================================
+   Sprachausgabe („Dominator-Stimme“: tief & langsam)
+   ===================================================================== */
+function pickVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  const vs = speechSynthesis.getVoices().filter(v => /^de/i.test(v.lang));
+  return vs.find(v => /male|mann|männ|conrad|stefan|markus|hans|yannick|klaus|bernd|günter|jonas/i.test(v.name) && !/female|frau/i.test(v.name)) || vs[0] || null;
+}
+/* In der Android-App (window.AndroidApp) spricht die Android-Stimme, sonst der Browser */
+const NATIVE = window.AndroidApp || null;
+function stopSpeech() {
+  if (NATIVE) { try { NATIVE.stopSpeak(); } catch (e) {} if (window.__ttsDone) window.__ttsDone(); }
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+function speak(text) {
+  if (NATIVE && text) return new Promise(res => {
+    let done = false; const fin = () => { if (!done) { done = true; window.__ttsDone = null; res(); } };
+    window.__ttsDone = fin; setTimeout(fin, 5000 + text.length * 180);
+    try { NATIVE.speak(text, clamp(+S.timer.pitch, 0.1, 2), clamp(+S.timer.rate, 0.3, 1.5)); } catch (e) { fin(); }
+  });
+  return new Promise(res => {
+    if (!('speechSynthesis' in window) || !text) return res();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE'; const v = pickVoice(); if (v) u.voice = v;
+    u.pitch = clamp(+S.timer.pitch, 0, 2); u.rate = clamp(+S.timer.rate, 0.3, 1.5); u.volume = 1;
+    let done = false; const fin = () => { if (!done) { done = true; res(); } };
+    u.onend = fin; u.onerror = fin; setTimeout(fin, 5000 + text.length * 180);
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  });
+}
+if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
+
+/* =====================================================================
+   Timer-Rad: Zeit → lautes Piepen → Drehen → Ansage → wieder von vorn
+   ===================================================================== */
+const T = {run:false, tok:0, flash:0, wake:null};
+function renderTimer(now = performance.now()) {
+  const cv = $('#tcv'), ctx = cv.getContext('2d'), {W, H} = sizeCanvas(cv);
+  ctx.clearRect(0, 0, W, H);
+  const r = bigRect(W, H);
+  drawWheel(ctx, S.timer.wheel, r.cx, r.cy, r.R, {bulbs:T.flash, glow:T.run, glowColor:'rgba(200,30,40,.8)', title:S.timer.wheel.title});
+}
+const fmt = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+function showClock(s) { const c = $('#tClock'); c.textContent = fmt(s); c.classList.toggle('warn', T.run && s <= 3); }
+function updT() { $('#tStart').textContent = T.run ? 'STOPP' : 'START'; if (!T.run) showClock(S.timer.seconds); renderTimer(); }
+async function wakeLock(on) {
+  try {
+    if (on && 'wakeLock' in navigator && !T.wake) T.wake = await navigator.wakeLock.request('screen');
+    if (!on && T.wake) { T.wake.release(); T.wake = null; }
+  } catch (e) {}
+}
+async function timerRun() {
+  const tok = ++T.tok; T.run = true; ac(); updT(); wakeLock(true);
+  const alive = () => T.run && T.tok === tok;
+  const w = S.timer.wheel;
+  while (alive()) {
+    let rem = Math.max(1, Math.round(S.timer.seconds));
+    showClock(rem); $('#tResult').classList.remove('show'); w._hl = null; renderTimer();
+    while (rem > 0 && alive()) {
+      await sleep(1000); if (!alive()) break;
+      rem--; showClock(rem);
+      if (rem > 0 && rem <= 3) beep(false, 0.12, 880);
+    }
+    if (!alive()) break;
+    for (let k = 0; k < 4 && alive(); k++) {          // lautes Piepen + Lichter
+      T.flash = 3; renderTimer(); beep(true, 0.28, 1250); await sleep(300);
+      T.flash = 0; renderTimer(); await sleep(170);
+    }
+    if (!alive()) break;
+    T.flash = 0;
+    const res = await spinAnim(w, now => { T.flash = (Math.floor(now / 160) % 2) + 1; renderTimer(now); }, S.settings.spinSec);
+    T.flash = 0; if (!alive()) break;
+    stopSound(); await flashWin(w, res, renderTimer);
+    const f = w.fields[res], line = resultLine(w, f, res);
+    quizLog(f);
+    toyPlay(f.toy);
+    $('#tResult').textContent = line; $('#tResult').classList.add('show');
+    if (S.timer.voice) await speak((S.timer.prefix ? S.timer.prefix + ' ' : '') + line);
+    if (!alive()) break;
+    await sleep(clamp(+S.timer.pause, 0, 120) * 1000);
+    if (!S.timer.auto) break;
+  }
+  if (T.tok === tok) { T.run = false; T.flash = 0; wakeLock(false); updT(); }
+}
+function timerStop() { toyStop(); T.run = false; T.tok++; T.flash = 0; stopSpeech(); wakeLock(false); updT(); }
+function openTimer() {
+  closePanel(); $('#timerView').classList.add('show'); $('#tResult').classList.remove('show');
+  goFullscreen(); requestAnimationFrame(() => updT());
+}
+
+/* =====================================================================
+   Rechte Leiste & Panel-Steuerung
+   ===================================================================== */
+function updateRail() {
+  const w = S.wheels[S.active];
+  $('#wlabel').textContent = !w.enabled ? (w.title || 'Rad ' + (S.active + 1)) : '';
+  $('#bUndo').style.display = S.snapshot ? '' : 'none';
+  $('#bEnd').style.display = S.quiz.session ? '' : 'none';
+  $('#bMode').innerHTML = isSlot() ? '🎡 RAD' : '🎰 SLOT';
+  $('#bSpin').textContent = isSlot() ? 'ZIEHEN' : 'DREHEN';
+}
+function setBusy(b) {
+  ['#bSpin', '#bJoker', '#bTimer', '#bUndo', '#bMode'].forEach(s => $(s).disabled = b);
+  document.querySelectorAll('.wspin').forEach(x => x.disabled = b);
+}
+function closePanel() { $('#panel').classList.remove('open'); $('#gear').classList.remove('on'); editHL = null; }
+function toast(msg, ms = 2600) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), ms); }
+
+const openSecs = new Set(['fields']);
+function renderPanel() {
+  const P = $('#panel'); if (!P.classList.contains('open')) return;
+  const keepScroll = P.scrollTop;
+  const w = S.wheels[S.active], n = w.fields.length, Pal = PALETTES[w.palette];
+  const op = k => openSecs.has(k) ? 'open' : '';
+  const chips = S.wheels.map((x, i) => `<div class="wchip ${i === S.active ? 'on' : ''}" data-act="sel" data-w="${i}">
+      <input type="checkbox" data-act="en" data-w="${i}" ${x.enabled ? 'checked' : ''}><span>${esc(x.title || 'Rad ' + (i + 1))}</span></div>`).join('');
+  const nextOpts = (f, all) => `<option value="-1">— keine Aktion</option><optgroup label="Rad drehen">` +
+      S.wheels.map((x, i) => (i === S.active && !all) ? '' :
+      `<option value="w${i}" ${!f.card && f.next === i ? 'selected' : ''}>→ ${esc(x.title || 'Rad ' + (i + 1))}</option>`).join('') +
+      `</optgroup>` + (S.presets.length ? `<optgroup label="Speicherkarte laden &amp; drehen">` + S.presets.map(c =>
+      `<option value="c${esc(c.id)}" ${f.card === c.id ? 'selected' : ''}>▶ ${c.kind === 'combo' ? '🎰' : '🎡'} ${esc(c.name)}</option>`).join('') + `</optgroup>` : '');
+  const stepOpts = t => `<optgroup label="Rad drehen">` + S.wheels.map((x, i) =>
+      `<option value="w${i}" ${t === 'w' + i ? 'selected' : ''}>🎡 ${esc(x.title || 'Rad ' + (i + 1))}</option>`).join('') + `</optgroup>` +
+      (S.presets.length ? `<optgroup label="Speicherkarte">` + S.presets.map(c =>
+      `<option value="c${esc(c.id)}" ${t === 'c' + c.id ? 'selected' : ''}>${c.kind === 'combo' ? '🎰' : '🎡'} Karte: ${esc(c.name)}</option>`).join('') + `</optgroup>` : '');
+  const cards = S.presets.map(c => {
+    const meta = c.kind === 'single' ? `Einzelrad · ${c.data.wheel.fields.length} Felder`
+      : `Kombination · ${c.data.slots.length} Räder (${c.data.slots.map(x => esc(x.wheel.title)).join(', ')})`;
+    return `<div class="card ${c.kind}"><b>${c.kind === 'combo' ? '🎰' : '🎡'} ${esc(c.name)}</b><div class="meta">${meta}</div>
+      <button data-ca="load" data-c="${esc(c.id)}">Laden</button><button class="go" data-ca="run" data-c="${esc(c.id)}">▶ Laden &amp; drehen</button>
+      <button data-ca="share" data-c="${esc(c.id)}">📤 Übermitteln${lockTag()}</button><button data-ca="del" data-c="${esc(c.id)}">🗑</button></div>`;
+  }).join('') || '<div class="hint">Noch keine Speicherkarten.</div>';
+  const toyRow = (attr, t) => !S.toy.enabled ? '' : `<div class="toyrow">📳 <input type="number" min="0" max="100" ${attr} data-ty="lvl" value="${t.lvl}" title="Stärke in %, 0 = aus">%
+      <input type="number" min="0.5" max="600" step="0.5" ${attr} data-ty="sec" value="${t.sec}" title="Dauer in Sekunden">s
+      <select ${attr} data-ty="pat">${Object.entries(TOY_PATS).map(([k, v]) => `<option value="${k}" ${t.pat === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      <select ${attr} data-ty="dev" title="Welches Spielzeug">${toyDevOpts(t.dev)}</select></div>`;
+  const rows = w.fields.map((f, i) => `<div class="frow" data-row="${i}">
+      <div class="ftop">
+        <span class="sw" style="background:${segColor(Pal, i, n)};color:${i % 2 && !(n % 2 && i === n - 1) ? '#333' : '#eee'}">${i + 1}</span>
+        <input type="number" min="0" max="99" inputmode="numeric" placeholder="Nr." data-f="${i}" data-fp="num" value="${f.num}">
+        <input type="text" placeholder="Text für Feld ${i + 1}" data-f="${i}" data-fp="text" value="${esc(f.text)}">
+        <button class="x" data-fa="del" data-f="${i}" title="Feld löschen">✕</button>
+      </div>
+      <div class="fsub">
+        <label style="margin:0">Gewicht<input type="number" min="0" max="100" step="1" data-f="${i}" data-fp="weight" value="${f.weight}"></label>
+        <label style="margin:0">Aktion<select data-f="${i}" data-fp="next">${nextOpts(f)}</select></label>
+        <div class="fmed">${f.media
+          ? `<span>${f.media.type === 'video' ? '🎬' : '🖼'} ${esc(f.media.name || 'Medium')}${f.media.type === 'video' && f.media.end > f.media.start ? ` (${(+f.media.start).toFixed(1)}–${(+f.media.end).toFixed(1)} s)` : ''}</span>
+             <button class="medbtn" data-fa="trim" data-f="${i}">${f.media.type === 'video' ? '🎬 Vorschau · Start/Stopp' : '🖼 Ansehen / ändern'}</button><button data-fa="unmedia" data-f="${i}">🗑</button>`
+          : `<button class="medbtn" data-fa="media" data-f="${i}">🎬 Video / Foto importieren</button>`}</div>
+        ${toyRow(`data-f="${i}"`, f.toy)}
+      </div></div>`).join('');
+  const tw = S.timer.wheel;
+  const trows = tw.fields.map((f, i) => `<div class="ftop" style="grid-template-columns:26px 1fr 70px 38px;margin:6px 0">
+      <span class="sw" style="background:${segColor(PALETTES[tw.palette], i, tw.fields.length)}"></span>
+      <input type="text" data-tf="${i}" data-tfp="text" value="${esc(f.text)}" placeholder="Ansage ${i + 1}">
+      <input type="number" min="0" max="100" data-tf="${i}" data-tfp="weight" value="${f.weight}" title="Gewicht">
+      <button class="x" data-ta="del" data-tf="${i}">✕</button>${toyRow(`data-tf="${i}"`, f.toy)}</div>`).join('');
+  const palOpts = sel => Object.entries(PALETTES).map(([k, v]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${v.name}</option>`).join('');
+
+  P.innerHTML = `
+  <details ${op('wheels')} data-sec="wheels"><summary>Räder (${visibleIdx().length} sichtbar)</summary>
+    <div class="hint">Häkchen = Rad anzeigen (Lücken erlaubt). Antippen = bearbeiten.</div>
+    <div class="wgrid">${chips}</div></details>
+
+  <details ${op('joker')} data-sec="joker"><summary>★ Joker</summary>
+    <div class="hint">Der Joker-Button oben rechts zeigt sein Video/Foto mit Text und startet danach die zugewiesene Aktion (Rad oder Speicherkarte).</div>
+    <div class="row2"><label>Zahl<input type="number" min="0" max="99" data-jp="num" value="${S.joker.num}"></label>
+      <label>Text<input type="text" data-jp="text" value="${esc(S.joker.text)}"></label></div>
+    <label>Zuweisung<select data-jp="next">${nextOpts(S.joker, true)}</select></label>
+    <div class="fmed">${S.joker.media
+      ? `<span>${S.joker.media.type === 'video' ? '🎬' : '🖼'} ${esc(S.joker.media.name || 'Medium')}</span>
+         ${S.joker.media.type === 'video' ? '<button data-act="jtrim">✂ Schnitt</button>' : ''}
+         <button data-act="jmedia">Ersetzen</button><button data-act="junmedia">🗑</button>`
+      : '<button data-act="jmedia">📎 Video / Foto für Joker</button>'}</div>
+    <div class="hint" style="margin-top:12px"><b style="color:#ffe08a">Abfolgen</b> – Beim Drücken des Jokers startet eine Abfolge (bei mehreren erscheint eine Auswahl). Jeder Schritt = Rad oder Speicherkarte + Anzahl Drehungen. Ohne Abfolge gilt die Zuweisung oben.</div>
+    ${S.joker.seqs.map((q, qi) => `<div class="card combo">
+      <label style="margin:0">Name<input type="text" data-q="${qi}" data-qp="name" value="${esc(q.name)}"></label>
+      ${q.steps.map((st, si) => `<div class="ftop" style="grid-template-columns:22px 1fr 74px 38px;margin:6px 0">
+        <span class="hint">${si + 1}.</span><select data-q="${qi}" data-s="${si}" data-stp="t">${stepOpts(st.t)}</select>
+        <input type="number" min="1" max="50" data-q="${qi}" data-s="${si}" data-stp="n" value="${st.n}" title="Anzahl Drehungen">
+        <button class="x" data-qa="delstep" data-q="${qi}" data-s="${si}">✕</button></div>`).join('') || '<div class="hint">Noch keine Schritte.</div>'}
+      <button data-qa="addstep" data-q="${qi}">+ Schritt</button><button class="go" data-qa="run" data-q="${qi}">▶ Starten</button><button data-qa="del" data-q="${qi}">🗑</button></div>`).join('')}
+    <button class="b pri" data-act="addseq">+ Neue Abfolge</button></details>
+
+  <details ${op('cards')} data-sec="cards"><summary>Speicherkarten (${S.presets.length})</summary>
+    <div class="hint">Eine Karte speichert ein Rad oder eine Kombination aus allen sichtbaren Rädern mit allen Einstellungen (Felder, Gewichte, Folgen, Medien). Im Feld unter „Aktion“ kann eine Karte direkt abgerufen und automatisch gedreht werden.</div>
+    <label>Name der Karte<input type="text" id="cardName" placeholder="z. B. Vorspiel-Runde"></label>
+    <button class="b pri" data-act="saveSingle">💾 Aktuelles Rad speichern</button>
+    <button class="b pri" data-act="saveCombo">💾 Kombination speichern (${visibleIdx().length} Räder)</button>
+    ${cards}
+    <button class="b" data-act="recvCard">📥 Karte empfangen / importieren${lockTag()}</button>
+    ${S.snapshot ? '<button class="b" data-act="undo">↩ Räder von vor dem Laden zurückholen</button>' : ''}</details>
+
+  <details ${op('fields')} data-sec="fields"><summary>Felder verwalten – ${esc(w.title || 'Rad ' + (S.active + 1))}</summary>
+    <div class="row2"><label>Überschrift<input type="text" data-wp="title" value="${esc(w.title)}"></label>
+      <label>Einheit<input type="text" data-wp="unit" value="${esc(w.unit)}" placeholder="z. B. Minuten"></label></div>
+    <label>Farben<select data-wp="palette">${palOpts(w.palette)}</select></label>
+    <div class="hint">Gewicht = Häufigkeit (2 = doppelt so oft, 0 = nie). Aktion = danach automatisch anbieten, Kette max. ${MAX_CHAIN} Schritte.</div>
+    ${rows}
+    <button class="b pri" data-act="addf" ${n >= MAX_FIELDS ? 'disabled' : ''}>+ Feld</button>
+    <span class="hint">${n} / ${MAX_FIELDS} Felder</span></details>
+
+  <details ${op('timer')} data-sec="timer"><summary>Timer-Rad</summary>
+    <div class="row2"><label>Zeit (Sekunden)<input type="number" min="3" max="3600" data-tp="seconds" value="${S.timer.seconds}"></label>
+      <label>Pause nach Ansage (s)<input type="number" min="0" max="120" data-tp="pause" value="${S.timer.pause}"></label></div>
+    <label class="chk"><input type="checkbox" data-tp="auto" ${S.timer.auto ? 'checked' : ''}> Immer wieder neu starten, bis Stopp</label>
+    <label class="chk"><input type="checkbox" data-tp="voice" ${S.timer.voice ? 'checked' : ''}> Ergebnis vorlesen</label>
+    <label>Ansage davor (optional)<input type="text" data-tp="prefix" value="${esc(S.timer.prefix)}" placeholder="z. B. Jetzt"></label>
+    <div class="row2"><label>Stimmlage (tief ↔ hoch)<input type="range" min="0" max="1.5" step="0.05" data-tp="pitch" value="${S.timer.pitch}"></label>
+      <label>Tempo<input type="range" min="0.4" max="1.3" step="0.05" data-tp="rate" value="${S.timer.rate}"></label></div>
+    <label>Farben<select data-tp="palette">${palOpts(tw.palette)}</select></label>
+    ${trows}
+    <button class="b" data-ta="add" ${tw.fields.length >= T_MAX ? 'disabled' : ''}>+ Feld</button> <span class="hint">${tw.fields.length} / ${T_MAX} Felder (min. ${T_MIN})</span>
+    <button class="b" data-act="testVoice">🔊 Stimme testen</button>
+    <button class="b pri" data-act="openTimer">⏱ Timer öffnen</button></details>
+
+  <details ${op('quiz')} data-sec="quiz"><summary>💞 Vorlieben-Fragebogen</summary>
+    <div class="hint">Beide bewerten getrennt von 1 (tabu) bis 5 (unbedingt). Daraus berechnet die App, was ihr beide mögt, lässt Tabus weg und trägt es mit passender Häufigkeit in die Räder ein.</div>
+    <button class="b pri" data-act="openQuiz">💞 Fragebogen öffnen</button></details>
+
+  <details ${op('toy')} data-sec="toy"><summary>📳 Spielzeug-Steuerung</summary>
+    <div class="hint">Steuert Bluetooth-Spielzeug (Lovense, We-Vibe, Satisfyer, Kiiroo, Magic Motion u. v. m.) über die kostenlose App <b>Intiface Central</b>, lokal ohne Internet.<br>
+    1. Intiface Central aus dem Play Store installieren und öffnen. 2. „Start Server“ drücken. 3. Hier „Verbinden“ tippen, Spielzeug einschalten, es erscheint automatisch.<br>
+    Danach hat jedes Feld (auch im Timer-Rad) eine Zeile 📳 Stärke % · Dauer s · Muster. Das Spielzeug läuft, sobald das Feld als Ergebnis kommt.</div>
+    <label class="chk"><input type="checkbox" data-toy="enabled" ${S.toy.enabled ? 'checked' : ''}> Spielzeug-Steuerung aktiv</label>
+    <label>Server-Adresse (Intiface)<input type="text" data-toy="url" value="${esc(S.toy.url)}"></label>
+    <button class="b pri" data-act="toyConnect">🔌 ${TOY.ws ? 'Neu verbinden' : 'Verbinden'}</button>
+    <button class="b" data-act="toyScan">🔍 Geräte suchen</button>
+    <button class="b" data-act="toyTest">📳 Test 2 s</button>
+    <button class="b" data-act="toyStop">■ Stopp</button>
+    <div class="hint" id="toyStatus">${toyStatusHtml()}</div>
+    <label>Gesamtstärke: <b id="toyMasterL">${S.toy.master} %</b><input type="range" min="0" max="100" step="5" data-toy="master" value="${S.toy.master}"></label></details>
+
+  ${ABO_ACTIVE ? '' : '<!--'}<details ${op('abo')} data-sec="abo"><summary>Abo${hasSub() ? ' · ' + tierName(LIC.tier) : ''}</summary>
+    <div class="hint">Status: <b>${hasSub() ? 'SexRad ' + tierName(LIC.tier) : 'kein aktives Abo'}</b>${LIC.src === 'test' ? ' (Testmodus)' : ''}${hasSub() ? (LIC.renew ? ' · verlängert sich automatisch' : ' · läuft zum Ende der Laufzeit aus') : ''}.<br>
+    ${isPro() ? 'Export, Import und Übermitteln sind frei. Nach Abo-Ende bleiben eure Daten 12 Monate erhalten.' : 'Euer Fortschritt bleibt nur in der App und wird 7 Tage nach Abo-Ende oder bei Deinstallation gelöscht. Export und längere Speicherung gibt es mit Pro.'}</div>
+    <button class="b pri" data-act="pwOpen">${isPro() ? 'Abo-Pläne ansehen' : '⭐ Auf Pro upgraden'}</button>
+    ${NATIVE && !TESTMODE ? '<button class="b" data-act="pwManage">Abo verwalten / kündigen</button>' : ''}</details>${ABO_ACTIVE ? '' : '-->'}
+
+  <details ${op('opts')} data-sec="opts"><summary>Optionen &amp; Export</summary>
+    <label class="chk"><input type="checkbox" data-sp="sound" ${S.settings.sound ? 'checked' : ''}> Tick- und Stopp-Ton</label>
+    <label class="chk"><input type="checkbox" data-sp="speakMain" ${S.settings.speakMain ? 'checked' : ''}> Ergebnisse der Räder auch vorlesen</label>
+    <label>Ergebnis groß anzeigen für (Sekunden, 0 = bis Schließen; mit Video bleibt es offen)<input type="number" min="0" max="60" data-sp="resultSec" value="${S.settings.resultSec}"></label>
+    <label>Folge-Rad / Karte automatisch starten nach (Sekunden, 0 = nur per Button)<input type="number" min="0" max="120" data-sp="autoNext" value="${S.settings.autoNext}"></label>
+    <label>Drehdauer: <b id="spinSecL">${S.settings.spinSec} s</b><input type="range" min="2" max="15" step="1" data-sp="spinSec" value="${S.settings.spinSec}"></label>
+    <button class="b" data-act="exportJson">⇩ Export JSON${lockTag()}</button>
+    <button class="b" data-act="exportZip">⇩ Voll-ZIP mit Medien${lockTag()}</button>
+    <button class="b" data-act="import">⇧ Import (JSON/ZIP)${lockTag()}</button>
+    <button class="b" data-act="fs">⛶ Vollbild</button>
+    <button class="b" data-act="reset">Alles zurücksetzen</button>
+    <div class="hint" style="margin-top:8px">Alles bleibt nur in der App auf diesem Gerät (Fotos/Videos ohne Größengrenze, nur durch den Gerätespeicher begrenzt). Export und Import nur mit Pro.</div></details>
+
+  <details ${op('install')} data-sec="install"><summary>Als App installieren</summary>
+    <div class="hint"><b>Samsung Tab / Android:</b> Seite in Chrome oder Samsung Internet öffnen → Menü ⋮ → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“. Dann über das Symbol starten: Vollbild im Querformat, ohne Browserleiste.<br>
+    <b>iPad/iPhone:</b> Safari → Teilen → „Zum Home-Bildschirm“.<br>
+    Hinweis: Als echte App (Vollbild, offline) lässt sie sich nur installieren, wenn sie über https geladen wurde. Direkt aus dem Datei-Manager geöffnet läuft sie als normaler Tab – einmal tippen schaltet dann auf Vollbild.</div></details>`;
+  P.scrollTop = keepScroll;
+}
+
+/* Panel-Ereignisse (Delegation) */
+function initPanelEvents() {
+  const P = $('#panel');
+  P.addEventListener('toggle', e => {
+    const d = e.target; if (!d.dataset || !d.dataset.sec) return;
+    d.open ? openSecs.add(d.dataset.sec) : openSecs.delete(d.dataset.sec);
+  }, true);
+
+  P.addEventListener('input', e => {
+    const el = e.target, w = S.wheels[S.active];
+    if (el.dataset.fp) {
+      const f = w.fields[+el.dataset.f], k = el.dataset.fp;
+      if (k === 'num') f.num = el.value === '' ? '' : clamp(Math.round(+el.value), 0, 99);
+      else if (k === 'text') f.text = el.value;
+      else if (k === 'weight') f.weight = clamp(+el.value || 0, 0, 100);
+      else if (k === 'next') { const v = el.value; f.next = v[0] === 'w' ? +v.slice(1) : -1; f.card = v[0] === 'c' ? v.slice(1) : null; }
+      save(); return;
+    }
+    if (el.dataset.wp) {
+      const k = el.dataset.wp; w[k] = el.value;
+      if (k === 'palette') { renderPanel(); render(); }
+      if (k === 'title') { updateRail(); }
+      save(); return;
+    }
+    if (el.dataset.qp) { S.joker.seqs[+el.dataset.q].name = el.value; save(); return; }
+    if (el.dataset.stp) {
+      const st = S.joker.seqs[+el.dataset.q].steps[+el.dataset.s];
+      if (el.dataset.stp === 't') st.t = el.value; else st.n = clamp(Math.round(+el.value || 1), 1, 50);
+      save(); return;
+    }
+    if (el.dataset.jp) {
+      const j = S.joker, k = el.dataset.jp;
+      if (k === 'num') j.num = el.value === '' ? '' : clamp(Math.round(+el.value), 0, 99);
+      else if (k === 'text') j.text = el.value;
+      else { const v = el.value; j.next = v[0] === 'w' ? +v.slice(1) : -1; j.card = v[0] === 'c' ? v.slice(1) : null; }
+      save(); return;
+    }
+    if (el.dataset.ty) {
+      const f = el.dataset.f != null ? S.wheels[S.active].fields[+el.dataset.f] : S.timer.wheel.fields[+el.dataset.tf];
+      const k = el.dataset.ty;
+      if (k === 'pat') f.toy.pat = el.value;
+      else if (k === 'dev') f.toy.dev = el.value;
+      else if (k === 'lvl') f.toy.lvl = clamp(Math.round(+el.value || 0), 0, 100);
+      else f.toy.sec = clamp(+el.value || 5, 0.5, 600);
+      save(); return;
+    }
+    if (el.dataset.toy) {
+      const k = el.dataset.toy;
+      if (k === 'enabled') { S.toy.enabled = el.checked; save(); renderPanel(); if (!el.checked) toyDisconnect(); return; }
+      if (k === 'url') S.toy.url = el.value.trim();
+      if (k === 'master') { S.toy.master = +el.value; $('#toyMasterL').textContent = el.value + ' %'; }
+      save(); return;
+    }
+    if (el.dataset.tfp) {
+      const f = S.timer.wheel.fields[+el.dataset.tf];
+      if (el.dataset.tfp === 'text') f.text = el.value; else f.weight = clamp(+el.value || 0, 0, 100);
+      save(); return;
+    }
+    if (el.dataset.tp) {
+      const k = el.dataset.tp;
+      if (el.type === 'checkbox') S.timer[k] = el.checked;
+      else if (k === 'prefix') S.timer[k] = el.value;
+      else if (k === 'palette') { S.timer.wheel.palette = el.value; renderPanel(); }
+      else S.timer[k] = +el.value || 0;
+      if (k === 'seconds') S.timer.seconds = clamp(Math.round(S.timer.seconds), 3, 3600);
+      save(); return;
+    }
+    if (el.dataset.sp) {
+      const k = el.dataset.sp;
+      S.settings[k] = el.type === 'checkbox' ? el.checked : +el.value;
+      if (k === 'spinSec') $('#spinSecL').textContent = el.value + ' s';
+      save(); return;
+    }
+  });
+
+  P.addEventListener('change', e => {
+    const el = e.target;
+    if (el.dataset.act === 'en') {
+      const i = +el.dataset.w;
+      if (!el.checked && visibleIdx().length <= 1) { el.checked = true; toast('Mindestens ein Rad muss sichtbar sein'); return; }
+      S.wheels[i].enabled = el.checked;
+      if (el.checked) S.active = i;
+      else if (S.active === i) S.active = visibleIdx()[0];
+      save(); renderPanel(); render(); updateRail(); return;
+    }
+    if (el.dataset.wp === 'title') renderPanel();
+  });
+
+  P.addEventListener('click', async e => {
+    const b = e.target.closest('[data-act],[data-fa],[data-ta],[data-ca],[data-qa]'); if (!b || b.disabled) return;
+    if (b.dataset.qa) {
+      const q = S.joker.seqs[+b.dataset.q], a = b.dataset.qa;
+      if (a === 'addstep') q.steps.push({t:'w' + S.active, n:1});
+      else if (a === 'delstep') q.steps.splice(+b.dataset.s, 1);
+      else if (a === 'run') { if (q.steps.length) { closePanel(); runSeq(q); } else toast('Abfolge hat keine Schritte'); return; }
+      else if (a === 'del') {
+        if (!b.dataset.armed) { b.dataset.armed = 1; b.textContent = 'Löschen?'; setTimeout(() => { delete b.dataset.armed; b.textContent = '🗑'; }, 3000); return; }
+        S.joker.seqs.splice(+b.dataset.q, 1);
+      }
+      save(); renderPanel(); return;
+    }
+    if (b.dataset.ca) {
+      const id = b.dataset.c, a = b.dataset.ca;
+      if (a === 'load') { loadCard(id); toast('Karte geladen'); }
+      else if (a === 'run') runCard(id, 0);
+      else if (a === 'share') { if (!needPro()) shareCard(id); }
+      else if (a === 'del') {
+        if (!b.dataset.armed) { b.dataset.armed = 1; b.textContent = 'Löschen?'; setTimeout(() => { delete b.dataset.armed; b.textContent = '🗑'; }, 3000); return; }
+        const c = S.presets.find(x => x.id === id), ids = [];
+        walkMedia(c, f => ids.push(f.media.id));
+        S.presets = S.presets.filter(x => x.id !== id); ids.forEach(delMedia); save(); renderPanel();
+      }
+      return;
+    }
+    const w = S.wheels[S.active];
+    if (b.dataset.act === 'sel' && e.target.type !== 'checkbox') {
+      S.active = +b.dataset.w; openSecs.add('fields'); save(); renderPanel(); render(); updateRail(); return;
+    }
+    if (b.dataset.fa) {
+      const i = +b.dataset.f, f = w.fields[i];
+      if (b.dataset.fa === 'del') {
+        if (w.fields.length <= MIN_FIELDS) { toast('Mindestens ' + MIN_FIELDS + ' Felder'); return; }
+        const mid = f.media && f.media.id;
+        w.fields.splice(i, 1); editHL = null; delMedia(mid);
+      } else if (b.dataset.fa === 'media') { pickMedia({kind:'wheel', w:S.active, f:i}); return; }
+      else if (b.dataset.fa === 'unmedia') { const mid = f.media.id; f.media = null; delMedia(mid); }
+      else if (b.dataset.fa === 'trim') { openMediaDlg({kind:'wheel', w:S.active, f:i}, false); return; }
+      save(); renderPanel(); render(); return;
+    }
+    if (b.dataset.ta) {
+      const tw = S.timer.wheel;
+      if (b.dataset.ta === 'add' && tw.fields.length < T_MAX) tw.fields.push(newField());
+      if (b.dataset.ta === 'del') {
+        if (tw.fields.length <= T_MIN) { toast('Timer-Rad: mindestens ' + T_MIN + ' Felder'); return; }
+        tw.fields.splice(+b.dataset.tf, 1);
+      }
+      save(); renderPanel(); return;
+    }
+    switch (b.dataset.act) {
+      case 'addseq': S.joker.seqs.push({id:'q' + uid(), name:'Abfolge ' + (S.joker.seqs.length + 1), steps:[{t:'w' + S.active, n:1}]}); openSecs.add('joker'); save(); renderPanel(); break;
+      case 'jmedia': pickMedia({kind:'joker'}); break;
+      case 'jtrim': openMediaDlg({kind:'joker'}, false); break;
+      case 'junmedia': { const mid = S.joker.media && S.joker.media.id; S.joker.media = null; delMedia(mid); save(); renderPanel(); break; }
+      case 'openQuiz': openQuiz('a'); break;
+      case 'toyConnect': S.toy.enabled = true; save(); toyConnect(); renderPanel(); break;
+      case 'toyScan': if (TOY.ws) { toySend('StartScanning'); toast('Suche Spielzeug …'); } else toast('Erst verbinden'); break;
+      case 'toyTest': if (TOY.devices.size) toyPlay({lvl:50, sec:2, pat:'konstant'}); else toast('Kein Spielzeug verbunden'); break;
+      case 'toyStop': toyStop(); break;
+      case 'saveSingle': saveCard('single', $('#cardName').value); break;
+      case 'saveCombo': saveCard('combo', $('#cardName').value); break;
+      case 'recvCard': if (!needPro()) $('#fileCard').click(); break;
+      case 'undo': undoCard(); break;
+      case 'addf': if (w.fields.length < MAX_FIELDS) { w.fields.push(newField()); save(); renderPanel(); render(); } break;
+      case 'openTimer': openTimer(); break;
+      case 'testVoice': speak((S.timer.prefix ? S.timer.prefix + ' ' : '') + (S.timer.wheel.fields[0].text || 'Test')); break;
+      case 'exportJson': if (!needPro()) exportJson(); break;
+      case 'exportZip': if (!needPro()) exportZip(); break;
+      case 'import': if (!needPro()) $('#fileImport').click(); break;
+      case 'pwOpen': pwUpsell = true; openPaywall(); break;
+      case 'pwManage': licManage(); break;
+      case 'fs': goFullscreen(true); break;
+      case 'reset':
+        if (b.dataset.armed) {
+          const ids = allMediaIds(), keep = S.presets;
+          S = defaultState(); S.presets = keep; ids.forEach(delMedia); save(); renderPanel(); render(); updateRail(); toast('Zurückgesetzt');
+        } else { b.dataset.armed = 1; b.textContent = 'Nochmal tippen = alles löschen'; setTimeout(() => { delete b.dataset.armed; b.textContent = 'Alles zurücksetzen'; }, 3500); }
+        break;
+    }
+  });
+
+  // Feld in der Verwaltung fokussiert → passendes Segment im Rad aufleuchten lassen
+  P.addEventListener('focusin', e => {
+    const row = e.target.closest('.frow'); if (!row) return;
+    P.querySelectorAll('.frow.hl').forEach(r => r.classList.remove('hl')); row.classList.add('hl');
+    editHL = +row.dataset.row; render();
+  });
+  P.addEventListener('focusout', e => {
+    const row = e.target.closest('.frow'); if (!row) return;
+    setTimeout(() => { if (!P.contains(document.activeElement) || !document.activeElement.closest('.frow')) {
+      row.classList.remove('hl'); editHL = null; render(); } }, 50);
+  });
+}
+
+/* =====================================================================
+   Foto/Video hinzufügen und zuschneiden
+   ===================================================================== */
+/* =====================================================================
+   Foto/Video-Import je Feld: Auswahl, Vorschau, Positions-Regler, Start/Stopp
+   ===================================================================== */
+const MI = {t:null, f:null, file:null, url:null, type:null, name:'', mime:'', ownUrl:false, loop:false};
+const fieldOf = t => t.kind === 'joker' ? S.joker : S.wheels[t.w].fields[t.f];
+const fmtS = s => (+s || 0).toFixed(1) + ' s';
+function pickMedia(t) { openMediaDlg(t, true); }
+function openTrim(f) { openMediaDlg(f === S.joker ? {kind:'joker'} : {kind:'wheel', w:S.active, f:S.wheels[S.active].fields.indexOf(f)}, false); }
+async function openMediaDlg(t, pick) {
+  closeMediaDlg(true);
+  const f = fieldOf(t); MI.t = t; MI.f = f; MI.file = null; MI.loop = false;
+  $('#mimpT').textContent = t.kind === 'joker' ? 'Video / Foto für den JOKER'
+    : `Video / Foto für Feld ${t.f + 1}${f.text ? ': ' + f.text : ''}`;
+  $('#mimp').classList.add('show');
+  if (!f.media && pick) { $('#fileMedia').value = ''; $('#fileMedia').click(); }
+  if (f.media) {
+    const url = await mediaURL(f.media.id);
+    if (url) mimpShow(url, f.media.type, f.media.name, f.media.mime, +f.media.start || 0, +f.media.end || 0, false);
+    else mimpShow(null);
+  } else mimpShow(null);
+}
+function mimpShow(url, type, name, mime, st = 0, en = 0, own = false) {
+  const v = $('#mimpVid'), im = $('#mimpImg');
+  if (MI.ownUrl && MI.url) URL.revokeObjectURL(MI.url);
+  MI.url = url; MI.type = type; MI.name = name || ''; MI.mime = mime || ''; MI.ownUrl = own;
+  v.pause(); v.removeAttribute('src'); v.load(); im.removeAttribute('src');
+  const isV = url && type === 'video', isI = url && type === 'image';
+  $('#mimpEmpty').style.display = url ? 'none' : 'flex';
+  v.style.display = isV ? 'block' : 'none'; im.style.display = isI ? 'block' : 'none';
+  $('#mimpVctl').style.display = isV ? 'block' : 'none';
+  $('#mOk').disabled = !url; $('#mDel').style.display = MI.f && MI.f.media ? '' : 'none';
+  $('#mPick').textContent = url ? '📂 Anderes Video / Foto' : '📂 Video / Foto auswählen';
+  $('#mInfo').textContent = url ? (MI.name + (MI.file ? ` · ${(MI.file.size / 1048576).toFixed(1)} MB · noch nicht gespeichert` : '')) : 'Videos (mp4, mov, webm) oder Fotos, beliebige Größe.';
+  if (isI) im.src = url;
+  if (isV) {
+    v.src = url; v.muted = false;
+    v.onloadedmetadata = () => {
+      const d = v.duration || 1;
+      ['#mS', '#mE', '#mPos'].forEach(s => $(s).max = d.toFixed(2));
+      $('#mS').value = clamp(st, 0, d); $('#mE').value = en > st ? clamp(en, 0, d) : d;
+      v.currentTime = +$('#mS').value; mimpUpd();
+    };
+    v.ontimeupdate = () => {
+      if (MI.loop && v.currentTime >= +$('#mE').value) { v.currentTime = +$('#mS').value; }
+      mimpUpd(true);
+    };
+    v.onplay = v.onpause = () => { $('#mPlay').textContent = v.paused ? '▶' : '❚❚'; if (v.paused) MI.loop = false; $('#mLoop').classList.toggle('on', MI.loop); };
+  }
+}
+function mimpUpd(fromVideo) {
+  const v = $('#mimpVid'), d = v.duration || 1, s = +$('#mS').value, e = +$('#mE').value;
+  if (fromVideo) $('#mPos').value = v.currentTime;
+  $('#mPosL').textContent = `${fmtS(v.currentTime)} / ${fmtS(d)}`;
+  $('#mSL').textContent = fmtS(s); $('#mEL').textContent = fmtS(e);
+  $('#mLen').textContent = 'Ausschnitt: ' + fmtS(e - s);
+  const sel = $('#mSel'); sel.style.left = (s / d * 100) + '%'; sel.style.width = Math.max(0.5, (e - s) / d * 100) + '%';
+  $('#mCur').style.left = (v.currentTime / d * 100) + '%';
+}
+function closeMediaDlg(keep) {
+  const v = $('#mimpVid'); v.pause(); v.removeAttribute('src'); v.load();
+  if (MI.ownUrl && MI.url) URL.revokeObjectURL(MI.url);
+  MI.url = null; MI.ownUrl = false; MI.file = null;
+  if (!keep) { $('#mimp').classList.remove('show'); MI.t = MI.f = null; }
+}
+$('#fileMedia').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file || !MI.t) return;
+  // keine feste Größengrenze – nur prüfen, ob auf dem Gerät noch Platz ist
+  try { const est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null;
+    if (est && est.quota && file.size > est.quota - (est.usage || 0)) { toast('Zu wenig Speicher auf dem Gerät für dieses Video (' + (file.size / 1048576).toFixed(0) + ' MB)'); return; }
+  } catch (err) { }
+  const ext = (file.name.split('.').pop() || '').toLowerCase();   // manche Android-Dateiauswahlen liefern keinen Typ
+  const mime = file.type || ({mp4:'video/mp4', m4v:'video/mp4', mov:'video/quicktime', webm:'video/webm', mkv:'video/x-matroska', '3gp':'video/3gpp',
+    jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', gif:'image/gif', webp:'image/webp', heic:'image/heic'}[ext] || '');
+  const type = mime.startsWith('video') ? 'video' : mime.startsWith('image') ? 'image' : null;
+  if (!type) { toast('Nur Fotos oder Videos'); return; }
+  const url = URL.createObjectURL(file);
+  mimpShow(url, type, file.name, mime, 0, 0, true);
+  MI.file = file;
+  $('#mInfo').textContent = `${file.name} · ${(file.size / 1048576).toFixed(1)} MB · noch nicht gespeichert`;
+});
+$('#mPick').onclick = () => { $('#fileMedia').value = ''; $('#fileMedia').click(); };
+$('#mPlay').onclick = () => { const v = $('#mimpVid'); MI.loop = false; v.paused ? v.play().catch(() => {}) : v.pause(); };
+$('#mLoop').onclick = () => { const v = $('#mimpVid'); v.currentTime = +$('#mS').value; MI.loop = true; v.play().catch(() => {}); $('#mLoop').classList.add('on'); };
+$('#mPos').oninput = () => { const v = $('#mimpVid'); v.pause(); v.currentTime = +$('#mPos').value; mimpUpd(); };
+$('#mS').oninput = () => { const s = $('#mS'), e = $('#mE'); if (+s.value > +e.value - 0.2) s.value = Math.max(0, +e.value - 0.2); const v = $('#mimpVid'); v.pause(); v.currentTime = +s.value; mimpUpd(true); };
+$('#mE').oninput = () => { const s = $('#mS'), e = $('#mE'); if (+e.value < +s.value + 0.2) e.value = +s.value + 0.2; const v = $('#mimpVid'); v.pause(); v.currentTime = +e.value; mimpUpd(true); };
+$('#mSetS').onclick = () => { const v = $('#mimpVid'); $('#mS').value = Math.min(v.currentTime, +$('#mE').value - 0.2); mimpUpd(); };
+$('#mSetE').onclick = () => { const v = $('#mimpVid'); $('#mE').value = Math.max(v.currentTime, +$('#mS').value + 0.2); mimpUpd(); };
+$('#mCancel').onclick = () => closeMediaDlg(false);
+$('#mDel').onclick = () => {
+  const f = MI.f; if (!f || !f.media) return;
+  const old = f.media.id; f.media = null; delMedia(old); save(); renderPanel(); toast('Video / Foto entfernt'); closeMediaDlg(false);
+};
+$('#mOk').onclick = async () => {
+  const f = MI.f; if (!f || !MI.url) return;
+  const v = $('#mimpVid'), d = v.duration || 0;
+  const st = MI.type === 'video' ? +$('#mS').value : 0, e = MI.type === 'video' ? +$('#mE').value : 0;
+  const end = (d && e >= d - 0.05) ? 0 : e;
+  try {
+    if (MI.file) {
+      const id = 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      toast('Speichere …', 1500);
+      await DB.put(id, MI.file);
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+      const old = f.media && f.media.id;
+      f.media = {id, type:MI.type, name:MI.name, mime:MI.mime, start:st, end};
+      delMedia(old);
+      toast(DB.db ? 'Gespeichert' : 'Gespeichert (nur bis zum Schließen – Speicher nicht verfügbar)');
+    } else if (f.media) { f.media.start = st; f.media.end = end; toast('Start / Stopp gespeichert'); }
+    save(); renderPanel(); closeMediaDlg(false);
+  } catch (err) { toast('Fehler beim Speichern: ' + err.message); }
+};
+
+/* =====================================================================
+   Export / Import (JSON und unkomprimiertes ZIP mit Medien)
+   ===================================================================== */
+// Läuft durch alle Felder (Räder, Timer, Speicherkarten, Sicherung) und ruft cb für Felder mit Medium auf
+function walkMedia(o, cb) {
+  if (!o || typeof o !== 'object') return;
+  if (Array.isArray(o)) { o.forEach(x => walkMedia(x, cb)); return; }
+  if (o.media && o.media.id) cb(o);
+  for (const k in o) if (k !== 'media') walkMedia(o[k], cb);
+}
+function allMediaIds() { const ids = new Set(); walkMedia(S, f => ids.add(f.media.id)); return [...ids]; }
+function mediaInUse(id) { let u = false; walkMedia(S, f => { if (f.media.id === id) u = true; }); return u; }
+function delMedia(id) { if (id && !mediaInUse(id)) DB.del(id).catch(() => {}); }
+function cleanState(withMedia) {
+  const o = strip(S);
+  if (!withMedia) walkMedia(o, f => f.media = null);
+  return o;
+}
+// Medien aus ZIP speichern bzw. fehlende Medien-Verweise entfernen
+async function restoreMedia(obj, z) {
+  const list = []; walkMedia(obj, f => list.push(f));
+  for (const f of list) {
+    const data = z && z['media/' + f.media.id];
+    if (data) await DB.put(f.media.id, new Blob([data], {type:f.media.mime || (f.media.type === 'video' ? 'video/mp4' : 'image/jpeg')}));
+    else if (!(await DB.get(f.media.id))) f.media = null;
+  }
+}
+async function zipWithMedia(obj, jsonName) {
+  const files = [], seen = new Set(), list = [];
+  walkMedia(obj, f => list.push(f));
+  for (const f of list) {
+    if (seen.has(f.media.id)) continue; seen.add(f.media.id);
+    const b = await DB.get(f.media.id);
+    if (b) files.push({name:'media/' + f.media.id, data:new Uint8Array(await b.arrayBuffer())});
+  }
+  list.forEach(f => { if (!seen.has(f.media.id) || !files.some(x => x.name === 'media/' + f.media.id)) f.media = null; });
+  files.unshift({name:jsonName, data:new TextEncoder().encode(JSON.stringify(obj, null, 2))});
+  return makeZip(files);
+}
+
+/* ---------- Speicherkarten ---------- */
+function saveCard(kind, name) {
+  const w = S.wheels[S.active];
+  name = (name || '').trim() || (kind === 'single' ? (w.title || 'Rad') : 'Kombination ' + (S.presets.filter(c => c.kind === 'combo').length + 1));
+  const data = kind === 'single' ? {wheel:strip(w)}
+    : {active:S.active, slots:visibleIdx().map(i => ({slot:i, wheel:strip(S.wheels[i])}))};
+  const ex = S.presets.find(c => c.kind === kind && c.name === name);
+  if (ex) { const old = []; walkMedia(ex, f => old.push(f.media.id)); ex.data = data; old.forEach(delMedia); toast('Karte „' + name + '“ überschrieben'); }
+  else { S.presets.push({id:'c' + uid(), name, kind, created:Date.now(), data}); toast('Karte „' + name + '“ gespeichert'); }
+  save(); renderPanel();
+}
+function loadCard(id) {
+  const c = S.presets.find(x => x.id === id); if (!c) { toast('Karte nicht gefunden'); return null; }
+  if (!S.snapshot) S.snapshot = {active:S.active, wheels:strip(S.wheels)};   // für ↩ VORHER
+  if (c.kind === 'single') {
+    const i = S.active, w = normWheel(strip(c.data.wheel), i);
+    w.enabled = true; S.wheels[i] = w;
+  } else {
+    S.wheels.forEach(w => w.enabled = false);
+    c.data.slots.forEach(x => { const w = normWheel(strip(x.wheel), x.slot); w.enabled = true; S.wheels[x.slot] = w; });
+    S.active = S.wheels[c.data.active] && S.wheels[c.data.active].enabled ? c.data.active : c.data.slots[0].slot;
+  }
+  save(); render(); renderPanel(); updateRail();
+  return c;
+}
+async function runCard(id, depth = 0) {
+  if (busy) return;
+  const c = loadCard(id); if (!c) return;
+  await sleep(400);
+  if (c.kind === 'single') await doSpin(S.active, depth);
+  else for (const x of c.data.slots) { if (S.wheels[x.slot].enabled) await doSpin(x.slot, depth); }
+}
+function undoCard() {
+  if (!S.snapshot) return;
+  S.wheels = S.snapshot.wheels.map((w, i) => normWheel(w, i)); S.active = S.snapshot.active; S.snapshot = null;
+  if (!S.wheels.some(w => w.enabled)) S.wheels[0].enabled = true;
+  if (!S.wheels[S.active].enabled) S.active = visibleIdx()[0];
+  save(); render(); renderPanel(); updateRail(); toast('Vorherige Räder wiederhergestellt');
+}
+// Übermitteln: über das Teilen-Menü (WhatsApp, Quick Share, Bluetooth …) oder als Datei
+async function shareCard(id) {
+  const c = S.presets.find(x => x.id === id); if (!c) return;
+  const obj = {fickradCard:1, card:strip(c)}, base = 'sexrad-karte-' + c.name.replace(/[^\wäöüÄÖÜß-]+/g, '_');
+  let hasMedia = false; walkMedia(obj, () => hasMedia = true);
+  const file = hasMedia
+    ? new File([await zipWithMedia(obj, 'card.json')], base + '.zip', {type:'application/zip'})
+    : new File([JSON.stringify(obj, null, 2)], base + '.json', {type:'application/json'});
+  if (NATIVE) { await nativeFile(file, file.name, 'share'); return; }
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    try { await navigator.share({files:[file], title:'SexRad – ' + c.name}); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  download(file, file.name); toast('Karte als Datei gespeichert – diese Datei verschicken');
+}
+async function addReceivedCard(card, z) {
+  const c = normCard(card); if (!c) throw new Error('Keine gültige Karte');
+  await restoreMedia(c, z);
+  c.id = 'c' + uid();
+  let name = c.name, k = 2; while (S.presets.some(x => x.name === name && x.kind === c.kind)) name = c.name + ' (' + k++ + ')';
+  c.name = name; S.presets.push(c); save(); renderPanel(); toast('Karte „' + name + '“ empfangen');
+}
+// Liest JSON oder ZIP: Karte → zu den Speicherkarten, sonst komplette Konfiguration
+async function importFile(file, cardOnly) {
+  const buf = await file.arrayBuffer(), head = new Uint8Array(buf, 0, 2);
+  let obj, z = null;
+  if (head[0] === 0x50 && head[1] === 0x4b) {
+    z = readZip(buf);
+    const js = z['card.json'] || z['config.json'];
+    if (!js) throw new Error('Keine card.json / config.json im ZIP');
+    obj = JSON.parse(new TextDecoder().decode(js));
+  } else obj = JSON.parse(new TextDecoder().decode(buf));
+  if (obj && obj.fickradCard) return addReceivedCard(obj.card, z);
+  if (cardOnly) throw new Error('Datei ist keine Speicherkarte');
+  await restoreMedia(obj, z);
+  const before = allMediaIds();
+  S = normalize(obj); before.forEach(delMedia);
+  save(); renderPanel(); render(); updateRail(); toast('Import erfolgreich');
+}
+// Datei an die Android-App übergeben (in Stücken, auch große Videos): 'save' = Download-Ordner, 'share' = Teilen-Menü
+async function nativeFile(blob, name, action) {
+  toast(action === 'share' ? 'Bereite Übermittlung vor …' : 'Speichere …', 4000);
+  const id = NATIVE.fileBegin(name, blob.type || 'application/octet-stream');
+  if (!id) { toast('Speichern fehlgeschlagen'); return; }
+  const CH = 3 * 256 * 1024;   // Vielfaches von 3 → saubere Base64-Stücke
+  for (let o = 0; o < blob.size; o += CH) {
+    const buf = new Uint8Array(await blob.slice(o, o + CH).arrayBuffer());
+    let bin = ''; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+    if (!NATIVE.fileChunk(id, btoa(bin))) { toast('Speichern fehlgeschlagen'); return; }
+  }
+  const msg = NATIVE.fileEnd(id, action);
+  if (action !== 'share') toast(msg, 4500);
+}
+function download(blob, name) {
+  if (NATIVE) { nativeFile(blob, name, 'save'); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+}
+const stamp = () => new Date().toISOString().slice(0, 10);
+function exportJson() {
+  download(new Blob([JSON.stringify(cleanState(false), null, 2)], {type:'application/json'}), `sexrad-${stamp()}.json`);
+}
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function makeZip(files) {           // files: [{name, data:Uint8Array}] – Methode "stored"
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  for (const f of files) {
+    const nm = enc.encode(f.name), crc = crc32(f.data), sz = f.data.length;
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, 0, true); h.setUint16(12, 0x21, true); h.setUint32(14, crc, true); h.setUint32(18, sz, true);
+    h.setUint32(22, sz, true); h.setUint16(26, nm.length, true); h.setUint16(28, 0, true);
+    parts.push(h.buffer, nm, f.data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
+    c.setUint16(10, 0, true); c.setUint16(12, 0, true); c.setUint16(14, 0x21, true); c.setUint32(16, crc, true);
+    c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, nm.length, true); c.setUint32(42, off, true);
+    central.push(c.buffer, nm);
+    off += 30 + nm.length + sz;
+  }
+  const cdSize = central.reduce((a, b) => a + b.byteLength, 0), e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+  e.setUint32(12, cdSize, true); e.setUint32(16, off, true);
+  return new Blob([...parts, ...central, e.buffer], {type:'application/zip'});
+}
+function readZip(buf) {             // liest unkomprimierte ZIPs (wie von dieser App erzeugt)
+  const dv = new DataView(buf), dec = new TextDecoder(), out = {};
+  let p = 0;
+  while (p + 30 <= buf.byteLength && dv.getUint32(p, true) === 0x04034b50) {
+    const method = dv.getUint16(p + 8, true), size = dv.getUint32(p + 18, true);
+    const nl = dv.getUint16(p + 26, true), xl = dv.getUint16(p + 28, true);
+    const name = dec.decode(new Uint8Array(buf, p + 30, nl)), start = p + 30 + nl + xl;
+    if (method !== 0) throw new Error('ZIP ist komprimiert – bitte nur ZIPs aus dieser App verwenden');
+    out[name] = new Uint8Array(buf, start, size);
+    p = start + size;
+  }
+  return out;
+}
+async function exportZip() {
+  toast('ZIP wird erstellt …', 4000);
+  try {
+    download(await zipWithMedia(cleanState(true), 'config.json'), `sexrad-voll-${stamp()}.zip`);
+  } catch (e) { toast('ZIP-Fehler: ' + e.message); }
+}
+$('#fileImport').addEventListener('change', async e => {
+  const file = e.target.files[0]; e.target.value = ''; if (!file) return;
+  try { await importFile(file, false); } catch (err) { toast('Import fehlgeschlagen: ' + err.message, 4000); }
+});
+$('#fileCard').addEventListener('change', async e => {
+  const file = e.target.files[0]; e.target.value = ''; if (!file) return;
+  try { await importFile(file, true); } catch (err) { toast('Empfang fehlgeschlagen: ' + err.message, 4000); }
+});
+
+/* =====================================================================
+   Sexspielzeug über Intiface Central (Buttplug-Protokoll v3, WebSocket, lokal)
+   ===================================================================== */
+const TOY = {ws:null, id:1, devices:new Map(), status:'nicht verbunden', ping:0, run:null, last:-1};
+function toySend(type, body = {}) {
+  if (!TOY.ws || TOY.ws.readyState !== 1) return;
+  body.Id = TOY.id++; TOY.ws.send(JSON.stringify([{[type]:body}]));
+}
+// Geräteliste für die Auswahl im Feld (verbundene + bereits gespeicherte Namen)
+function toyDevOpts(sel) {
+  const names = new Set([...TOY.devices.values()].map(d => d.name));
+  const walk = []; S.wheels.forEach(w => w.fields.forEach(f => f.toy && f.toy.dev && walk.push(f.toy.dev)));
+  S.timer.wheel.fields.forEach(f => f.toy && f.toy.dev && walk.push(f.toy.dev)); walk.forEach(n => names.add(n));
+  return `<option value="">Alle Geräte</option>` + [...names].map(n => `<option value="${esc(n)}" ${n === sel ? 'selected' : ''}>${esc(n)}</option>`).join('');
+}
+function toyStatusHtml() {
+  const devs = [...TOY.devices.values()].map(d => '📳 ' + esc(d.name)).join('<br>');
+  return 'Status: <b>' + esc(TOY.status) + '</b>' + (devs ? '<br>' + devs : (TOY.ws ? '<br>Noch kein Spielzeug – einschalten bzw. „Geräte suchen“.' : ''));
+}
+function toyUI() {
+  const el = document.getElementById('toyStatus'); if (el) el.innerHTML = toyStatusHtml();
+  const b = $('#bToyStop'); b.style.display = TOY.ws ? 'block' : 'none'; b.classList.toggle('live', !!TOY.run);
+}
+function toySetStatus(t) { TOY.status = t; toyUI(); }
+function toyDisconnect(silent) {
+  toyStop();
+  if (TOY.ws) { const ws = TOY.ws; TOY.ws = null; ws.onclose = null; try { ws.close(); } catch (e) {} }
+  clearInterval(TOY.ping); TOY.devices.clear(); if (!silent) toySetStatus('nicht verbunden');
+}
+function toyConnect() {
+  toyDisconnect(true);
+  let ws;
+  try { ws = new WebSocket(S.toy.url); } catch (e) { toySetStatus('Adresse ungültig oder hier blockiert'); return; }
+  TOY.ws = ws; TOY.id = 1; toySetStatus('verbinde …');
+  ws.onopen = () => toySend('RequestServerInfo', {ClientName:'SexRad', MessageVersion:3});
+  ws.onmessage = e => {
+    let arr; try { arr = JSON.parse(e.data); } catch (x) { return; }
+    for (const m of arr) { const k = Object.keys(m)[0]; onToyMsg(k, m[k]); }
+  };
+  ws.onerror = () => toySetStatus('keine Verbindung – läuft Intiface Central und ist der Server gestartet?');
+  ws.onclose = () => { clearInterval(TOY.ping); TOY.ws = null; TOY.devices.clear(); if (TOY.run) { clearInterval(TOY.run); TOY.run = null; }
+    if (!/keine Verbindung/.test(TOY.status)) toySetStatus('getrennt'); };
+}
+function onToyMsg(k, v) {
+  if (k === 'ServerInfo') {
+    toySetStatus('verbunden mit ' + (v.ServerName || 'Intiface'));
+    if (v.MaxPingTime > 0) TOY.ping = setInterval(() => toySend('Ping'), Math.max(200, v.MaxPingTime / 2));
+    toySend('RequestDeviceList'); toySend('StartScanning');
+  } else if (k === 'DeviceList') (v.Devices || []).forEach(toyAdd);
+  else if (k === 'DeviceAdded') { toyAdd(v); toast('📳 ' + (v.DeviceDisplayName || v.DeviceName) + ' verbunden'); }
+  else if (k === 'DeviceRemoved') { TOY.devices.delete(v.DeviceIndex); toyUI(); }
+  else if (k === 'Error') toySetStatus('Fehler: ' + (v.ErrorMessage || '?'));
+}
+function toyAdd(d) {
+  const sc = (d.DeviceMessages && d.DeviceMessages.ScalarCmd) || [];
+  const lin = (d.DeviceMessages && d.DeviceMessages.LinearCmd) || [];   // Stoß-/Hub-Geräte
+  TOY.devices.set(d.DeviceIndex, {name:d.DeviceDisplayName || d.DeviceName, scalars:sc.map((x, i) => ({Index:i, ActuatorType:x.ActuatorType || 'Vibrate'})),
+    linear:lin.length, pos:0, nextAt:0});
+  toyUI(); if ($('#panel').classList.contains('open')) renderPanel();
+}
+function toyLevel(x, dev) {     // x = 0..1, Gesamtstärke wird eingerechnet; dev = Gerätename oder '' für alle
+  x = clamp(x * (S.toy.master / 100), 0, 1);
+  const now = performance.now();
+  // Hub-Geräte: hin und her, je stärker desto schneller
+  for (const [idx, d] of TOY.devices) if (d.linear && (!dev || d.name === dev) && x > 0.02 && now >= d.nextAt) {
+    const ms = Math.round(clamp(1100 - 900 * x, 150, 1100));
+    d.pos = d.pos > 0.5 ? 0 : 1; d.nextAt = now + ms;
+    toySend('LinearCmd', {DeviceIndex:idx, Vectors:Array.from({length:d.linear}, (_, i) => ({Index:i, Duration:ms, Position:d.pos}))});
+  }
+  if (TOY.last >= 0 && Math.abs(x - TOY.last) < 0.02) return;
+  TOY.last = x;
+  for (const [idx, d] of TOY.devices) if (d.scalars.length && (!dev || d.name === dev))
+    toySend('ScalarCmd', {DeviceIndex:idx, Scalars:d.scalars.map(s => ({Index:s.Index, Scalar:x, ActuatorType:s.ActuatorType}))});
+}
+function toyStop() {
+  if (TOY.run) { clearInterval(TOY.run); TOY.run = null; }
+  TOY.last = -1; toySend('StopAllDevices'); toyUI();
+}
+// Muster abspielen: Stärke (0–100 %), Dauer (s), Muster
+function toyPlay(t) {
+  if (!t || !(+t.lvl > 0) || !S.toy.enabled || !TOY.devices.size) return;
+  if (TOY.run) clearInterval(TOY.run);
+  const I = clamp(+t.lvl, 0, 100) / 100, dur = clamp(+t.sec || 5, 0.5, 600) * 1000, pat = t.pat || 'konstant', t0 = performance.now();
+  const lv = ms => {
+    const s = ms / 1000;
+    switch (pat) {
+      case 'puls': return Math.floor(s / 0.5) % 2 ? 0 : I;
+      case 'welle': return I * (0.55 + 0.45 * Math.sin(s * Math.PI));
+      case 'steigernd': return I * Math.min(1, 0.15 + 0.85 * ms / dur);
+      case 'zufall': return I * clamp(0.5 + (Math.sin(s * 7.3) + Math.sin(s * 3.1 + 1)) / 4, 0.15, 1);
+      default: return I;
+    }
+  };
+  TOY.last = -1;
+  const dev = t.dev && [...TOY.devices.values()].some(d => d.name === t.dev) ? t.dev : '';   // fehlt das Gerät: alle
+  const step = () => { const ms = performance.now() - t0; if (ms >= dur) { toyStop(); return; } toyLevel(lv(ms), dev); };
+  step(); TOY.run = setInterval(step, 100); toyUI();
+}
+$('#bToyStop').onclick = toyStop;
+addEventListener('pagehide', () => toyStop());
+document.addEventListener('keydown', e => { if (e.key === 'Escape') toyStop(); });
+
+/* =====================================================================
+   Vorlieben-Fragebogen: Er und Sie bewerten 1–5, Algorithmus füllt die Räder
+   ===================================================================== */
+// q = Frage, l = Text im Rad. Kategorien werden je einem Rad zugeordnet.
+const QUIZ = [
+  {id:'vor', name:'Vorspiel', wheel:0, items:[
+    ['kuss','Leidenschaftliches Küssen','Küssen'], ['massage','Erotische Massage','Massage'], ['strip','Striptease / langsam ausziehen','Striptease'],
+    ['oral_sie','Oral: Sie verwöhnt ihn','Blasen'], ['oral_er','Oral: Er verwöhnt sie','Lecken'], ['hand','Mit den Händen verwöhnen','Handarbeit'], ['deep','Deepthroat','Deepthroat'],
+    ['brust','Brüste küssen und streicheln','Brüste verwöhnen'], ['dirty','Dirty Talk','Dirty Talk'], ['dusche','Gemeinsam duschen','Zusammen duschen'],
+    ['eis','Mit Eiswürfeln oder Wärme spielen','Eiswürfel'], ['edging','Necken ohne Erlösung (Edging)','Edging'], ['fuss','Füße / Zehen verwöhnen','Füße verwöhnen']]},
+  {id:'pos', name:'Stellungen', wheel:1, items:[
+    ['missionar','Missionar','Missionar'], ['reiter','Reiterin (sie oben)','Reiterin'], ['reverse','Umgekehrte Reiterin','Umgekehrte Reiterin'],
+    ['doggy','Doggy-Style','Doggy'], ['loeffel','Löffelchen','Löffelchen'], ['stehend','Im Stehen','Im Stehen'], ['schoss','Sitzend auf dem Schoß','Auf dem Schoß'],
+    ['tisch','Auf dem Tisch / an der Kante','Tischkante'], ['69','69','69'], ['bauch','Flach auf dem Bauch','Bauchlage'], ['beine','Beine über den Schultern','Beine hoch']]},
+  {id:'ort', name:'Orte', wheel:2, items:[
+    ['bett','Bett','Bett'], ['sofa','Sofa','Sofa'], ['dusche_o','Dusche / Badewanne','Dusche'], ['kueche','Küche','Küche'], ['boden','Boden / Teppich','Boden'],
+    ['spiegel','Vor dem Spiegel','Spiegel'], ['auto','Im Auto','Auto'], ['draussen','Draußen (ungestört)','Draußen'], ['treppe','Treppe / Flur','Treppe']]},
+  {id:'art', name:'Spielart', wheel:3, items:[
+    ['sanft','Sanft und langsam','Sanft'], ['hart','Hart und wild','Hart'], ['er_dom','Er bestimmt','Er bestimmt'], ['sie_dom','Sie bestimmt','Sie bestimmt'],
+    ['augen','Augen verbinden','Augen verbinden'], ['fessel','Leichtes Fesseln der Hände','Fesseln'], ['klaps','Klaps auf den Po','Po-Klaps'],
+    ['haare','Sanft an den Haaren ziehen','Haare ziehen'], ['befehle','Befehle geben / befolgen','Befehle'], ['rolle','Rollenspiel','Rollenspiel'],
+    ['beissen','Leichtes Beißen / Knutschflecke','Beißen'], ['foto','Erotische Fotos / Videos voneinander','Fotos machen'],
+    ['spank','Kräftiges Spanking','Spanking'], ['fessel_fest','Festes Fesseln an Bett oder Stuhl','Festbinden'], ['unterw','Komplette Unterwerfung (Herr/Sklavin-Spiel)','Unterwerfung']]},
+  {id:'toy', name:'Spielzeug', wheel:4, toy:true, items:[
+    ['vib','Vibrator bei ihr','Vibrator'], ['lush','Lush tragen (ferngesteuert)','Lush tragen'], ['plug','Analplug (z. B. Hush)','Plug'],
+    ['wand','Massagestab (z. B. Domi)','Domi'], ['ring','Penisring / Vibro-Ring','Penisring'], ['toy_er','Spielzeug für ihn','Toy für ihn'], ['stoss','Stoß-Toy','Stoß-Toy'], ['anal_gross','Großes Anal-Toy','Großes Anal-Toy']]},
+  {id:'fin', name:'Abschluss', wheel:-1, timer:true, items:[
+    ['muschi','In die Muschi','in die Muschi'], ['arsch','In den Po (anal)','in den Arsch'], ['mund','In den Mund','in den Mund'],
+    ['gesicht','Ins Gesicht','ins Gesicht'], ['brueste','Auf die Brüste','auf die Brüste'], ['bauch_f','Auf den Bauch','auf den Bauch'], ['po','Auf den Po','auf den Po']]},
+];
+const QLABEL = ['', 'tabu', 'eher nicht', 'vielleicht', 'gerne', 'unbedingt'];
+// Intensitäts-Stufen: 1 Soft · 2 Middle · 3 Hard · 4 Heavy Duty
+const STUFEN = ['', 'Soft', 'Middle', 'Hard', 'Heavy Duty'];
+const STUFE_KURZ = ['', 'S', 'M', 'H', 'HD'];
+const STUFE_TOY = [0, 35, 60, 80, 100];           // Spielzeug-Stärke je Stufe in %
+const QLVL = {
+  'vor.kuss':1, 'vor.massage':1, 'vor.hand':1, 'vor.brust':1, 'vor.dusche':1, 'vor.fuss':1,
+  'vor.strip':2, 'vor.oral_sie':2, 'vor.oral_er':2, 'vor.dirty':2, 'vor.eis':2, 'vor.edging':3, 'vor.deep':4,
+  'pos.missionar':1, 'pos.loeffel':1, 'pos.schoss':1, 'pos.reiter':2, 'pos.reverse':2, 'pos.doggy':2, 'pos.stehend':2,
+  'pos.69':2, 'pos.bauch':2, 'pos.tisch':3, 'pos.beine':3,
+  'ort.bett':1, 'ort.sofa':1, 'ort.dusche_o':1, 'ort.kueche':2, 'ort.boden':2, 'ort.spiegel':2, 'ort.treppe':2, 'ort.auto':3, 'ort.draussen':3,
+  'art.sanft':1, 'art.augen':2, 'art.rolle':2, 'art.hart':3, 'art.er_dom':3, 'art.sie_dom':3, 'art.fessel':3, 'art.klaps':3,
+  'art.haare':3, 'art.befehle':3, 'art.beissen':3, 'art.foto':3, 'art.spank':4, 'art.fessel_fest':4, 'art.unterw':4,
+  'toy.vib':2, 'toy.ring':2, 'toy.toy_er':2, 'toy.wand':2, 'toy.lush':3, 'toy.plug':3, 'toy.stoss':3, 'toy.anal_gross':4,
+  'fin.bauch_f':1, 'fin.po':1, 'fin.muschi':1, 'fin.brueste':2, 'fin.mund':2, 'fin.gesicht':3, 'fin.arsch':4,
+};
+// Stufe eines Punkts: eigene Einordnung > Katalog > Middle
+const itemLvl = id => (QS().lvlOv || {})[id] || QLVL[id] || 2;
+// Geschätzte Wunsch-Stufe einer Person aus ihren Bewertungen: höchste Stufe, deren Punkte sie im Schnitt mit ≥ 3,5 bewertet
+function estStufe(who) {
+  let best = 1;
+  for (let L = 2; L <= 4; L++) {
+    const v = allQuizItems().filter(it => itemLvl(it.id) === L).map(it => eff(it.id, who)).filter(Boolean);
+    if (v.length && v.reduce((a, b) => a + b, 0) / v.length >= 3.5) best = L;
+  }
+  return best;
+}
+const stufeOf = who => (QS().stufe || {})[who] || estStufe(who);
+// Gemeinsame Stufe: nie höher als die vorsichtigere Person will (Einverständnis beider)
+const stufeMax = () => Math.min(stufeOf('a'), stufeOf('b'));
+const stufeSession = () => clamp(QS().stufeSel || stufeMax(), 1, stufeMax());
+const lvlTag = id => { const L = itemLvl(id); return `<span class="qlvl l${L}" title="${STUFEN[L]}">${STUFE_KURZ[L]}</span>`; };
+let quizTab = 'a';
+const QS = () => S.quiz;
+function quizItems(c) { return c.items.map(([id, q, l]) => ({id:c.id + '.' + id, q, l})).concat((QS().custom[c.id] || []).map(x => ({id:x.id, q:x.l, l:x.l, custom:true}))); }
+function allQuizItems() { return QUIZ.flatMap(c => quizItems(c).map(it => Object.assign({cat:c}, it))); }
+function itemById(id) { return allQuizItems().find(x => x.id === id); }
+// Wirksame Bewertung: gelernter Wert aus früheren Sessions, sonst die Antwort im Fragebogen
+function eff(id, who) { const L = (QS().learn[id] || {})[who]; if (L != null) return L; return (QS().ans[id] || {})[who] || 0; }
+// Algorithmus: geometrisches Mittel belohnt gemeinsame Begeisterung, eine 1 (tabu) von einem schließt immer aus.
+function quizScore(id) {
+  const a = eff(id, 'a'), b = eff(id, 'b');
+  if (!a || !b) return {state:'open'};
+  if (a < 1.5 || b < 1.5) return {state:'tabu'};
+  const score = Math.sqrt(a * b), L = itemLvl(id), ST = stufeSession();
+  if (L > ST) return {state:'stufe', score, lvl:L};
+  // Abwägen: Punkte genau auf der gewählten Stufe kommen öfter, deutlich mildere seltener
+  const bonus = L === ST && ST > 1 ? 1 : (ST - L >= 2 ? -1 : 0);
+  return {state:score >= QS().thr ? 'in' : 'low', score, lvl:L, weight:clamp(Math.round(score * 2 - 4) + bonus, 1, 6)};
+}
+function quizResult(c) {
+  const all = quizItems(c).map(it => Object.assign({}, it, quizScore(it.id)));
+  const inc = all.filter(x => x.state === 'in').sort((x, y) => y.score - x.score);
+  return {inc, open:all.filter(x => x.state === 'open').length, out:all.filter(x => x.state === 'tabu' || x.state === 'low').length, over:all.filter(x => x.state === 'stufe').length};
+}
+// Punktesystem: Match-Quote, Punkte (5+5 = 100 je Punkt), je Kategorie
+function quizStats() {
+  let rated = 0, match = 0, pts = 0, open = 0;
+  const cats = QUIZ.map(c => {
+    let cm = 0, cr = 0;
+    quizItems(c).forEach(it => {
+      const r = quizScore(it.id);
+      if (r.state === 'open') { open++; return; }
+      rated++; cr++;
+      if (r.state === 'in' || (r.state === 'stufe' && r.score >= QS().thr)) { match++; cm++; pts += Math.round(r.score * r.score * 4); }
+    });
+    return {c, pct:cr ? Math.round(cm / cr * 100) : 0, cm, cr};
+  });
+  const top = allQuizItems().map(it => Object.assign(it, quizScore(it.id))).filter(x => x.state === 'in').sort((x, y) => y.score - x.score);
+  const lv = [1, 2, 3, 4].map(L => { const its = allQuizItems().filter(it => itemLvl(it.id) === L); let m = 0, r = 0;
+    its.forEach(it => { const a = eff(it.id, 'a'), b = eff(it.id, 'b'); if (!a || !b) return; r++; if (a >= 1.5 && b >= 1.5 && Math.sqrt(a * b) >= QS().thr) m++; });
+    return {L, n:its.length, m, pct:r ? Math.round(m / r * 100) : 0}; });
+  const ses = QS().sessions, avgF = ses.length ? Math.round(ses.reduce((n, s) => n + s.fulfil, 0) / ses.length) : null;
+  return {pct:rated ? Math.round(match / rated * 100) : 0, pts, match, rated, open, cats, top, sessions:ses.length, avgF, lv};
+}
+// Persönlicher Vorschlag: gemeinsame Favoriten + Wünsche des Partners, bei denen man „vielleicht“ gesagt hat (nie Tabus)
+function quizProposal(who) {
+  const N = QS().names, other = who === 'a' ? 'b' : 'a', st = quizStats(), d = new Date().toLocaleDateString('de-DE');
+  const wishes = allQuizItems().filter(it => { const me = eff(it.id, who), ot = eff(it.id, other);
+    return ot >= 4 && me >= 2.5 && me < 3.5 && quizScore(it.id).state !== 'tabu'; });
+  const last = QS().sessions[QS().sessions.length - 1];
+  let t = `💞 SexRad – Vorschlag für ${N[who]} (${d})\n\n`;
+  t += `Match: ${st.pct} % · ${st.pts} Punkte · ${st.match} gemeinsame Vorlieben\n`;
+  t += `Deine Stufe: ${STUFEN[stufeOf(who)]} · ${N[other]}: ${STUFEN[stufeOf(other)]} · gemeinsam: ${STUFEN[stufeSession()]}\n\n`;
+  t += `🔥 Eure Top-Gemeinsamkeiten:\n` + (st.top.slice(0, 8).map(x => '  • ' + x.l).join('\n') || '  (noch keine)') + '\n\n';
+  if (wishes.length) t += `✨ Das wünscht sich ${N[other]} besonders – du hast „vielleicht“ gesagt. Lust, es auszuprobieren?\n` + wishes.slice(0, 8).map(x => '  • ' + x.q).join('\n') + '\n\n';
+  if (last) t += `🏁 Letzte Session (${new Date(last.date).toLocaleDateString('de-DE')}): Erfüllung ${last.fulfil} %` +
+    (last.highlights.length ? `\n  Highlights: ${last.highlights.join(', ')}` : '') + '\n\n';
+  t += `Alles freiwillig – ein Nein ist immer okay.`;
+  return t;
+}
+async function sendText(text, fname) {
+  if (NATIVE) { await nativeFile(new Blob([text], {type:'text/plain'}), fname, 'share'); return; }
+  if (navigator.share) { try { await navigator.share({title:'SexRad', text}); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(text); toast('Text kopiert – zum Verschicken einfügen', 4000); } catch (e) {}
+  download(new Blob([text], {type:'text/plain'}), fname);
+}
+
+/* ---------- Session: Ergebnisse mitschreiben, danach Rückblick ---------- */
+function sessionStart() { QS().session = {start:Date.now(), log:[]}; QS().fb = null; save(); updateRail(); toast('Session gestartet – am Ende „🏁 SESSION ENDE“ drücken', 4000); }
+function quizLog(f) { if (!QS().session || !f || !f.qid) return; QS().session.log.push(f.qid); save(); }
+function sessionEnd() {
+  const s = QS().session;
+  if (!QS().fb) QS().fb = {items:[...new Set(s ? s.log : [])], ans:{}, overall:{}};
+  save(); openQuiz('fa');
+}
+// Lernen: Erlebnis fließt zu 40 % in die Vorliebe ein, eine 1 nach dem Erleben macht den Punkt künftig tabu
+function sessionLearn() {
+  const fb = QS().fb; if (!fb) return;
+  const items = [];
+  fb.items.forEach(id => {
+    const r = fb.ans[id] || {};
+    ['a', 'b'].forEach(w => {
+      const v = r[w]; if (!(v >= 1)) return;
+      const base = eff(id, w) || v;
+      (QS().learn[id] = QS().learn[id] || {})[w] = v === 1 ? 1 : clamp(base * 0.6 + v * 0.4, 1, 5);
+    });
+    if ((r.a >= 1) || (r.b >= 1)) items.push({id, a:r.a || 0, b:r.b || 0});
+  });
+  const ov = fb.overall, ovs = [ov.a, ov.b].filter(v => v >= 1);
+  const fulfil = ovs.length ? Math.round(ovs.reduce((n, v) => n + (v - 1) / 4, 0) / ovs.length * 100) : 0;
+  const highlights = items.filter(x => x.a >= 4 && x.b >= 4).map(x => (itemById(x.id) || {}).l).filter(Boolean);
+  QS().sessions.push({date:Date.now(), fulfil, items, highlights});
+  licTrim();
+  QS().session = null; QS().fb = null;
+  save(); updateRail();
+  return fulfil;
+}
+
+function openQuiz(tab) { closePanel(); quizTab = tab || 'a'; $('#quiz').classList.add('show'); renderQuiz(); $('#qBody').scrollTop = 0; }
+function quizHead() {
+  const N = QS().names, fbMode = quizTab === 'fa' || quizTab === 'fb' || quizTab === 'fr';
+  const tabs = fbMode ? [['fa', '♂ ' + N.a + ' Rückblick'], ['fb', '♀ ' + N.b + ' Rückblick'], ['fr', 'Session-Auswertung']]
+    : [['a', '♂ ' + N.a + ' bewertet'], ['b', '♀ ' + N.b + ' bewertet'], ['r', 'Auswertung']];
+  $('#qHead').innerHTML = `<div class="qt">${fbMode ? '🏁 Session-Rückblick' : '💞 Vorlieben'}</div>` +
+    tabs.map(([k, l]) => `<button class="qtab ${quizTab === k ? 'on' : ''}" data-qtab="${k}">${esc(l)}</button>`).join('') +
+    `<button class="qtab" data-qtab="x">✕</button>`;
+}
+const rateBtns = (attrs, v, withNone) => (withNone ? `<button ${attrs} data-v="0" class="${v === 0 ? 'on' : ''}" title="nicht gemacht">–</button>` : '') +
+  [1, 2, 3, 4, 5].map(n => `<button ${attrs} data-v="${n}" class="${v === n ? 'on' : ''}" title="${QLABEL[n]}">${n}</button>`).join('');
+
+function renderQuiz() {
+  quizHead();
+  const N = QS().names, B = $('#qBody');
+  if (quizTab === 'a' || quizTab === 'b') {
+    const who = quizTab, total = allQuizItems().length;
+    const done = allQuizItems().filter(it => (QS().ans[it.id] || {})[who]).length;
+    B.innerHTML = `<div class="qmap">Name: <input type="text" data-qname="${who}" value="${esc(N[who])}" class="qname">
+        <span class="qprog">${done} / ${total} beantwortet</span></div>
+      <div class="qmap"><b>Wie intensiv magst du es?</b></div>
+      <div class="qstufe">${[1, 2, 3, 4].map(L => `<button data-qstufe="${L}" class="${(QS().stufe || {})[who] === L ? 'on' : ''}">${STUFEN[L]}</button>`).join('')}
+        <button data-qstufe="0" class="${!(QS().stufe || {})[who] ? 'on' : ''}">Automatisch</button>
+        <span class="hint">${(QS().stufe || {})[who] ? '' : 'laut deinen Antworten: <b>' + STUFEN[estStufe(who)] + '</b>'}</span></div>
+      <div class="qlegend">Jeder bewertet allein – die Antworten des anderen bleiben verdeckt.<br>
+        Stufen: ${[1, 2, 3, 4].map(L => `<span class="qlvl l${L}">${STUFE_KURZ[L]}</span> ${STUFEN[L]}`).join(' · ')} – Tippen auf das Kürzel ordnet einen Punkt anders ein.<br>
+        <b>1</b> tabu · <b>2</b> eher nicht · <b>3</b> vielleicht · <b>4</b> gerne · <b>5</b> unbedingt. Eine 1 schließt den Punkt immer aus, egal was der andere sagt.</div>` +
+      QUIZ.map(c => `<h3>${esc(c.name)}</h3>` + quizItems(c).map(it => {
+        const v = (QS().ans[it.id] || {})[who] || 0;
+        return `<div class="qrow"><div class="qq">${esc(it.q)}${lvlTag(it.id).replace('<span ', `<span data-qlvl="${esc(it.id)}" `)}${it.custom ? ' <small style="opacity:.6">(eigene)</small>' : ''}</div><div class="qrate">${rateBtns(`data-qid="${esc(it.id)}"`, v)}</div></div>`;
+      }).join('') + `<div class="qadd"><input type="text" placeholder="Eigenen Punkt zu „${esc(c.name)}“ hinzufügen" data-qnew="${c.id}"><button class="qbtn alt" style="margin:0" data-qaddc="${c.id}">+</button></div>`).join('') +
+      `<button class="qbtn" data-qgo="${who === 'a' ? 'b' : 'r'}">${who === 'a' ? 'Weiter: ' + esc(N.b) + ' bewertet ▶' : 'Zur Auswertung ▶'}</button>`;
+    return;
+  }
+  if (quizTab === 'r') {
+    const st = quizStats();
+    const wopts = sel => `<option value="-1" ${sel === -1 ? 'selected' : ''}>– nicht eintragen</option>` + S.wheels.map((w, i) => `<option value="${i}" ${sel === i ? 'selected' : ''}>Rad ${i + 1}${w.title && w.title !== 'Rad ' + (i + 1) ? ' (' + esc(w.title) + ')' : ''}</option>`).join('');
+    B.innerHTML = `<div class="qscore">
+        <div class="qbig"><b>${st.pct} %</b><span>Match</span></div>
+        <div class="qbig"><b>${st.pts}</b><span>Punkte</span></div>
+        <div class="qbig"><b>${st.match}</b><span>gemeinsame Vorlieben</span></div>
+        <div class="qbig"><b>${st.avgF == null ? '–' : st.avgF + ' %'}</b><span>Erfüllung (${st.sessions} Sessions)</span></div></div>
+      ${st.open ? `<div class="qlegend">⚠ ${st.open} Punkte sind noch nicht von beiden bewertet.</div>` : ''}
+      <div class="qbars">${st.cats.map(x => `<div class="qbar"><span>${esc(x.c.name)}</span><i><em style="width:${x.pct}%"></em></i><b>${x.pct} %</b></div>`).join('')}</div>
+      <h3>Intensität</h3>
+      <div class="qlegend">${esc(N.a)} will: <b>${STUFEN[stufeOf('a')]}</b>${(QS().stufe || {}).a ? '' : ' (geschätzt)'} · ${esc(N.b)} will: <b>${STUFEN[stufeOf('b')]}</b>${(QS().stufe || {}).b ? '' : ' (geschätzt)'} ·
+        gemeinsam höchstens: <b>${STUFEN[stufeMax()]}</b>. Höher geht es nur, wenn beide ihre Stufe anheben.</div>
+      <div class="qbars">${st.lv.map(x => `<div class="qbar"><span><span class="qlvl l${x.L}">${STUFE_KURZ[x.L]}</span> ${STUFEN[x.L]}</span><i><em style="width:${x.pct}%"></em></i><b>${x.pct} %</b></div>`).join('')}</div>
+      <div class="qstufe"><b style="color:#e9d6a6">Stufe für diese Session:</b>${[1, 2, 3, 4].map(L => `<button data-qsel="${L}" class="${stufeSession() === L ? 'on' : ''}" ${L > stufeMax() ? 'disabled' : ''}>${STUFEN[L]}</button>`).join('')}</div>
+      ${stufeSession() >= 3 ? '<div class="qlegend">⚠ Ab Stufe Hard: vorher ein Safeword vereinbaren. Ein Stopp gilt immer sofort.</div>' : ''}
+      <div class="qlegend">🔥 Top: ${st.top.slice(0, 6).map(x => esc(x.l)).join(' · ') || '–'}</div>
+      <button class="qbtn" data-qsend="a">📤 Vorschlag an ${esc(N.a)}</button><button class="qbtn" data-qsend="b">📤 Vorschlag an ${esc(N.b)}</button>
+      ${QS().session ? `<button class="qbtn alt" data-qend="1">🏁 Session beenden & Rückblick</button>` : `<button class="qbtn alt" data-qsess="1">▶ Session starten (Räder so lassen)</button>`}
+      <div class="qlegend" style="margin-top:14px">Eingetragen wird nur, was ihr <b>beide</b> mögt. Tabus und Einzelwerte werden nicht angezeigt.
+        Häufigkeit im Rad = wie sehr ihr es zusammen wollt (Gewicht 1–6). Nach jeder Session lernt der Algorithmus aus eurem Rückblick.</div>
+      <label class="qmap">Mut-Regler: <b id="qthrL">${QS().thr.toFixed(1)}</b>
+        <input type="range" min="2" max="4" step="0.1" value="${QS().thr}" data-qthr style="width:220px"> <span>(links = mutiger, mehr Punkte · rechts = nur Favoriten)</span></label>` +
+      QUIZ.map(c => {
+        const r = quizResult(c), m = QS().map[c.id] ?? c.wheel;
+        return `<h3>${esc(c.name)} <small style="font:13px system-ui;color:#a8988a">${r.inc.length} Treffer${r.open ? ' · ' + r.open + ' offen' : ''}${r.out ? ' · ' + r.out + ' passen nicht' : ''}${r.over ? ' · ' + r.over + ' über der Stufe' : ''}</small></h3>
+          <div class="qmap">Eintragen in: <select data-qmap="${c.id}">${wopts(m)}</select>
+          ${c.timer ? `<label class="chk" style="font-size:13px!important"><input type="checkbox" data-qtimer ${QS().timer ? 'checked' : ''}> auch ins Timer-Rad (3–9 Felder)</label>` : ''}</div>
+          <div class="qres">${r.inc.map(x => `<span class="qchip">${esc(x.l)}<small>×${x.weight}</small>${lvlTag(x.id)}</span>`).join('') || '<span class="hint">Noch keine gemeinsamen Treffer.</span>'}</div>`;
+      }).join('') +
+      `<button class="qbtn" data-qapply="1">✔ In die Räder eintragen & Session starten</button><button class="qbtn alt" data-qreset="1">Antworten löschen</button>
+       <div class="qlegend">Beim Eintragen werden die bisherigen Räder gesichert (↩ VORHER) und das Ergebnis als Speicherkarte „Vorlieben …“ gespeichert.</div>` +
+      (QS().sessions.length ? `<h3>Bisherige Sessions</h3>` + QS().sessions.slice().reverse().map(s =>
+        `<div class="qlegend">${new Date(s.date).toLocaleDateString('de-DE')} · Erfüllung <b>${s.fulfil} %</b> · ${s.items.length} Punkte erlebt${s.highlights.length ? ' · Highlights: ' + s.highlights.map(esc).join(', ') : ''}</div>`).join('') : '');
+    return;
+  }
+  // ---- Rückblick nach der Session ----
+  if (!QS().fb) QS().fb = {items:[...new Set(QS().session ? QS().session.log : [])], ans:{}, overall:{}};
+  const fb = QS().fb;
+  if (quizTab === 'fa' || quizTab === 'fb') {
+    const who = quizTab === 'fa' ? 'a' : 'b';
+    const others = allQuizItems().filter(it => !fb.items.includes(it.id));
+    B.innerHTML = `<div class="qlegend"><b>${esc(N[who])}</b> füllt allein aus – die Antworten von ${esc(N[who === 'a' ? 'b' : 'a'])} bleiben verdeckt.</div>
+      <h3>Wie erfüllt war die Session für dich?</h3>
+      <div class="qrow"><div class="qq">1 = gar nicht · 3 = okay · 5 = absolut erfüllt</div><div class="qrate">${rateBtns(`data-fbo="${who}"`, fb.overall[who] || 0)}</div></div>
+      <h3>Was habt ihr gemacht – und wie war es?</h3>
+      <div class="qlegend"><b>–</b> nicht gemacht · <b>1</b> nie wieder · <b>2</b> eher nicht · <b>3</b> okay · <b>4</b> gut · <b>5</b> großartig</div>` +
+      (fb.items.map(id => { const it = itemById(id); if (!it) return '';
+        return `<div class="qrow"><div class="qq">${esc(it.q)} <small style="opacity:.55">${esc(it.cat.name)}</small></div><div class="qrate">${rateBtns(`data-fbid="${esc(id)}"`, (fb.ans[id] || {})[who] ?? -1, true)}</div></div>`; }).join('')
+        || '<div class="hint">Noch keine Punkte aus den Rädern – unten hinzufügen, was ihr gemacht habt.</div>') +
+      `<div class="qadd"><select id="fbAddSel" class="qsel">${QUIZ.map(c => `<optgroup label="${esc(c.name)}">` + others.filter(o => o.cat === c).map(o => `<option value="${esc(o.id)}">${esc(o.q)}</option>`).join('') + '</optgroup>').join('')}</select>
+        <button class="qbtn alt" style="margin:0" data-fbadd="1">+ auch gemacht</button></div>
+      <button class="qbtn" data-qgo="${who === 'a' ? 'fb' : 'fr'}">${who === 'a' ? 'Weiter: ' + esc(N.b) + ' ▶' : 'Zur Session-Auswertung ▶'}</button>`;
+    return;
+  }
+  // fr: Session-Auswertung
+  const rows = fb.items.map(id => ({id, it:itemById(id), r:fb.ans[id] || {}})).filter(x => x.it && (x.r.a >= 1 || x.r.b >= 1));
+  const avg = x => { const v = [x.r.a, x.r.b].filter(n => n >= 1); return v.reduce((s, n) => s + n, 0) / v.length; };
+  const ovs = [fb.overall.a, fb.overall.b].filter(v => v >= 1);
+  const fulfil = ovs.length ? Math.round(ovs.reduce((n, v) => n + (v - 1) / 4, 0) / ovs.length * 100) : null;
+  const wished = allQuizItems().filter(it => { const s = quizScore(it.id); return s.state === 'in' && s.score >= 4; });
+  const wishedDone = wished.filter(it => rows.some(x => x.id === it.id)).length;
+  B.innerHTML = `<div class="qscore">
+      <div class="qbig"><b>${fulfil == null ? '–' : fulfil + ' %'}</b><span>Erfüllung</span></div>
+      <div class="qbig"><b>${rows.length}</b><span>Punkte erlebt</span></div>
+      <div class="qbig"><b>${wished.length ? Math.round(wishedDone / wished.length * 100) + ' %' : '–'}</b><span>Top-Wünsche erfüllt</span></div>
+      <div class="qbig"><b>${rows.filter(x => x.r.a >= 4 && x.r.b >= 4).length}</b><span>Highlights</span></div></div>
+    ${(fb.overall.a ? '' : `<div class="qlegend">⚠ ${esc(N.a)} hat den Rückblick noch nicht ausgefüllt.</div>`) + (fb.overall.b ? '' : `<div class="qlegend">⚠ ${esc(N.b)} hat den Rückblick noch nicht ausgefüllt.</div>`)}
+    <h3>Erlebt</h3>
+    <div class="qres">${rows.sort((x, y) => avg(y) - avg(x)).map(x => `<span class="qchip">${esc(x.it.l)}<small>${'★'.repeat(Math.round(avg(x)))}</small></span>`).join('') || '<span class="hint">–</span>'}</div>
+    ${rows.some(x => x.r.a === 1 || x.r.b === 1) ? `<div class="qlegend">Einige Punkte werden künftig weggelassen (jemand hat „nie wieder“ gewählt).</div>` : ''}
+    <div class="qlegend">Beim Speichern lernt der Algorithmus: Jedes Erlebnis fließt zu 40 % in eure Vorlieben ein. Auch die Stufe (Soft, Middle, Hard, Heavy Duty) wird neu eingeschätzt: Wer harte Punkte gut bewertet, wird eine Stufe höher vorgeschlagen. Danach könnt ihr die Räder neu berechnen lassen.</div>
+    <button class="qbtn" data-fblearn="1">💾 Speichern & Algorithmus lernen lassen</button>`;
+}
+function quizApply() {
+  if (!S.snapshot) S.snapshot = {active:S.active, wheels:strip(S.wheels)};
+  const used = [], skipped = [];
+  let timerDone = false;
+  QUIZ.forEach(c => {
+    const r = quizResult(c), m = QS().map[c.id] ?? c.wheel;
+    const mk = x => normField({text:x.l, weight:x.weight, qid:x.id, toy:c.toy ? {lvl:STUFE_TOY[stufeSession()], sec:30, pat:stufeSession() >= 3 ? 'steigernd' : 'welle', dev:''} : undefined});
+    if (m >= 0) {
+      if (r.inc.length < MIN_FIELDS) skipped.push(c.name);
+      else {
+        const old = S.wheels[m];
+        S.wheels[m] = normWheel({title:c.name, unit:'', palette:old.palette, enabled:true, history:[], fields:r.inc.slice(0, MAX_FIELDS).map(mk)}, m);
+        used.push(m);
+      }
+    }
+    if (c.timer && QS().timer) {
+      if (r.inc.length >= T_MIN) { S.timer.wheel.fields = r.inc.slice(0, T_MAX).map(mk); timerDone = true; }
+      else skipped.push('Timer-Rad');
+    }
+  });
+  if (!used.length) { toast('Zu wenig gemeinsame Treffer – erst beide ausfüllen oder Mut-Regler nach links', 4500); return; }
+  S.wheels.forEach((w, i) => w.enabled = used.includes(i));
+  S.active = used[0];
+  const name = 'Vorlieben ' + new Date().toLocaleDateString('de-DE');
+  const data = {active:S.active, slots:used.map(i => ({slot:i, wheel:strip(S.wheels[i])}))};
+  const ex = S.presets.find(c => c.kind === 'combo' && c.name === name);
+  if (ex) ex.data = data; else S.presets.push({id:'c' + uid(), name, kind:'combo', created:Date.now(), data});
+  QS().session = {start:Date.now(), log:[]}; QS().fb = null;
+  save(); render(); updateRail(); renderPanel();
+  $('#quiz').classList.remove('show');
+  toast(`${used.length} Räder eingetragen${timerDone ? ' + Timer-Rad' : ''}${skipped.length ? ' · übersprungen: ' + skipped.join(', ') : ''} · Session läuft`, 6000);
+}
+$('#quiz').addEventListener('click', e => {
+  const t = e.target.closest('button') || e.target, d = t.dataset, fb = QS().fb;
+  if (d.qtab) { if (d.qtab === 'x') { $('#quiz').classList.remove('show'); render(); } else { quizTab = d.qtab; renderQuiz(); $('#qBody').scrollTop = 0; } return; }
+  const mark = () => t.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === t));
+  if (d.qid) {
+    (QS().ans[d.qid] = QS().ans[d.qid] || {})[quizTab] = +d.v;
+    delete (QS().learn[d.qid] || {})[quizTab];   // neue Antwort ersetzt den gelernten Wert
+    save(); mark();
+    const pg = document.querySelector('.qprog'); if (pg) pg.textContent = allQuizItems().filter(it => (QS().ans[it.id] || {})[quizTab]).length + ' / ' + allQuizItems().length + ' beantwortet';
+    return;
+  }
+  if (d.fbo) { fb.overall[d.fbo] = +d.v; save(); mark(); return; }
+  if (d.fbid) { (fb.ans[d.fbid] = fb.ans[d.fbid] || {})[quizTab === 'fa' ? 'a' : 'b'] = +d.v; save(); mark(); return; }
+  if (d.fbadd) { const v = $('#fbAddSel').value; if (v && !fb.items.includes(v)) { fb.items.push(v); save(); renderQuiz(); } return; }
+  if (d.fblearn) { const f = sessionLearn(); quizTab = 'r'; renderQuiz(); $('#qBody').scrollTop = 0; toast(`Gespeichert – Erfüllung ${f} %. Der Algorithmus hat dazugelernt. „In die Räder eintragen“ berechnet neu.`, 6000); return; }
+  if (d.qgo) { quizTab = d.qgo; renderQuiz(); $('#qBody').scrollTop = 0; return; }
+  if (d.qsend) { const N = QS().names; sendText(quizProposal(d.qsend), 'SexRad-Vorschlag-' + N[d.qsend].replace(/[^\wäöüÄÖÜß-]+/g, '_') + '.txt'); return; }
+  if (d.qsess) { sessionStart(); renderQuiz(); return; }
+  if (d.qstufe != null) { QS().stufe = QS().stufe || {}; if (+d.qstufe) QS().stufe[quizTab] = +d.qstufe; else delete QS().stufe[quizTab]; QS().stufeSel = 0; save(); renderQuiz(); return; }
+  if (d.qsel) { QS().stufeSel = +d.qsel; save(); renderQuiz(); return; }
+  if (d.qlvl) { const ov = QS().lvlOv = QS().lvlOv || {}; ov[d.qlvl] = itemLvl(d.qlvl) % 4 + 1; save();
+    t.className = 'qlvl l' + ov[d.qlvl]; t.textContent = STUFE_KURZ[ov[d.qlvl]]; t.title = STUFEN[ov[d.qlvl]]; return; }
+  if (d.qend) { sessionEnd(); return; }
+  if (d.qaddc) {
+    const inp = document.querySelector(`[data-qnew="${d.qaddc}"]`), l = inp.value.trim(); if (!l) return;
+    (QS().custom[d.qaddc] = QS().custom[d.qaddc] || []).push({id:d.qaddc + '.x' + uid(), l}); save(); renderQuiz(); return;
+  }
+  if (d.qapply) { quizApply(); return; }
+  if (d.qreset) {
+    if (!d.armed) { d.armed = 1; t.textContent = 'Wirklich alle Antworten löschen?'; return; }
+    QS().ans = {}; QS().learn = {}; save(); renderQuiz(); toast('Antworten gelöscht');
+  }
+});
+$('#quiz').addEventListener('change', e => { if (e.target.dataset.qthr != null) renderQuiz(); });
+$('#quiz').addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.qname) { QS().names[t.dataset.qname] = t.value || (t.dataset.qname === 'a' ? 'Er' : 'Sie'); save(); quizHead(); }
+  if (t.dataset.qthr != null) { QS().thr = +t.value; save(); $('#qthrL').textContent = QS().thr.toFixed(1); }
+  if (t.dataset.qmap) { QS().map[t.dataset.qmap] = +t.value; save(); }
+  if (t.dataset.qtimer != null) { QS().timer = t.checked; save(); }
+});
+$('#bEnd').onclick = sessionEnd;
+
+/* =====================================================================
+   Vollbild beim ersten Tippen
+   ===================================================================== */
+let triedFs = false;
+function goFullscreen(force) {
+  const el = document.documentElement;
+  if (document.fullscreenElement || document.webkitFullscreenElement) return;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (req) { try { const p = req.call(el, {navigationUI:'hide'}); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+  if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+}
+document.addEventListener('pointerdown', () => { ac(); if (!triedFs) { triedFs = true; goFullscreen(); } }, true);
+
+/* =====================================================================
+   Bedienung
+   ===================================================================== */
+$('#bSpin').onclick = () => isSlot() ? slotSpin() : doSpin(S.active);
+$('#bMode').onclick = () => setMode(isSlot() ? 'rad' : 'slot');
+// Joker: eigenes Video/Foto + Text zeigen, danach zugewiesenes Rad / Karte starten
+/* Joker-Abfolgen: mehrere gespeicherte Abläufe (Rad/Karte × Anzahl) */
+const SEQ = {run:false, abort:false};
+function pickSeq(seqs) {
+  return new Promise(res => {
+    const box = $('#jpick');
+    $('#jpickList').innerHTML = seqs.map((q, i) => `<button class="jbtn" data-pick="${i}">★ ${esc(q.name)}<small>${q.steps.map(st => stepName(st)).join(' → ')}</small></button>`).join('');
+    box.classList.add('show');
+    const fin = v => { box.classList.remove('show'); box.onclick = null; res(v); };
+    box.onclick = e => { const b = e.target.closest('[data-pick]'); if (b) fin(seqs[+b.dataset.pick]); else if (e.target.id === 'jpickX' || e.target === box) fin(null); };
+  });
+}
+function stepName(st) {
+  const c = st.t[0] === 'c' ? S.presets.find(x => x.id === st.t.slice(1)) : null;
+  const name = c ? 'Karte ' + c.name : (S.wheels[+st.t.slice(1)] || {}).title || '?';
+  return esc(name) + (st.n > 1 ? ' ×' + st.n : '');
+}
+async function runSeq(q) {
+  if (busy || SEQ.run) return;
+  SEQ.run = true; SEQ.abort = false;
+  const total = q.steps.reduce((a, st) => a + st.n, 0); let k = 0;
+  try {
+    for (const st of q.steps) for (let i = 0; i < st.n; i++) {
+      if (SEQ.abort) return;
+      k++; toast(`${q.name}: ${k} / ${total}`, 1600);
+      if (st.t[0] === 'c') await runCard(st.t.slice(1), 0); else await doSpin(+st.t.slice(1), 0);
+      await sleep(350);
+    }
+  } finally { SEQ.run = false; }
+  if (!SEQ.abort) toast(`Abfolge „${q.name}“ fertig`); else toast('Abfolge gestoppt');
+}
+$('#bJoker').onclick = async () => {
+  if (busy || SEQ.run) return;
+  const seqs = S.joker.seqs.filter(q => q.steps.length);
+  let seq = null;
+  if (seqs.length === 1) seq = seqs[0];
+  else if (seqs.length > 1) { seq = await pickSeq(seqs); if (!seq) return; }
+  busy = true; ac(); setBusy(true); closePanel();
+  SEQ.run = !!seq;   // Stopp-Button schon beim Joker-Intro zeigen
+  const next = await showResult({unit:'', title:'Joker'}, 0, 0, Object.assign({}, S.joker, seq ? {next:-1, card:null} : {}));
+  SEQ.run = false; busy = false; setBusy(false); render();
+  if (seq) { if (!SEQ.abort) await runSeq(seq); SEQ.abort = false; }
+  else if (next) await runNext(next, 1);
+};
+$('#bTimer').onclick = openTimer;
+$('#bUndo').onclick = undoCard;
+$('#wbtns').addEventListener('click', e => { const b = e.target.closest('[data-spin]'); if (b && !b.disabled) doSpin(+b.dataset.spin); });
+$('#gear').onclick = () => {
+  const P = $('#panel'), open = !P.classList.contains('open');
+  P.classList.toggle('open', open); $('#gear').classList.toggle('on', open);
+  if (open) renderPanel(); else { editHL = null; render(); }
+};
+// Tippen auf ein Rad = aktives Rad wechseln
+$('#cv').addEventListener('pointerdown', e => {
+  if (busy || !lastLayout) return;
+  const r = $('#cv').getBoundingClientRect(), d = lastLayout.d, x = (e.clientX - r.left) * d, y = (e.clientY - r.top) * d;
+  lastLayout.rects.forEach((q, k) => {
+    if (Math.hypot(x - q.cx, y - q.cy) <= q.R && lastLayout.vis[k] !== S.active) {
+      S.active = lastLayout.vis[k]; editHL = null; save(); render(); renderPanel(); updateRail();
+    }
+  });
+});
+$('#tStart').onclick = () => T.run ? timerStop() : timerRun();
+$('#tClose').onclick = () => { timerStop(); $('#timerView').classList.remove('show'); render(); };
+$('#tMinus').onclick = () => { S.timer.seconds = clamp(S.timer.seconds - (S.timer.seconds > 60 ? 15 : 5), 3, 3600); save(); if (!T.run) showClock(S.timer.seconds); };
+$('#tPlus').onclick = () => { S.timer.seconds = clamp(S.timer.seconds + (S.timer.seconds >= 60 ? 15 : 5), 3, 3600); save(); if (!T.run) showClock(S.timer.seconds); };
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input,select,textarea')) return;
+  if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); $('#timerView').classList.contains('show') ? $('#tStart').click() : doSpin(S.active); }
+});
+let rzT = 0;
+addEventListener('resize', () => { cancelAnimationFrame(rzT); rzT = requestAnimationFrame(() => { render(); if ($('#timerView').classList.contains('show')) renderTimer(); }); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && T.run) wakeLock(true); });
+
+// Offline-Cache (Service Worker) nur, wenn über http(s) geladen
+if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+// Für Icon-Erzeugung/Tests
+
+/* =====================================================================
+   Update: neue Version der App aus dem Update-Speicher laden
+   (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
+   ===================================================================== */
+const APP_BUILD = 2026110104;
+const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
+const UPD = { remote: null, busy: false };
+const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
+function buildTxt(b) { b = String(b || ''); return b.length >= 10 ? b.slice(6, 8) + '.' + b.slice(4, 6) + '.' + b.slice(0, 4) + ' (' + (+b.slice(8)) + ')' : (b || '–'); }
+function updShowVer() {
+  const ov = updNative() && AndroidApp.updateInstalled ? +AndroidApp.updateInstalled() || 0 : 0;
+  $('#updVer').textContent = 'Installiert: Version ' + buildTxt(APP_BUILD) + (ov ? ' · per Update geladen' : '');
+  $('#updReset').style.display = ov ? '' : 'none';
+}
+function updResult(r) {
+  UPD.busy = false;
+  const msg = $('#updMsg'), notes = $('#updNotes'), go = $('#updGo');
+  if (!r || r.error) {
+    UPD.remote = null; go.style.display = 'none'; notes.style.display = 'none';
+    msg.textContent = 'Keine Verbindung zum Update-Speicher. Bitte Internet prüfen und nochmal versuchen.' + (r && r.error ? ' (' + r.error + ')' : '');
+    return;
+  }
+  UPD.remote = r;
+  const neu = +r.build > APP_BUILD;
+  $('#bUpd').classList.toggle('new', neu);
+  if (neu) {
+    msg.innerHTML = '<b>Neue Version ' + esc(buildTxt(r.build)) + ' verfügbar.</b> Deine Räder, Karten, Videos und Vorlieben bleiben erhalten.';
+    notes.textContent = r.notes || ''; notes.style.display = r.notes ? 'block' : 'none';
+    go.style.display = ''; go.textContent = updNative() ? 'Jetzt laden' : 'Neu laden';
+  } else {
+    msg.textContent = 'Du hast schon die neueste Version.';
+    notes.style.display = 'none'; go.style.display = 'none';
+  }
+}
+window.__update = json => { let r = null; try { r = typeof json === 'string' ? JSON.parse(json) : json; } catch (e) { r = {error: 'Antwort ungültig'}; }
+  if (r && r.installed) { $('#updMsg').textContent = 'Update geladen – die App startet neu …'; return; }
+  updResult(r); };
+async function updCheck(silent) {
+  if (UPD.busy) return; UPD.busy = true;
+  if (!silent) { $('#updMsg').textContent = 'Suche nach neuer Version …'; $('#updGo').style.display = 'none'; $('#updNotes').style.display = 'none'; }
+  if (updNative()) { AndroidApp.updateCheck(); return; }
+  try {
+    const r = await fetch(UPD_BASE + 'version.json?t=' + Date.now(), {cache: 'no-store'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    updResult(await r.json());
+  } catch (e) { updResult({error: e.message}); }
+}
+function updOpen() { updShowVer(); $('#upd').classList.add('show'); updCheck(false); }
+$('#bUpd').onclick = updOpen;
+$('#updClose').onclick = () => $('#upd').classList.remove('show');
+$('#updGo').onclick = () => {
+  if (!UPD.remote) return;
+  if (updNative()) { $('#updMsg').textContent = 'Lade Update …'; $('#updGo').style.display = 'none'; AndroidApp.updateInstall(); }
+  else location.reload();
+};
+$('#updReset').onclick = e => { const b = e.currentTarget; if (!updNative()) return;
+  if (b.dataset.arm) { AndroidApp.updateReset(); return; }
+  b.dataset.arm = 1; b.textContent = 'Nochmal tippen = zurück'; setTimeout(() => { delete b.dataset.arm; b.textContent = 'Original-Version'; }, 4000); };
+// beim Start einmal still prüfen (nur Hinweis-Punkt am Knopf)
+setTimeout(() => { if (navigator.onLine !== false) updCheck(true); }, 4000);
+
+window.SexRad = window.FickRad = {drawWheel, newWheel, get state() { return S; }};
+
+/* =====================================================================
+   Abo über Google Play
+   Basis: alles nutzbar, Fortschritt nur in der App; nach Abo-Ende 7 Tage, dann gelöscht.
+   Pro:   zusätzlich Export/Import/Übermitteln, unbegrenzter Verlauf, Daten bleiben 12 Monate.
+   Deinstallation löscht die App-Daten immer (macht Android selbst).
+   ===================================================================== */
+// Hauptschalter: Abo ist vorbereitet, aber noch AUS (siehe ZIELE.md). true = Abo aktiv.
+const ABO_ACTIVE = false;
+const LIC_KEY = 'sexrad.lic', DAY = 864e5;
+const SUBS = {basis:'sexrad_basis', pro:'sexrad_pro'};
+const KEEP = {basis:7 * DAY, pro:365 * DAY};
+const OFFLINE_MAX = 30 * DAY;            // so lange darf das Abo ungeprüft bleiben (offline)
+const BASIS_SESSIONS = 5;
+const TESTMODE = !NATIVE || !!(NATIVE.testMode && NATIVE.testMode());
+const licDefault = () => ({tier:'none', last:'none', seen:0, endAt:0, checked:0, src:'', renew:false});
+let LIC; try { LIC = Object.assign(licDefault(), JSON.parse(localStorage.getItem(LIC_KEY))); } catch (e) { LIC = licDefault(); }
+if (!ABO_ACTIVE) LIC = Object.assign(licDefault(), {tier:'pro', last:'pro', src:'off'});   // alles frei, nichts wird gelöscht
+let BILL = {ready:false, known:false, products:[], subs:[], error:''};
+let pwUpsell = false;
+const isPro = () => LIC.tier === 'pro';
+const hasSub = () => LIC.tier !== 'none';
+const licStale = () => hasSub() && LIC.src === 'play' && Date.now() - LIC.checked > OFFLINE_MAX;
+const licLocked = () => !hasSub() || licStale();
+const licDeadline = () => LIC.endAt + (KEEP[LIC.last] || 0);
+const licSave = () => { if (!ABO_ACTIVE) return; try { localStorage.setItem(LIC_KEY, JSON.stringify(LIC)); } catch (e) {} };
+const fmtDate = t => new Date(t).toLocaleDateString('de-DE', {day:'numeric', month:'long', year:'numeric'});
+const lockTag = () => isPro() ? '' : ' <span class="lock">PRO</span>';
+const tierName = t => ({basis:'Basis', pro:'Pro', none:'kein Abo'})[t] || t;
+
+function licSet(tier, src, renew) {
+  const now = Date.now();
+  LIC.src = src; LIC.checked = now;
+  if (tier !== 'none') Object.assign(LIC, {tier, last:tier, seen:now, endAt:0, renew:!!renew});
+  else { LIC.tier = 'none'; if (LIC.last !== 'none' && !LIC.endAt) LIC.endAt = now; }
+  licSave(); licCheck();
+}
+async function wipeAll() {
+  try { toyStop(); } catch (e) {}
+  try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+  try { if (DB.db) DB.db.close(); } catch (e) {}
+  await new Promise(r => { try { const q = indexedDB.deleteDatabase('fickrad-media'); q.onsuccess = q.onerror = q.onblocked = () => r(); } catch (e) { r(); } });
+  Object.assign(LIC, {last:'none', seen:0, endAt:0}); licSave();
+  location.reload();
+}
+function licTrim() {
+  if (!isPro() && S.quiz.sessions.length > BASIS_SESSIONS) { S.quiz.sessions = S.quiz.sessions.slice(-BASIS_SESSIONS); save(); }
+}
+function licCheck() {
+  if (!ABO_ACTIVE) { renderPanel(); return; }
+  if (!hasSub() && LIC.last !== 'none' && LIC.endAt && Date.now() > licDeadline()) { wipeAll(); return; }
+  if (hasSub()) licTrim();
+  if (licLocked()) { pwUpsell = false; openPaywall(); }
+  else if ($('#paywall').classList.contains('show') && !pwUpsell) closePaywall();
+  else if ($('#paywall').classList.contains('show')) renderPaywall();
+  renderPanel();
+}
+// Antwort der Android-App (Google Play Billing)
+window.__billing = s => {
+  if (!ABO_ACTIVE) return;
+  try { Object.assign(BILL, typeof s === 'string' ? JSON.parse(s) : s); } catch (e) { return; }
+  if (BILL.known) {
+    const act = BILL.subs.filter(x => !x.pending), ids = act.map(x => x.product);
+    licSet(ids.includes(SUBS.pro) ? 'pro' : ids.includes(SUBS.basis) ? 'basis' : 'none', 'play', act.some(x => x.autoRenew));
+  } else if ($('#paywall').classList.contains('show')) renderPaywall();
+  if (BILL.event === 'cancel') toast('Kauf abgebrochen');
+  if (BILL.event === 'pending') toast('Zahlung wird noch bearbeitet …', 4000);
+  if (BILL.event === 'error' && BILL.error) toast('Google Play: ' + BILL.error, 4500);
+  BILL.event = '';
+};
+function needPro() {
+  if (isPro()) return false;
+  toast('Export, Import und Übermitteln gibt es mit SexRad Pro', 3500);
+  pwUpsell = true; openPaywall(); return true;
+}
+function openPaywall() { closePanel(); $('#paywall').classList.add('show'); renderPaywall(); }
+function closePaywall() { pwUpsell = false; $('#paywall').classList.remove('show'); }
+
+const ISO_P = {D:['Tag', 'Tage'], W:['Woche', 'Wochen'], M:['Monat', 'Monate'], Y:['Jahr', 'Jahre']};
+function isoPeriod(p) { const m = /^P(\d+)([DWMY])$/.exec(p || ''); if (!m) return ''; const n = +m[1]; return n + ' ' + ISO_P[m[2]][n === 1 ? 0 : 1]; }
+function planBtn(prod, plan) {
+  const plans = (BILL.products.find(x => x.id === SUBS[prod]) || {}).plans || [], o = plans.find(x => x.plan === plan);
+  const label = plan === 'jahr' ? 'Jährlich' : 'Monatlich';
+  let sub = o ? o.price + (plan === 'jahr' ? ' pro Jahr' : ' pro Monat') : (NATIVE && BILL.ready ? 'derzeit nicht verfügbar' : 'Preis aus Google Play');
+  if (o && o.trial) sub += ' · ' + isoPeriod(o.trial) + ' gratis testen';
+  return `<button class="pwbuy ${plan === 'jahr' ? '' : 'alt'}" data-buy="${prod}:${plan}">${label}<small>${esc(sub)}</small></button>`;
+}
+function renderPaywall() {
+  const locked = licLocked(), lapsed = !hasSub() && LIC.last !== 'none' && LIC.endAt;
+  let warn = '';
+  if (lapsed) warn += `<div class="pwwarn">⚠ Euer ${tierName(LIC.last)}-Abo ist abgelaufen. Räder, Karten, Videos und Fragebögen werden am <b>${fmtDate(licDeadline())}</b> endgültig gelöscht – verlängert ihr vorher, bleibt alles erhalten.` +
+    (LIC.last === 'pro' ? `<br><button class="qbtn alt" data-pwx="zip">⇩ Daten vorher als Voll-ZIP sichern</button>` : '') + `</div>`;
+  if (licStale()) warn += `<div class="pwwarn">Das Abo konnte seit über 30 Tagen nicht geprüft werden. Bitte kurz mit dem Internet verbinden – es geht nichts verloren.</div>`;
+  if (NATIVE && !TESTMODE && !BILL.ready) warn += `<div class="pwwarn" style="border-color:#c9a24e;background:#1e170b;color:#f3e2b5">${BILL.error ? 'Google Play nicht erreichbar: ' + esc(BILL.error) : 'Verbinde mit Google Play …'}</div>`;
+  const li = (ok, t) => `<li class="${ok ? '' : 'no'}">${ok ? '✓' : '✕'} ${t}</li>`;
+  $('#paywall').innerHTML = (locked ? '' : '<button id="pwClose" data-pwx="close">✕</button>') +
+    `<h1>SexRad</h1><div class="pwsub">${hasSub() ? 'Euer Abo: <b>' + tierName(LIC.tier) + '</b>' : 'Wählt euer Abo – monatlich oder jährlich, jederzeit in Google Play kündbar.'}</div>${warn}
+    <div class="pwgrid">
+      <div class="pwcard ${LIC.tier === 'basis' ? 'cur' : ''}"><h2>Basis</h2><ul>
+        ${li(1, 'Alle Räder, Karten, Joker, Timer und Spielzeug-Steuerung')}
+        ${li(1, 'Vorlieben-Fragebogen mit Punkten und Session-Rückblick')}
+        ${li(1, 'Fortschritt wird gespeichert – nur in der App auf diesem Gerät')}
+        ${li(1, 'Verlauf der letzten ' + BASIS_SESSIONS + ' Sessions')}
+        ${li(0, 'Export, Import und Übermitteln von Karten')}
+        ${li(0, 'Längere Speicherung: 7 Tage nach Abo-Ende wird alles gelöscht')}</ul>
+        ${planBtn('basis', 'monat')}${planBtn('basis', 'jahr')}</div>
+      <div class="pwcard pro ${LIC.tier === 'pro' ? 'cur' : ''}"><h2>Pro ⭐</h2><ul>
+        ${li(1, 'Alles aus Basis')}
+        ${li(1, 'Export als Datei und Voll-ZIP mit allen Videos, Import')}
+        ${li(1, 'Karten und Kombinationen an den Partner übermitteln')}
+        ${li(1, 'Unbegrenzter Session-Verlauf, der Algorithmus lernt aus allem')}
+        ${li(1, 'Daten bleiben nach Abo-Ende 12 Monate erhalten und lassen sich sichern')}</ul>
+        ${planBtn('pro', 'monat')}${planBtn('pro', 'jahr')}</div>
+    </div>
+    <div class="pwfoot">Bei Deinstallation löscht Android alle Daten der App sofort – Pro-Nutzer sichern vorher per Export.<br>
+      ${NATIVE && !TESTMODE ? '<button class="qbtn alt" data-pwx="restore">Käufe wiederherstellen</button><button class="qbtn alt" data-pwx="manage">Abo verwalten / kündigen</button>' : ''}
+      ${TESTMODE ? `<div class="pwtest">Testmodus (${NATIVE ? 'Test-App' : 'Browser-Version'}) – Abo simulieren:
+        <button class="qbtn alt" data-pwt="basis">Basis</button><button class="qbtn alt" data-pwt="pro">Pro</button>
+        <button class="qbtn alt" data-pwt="none">Abgelaufen</button><button class="qbtn alt" data-pwt="ff">⏩ Löschfrist vorspulen</button></div>` : ''}</div>`;
+}
+$('#paywall').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset;
+  if (d.buy) {
+    const [prod, plan] = d.buy.split(':');
+    if (NATIVE && NATIVE.billingBuy && !TESTMODE) NATIVE.billingBuy(SUBS[prod], plan);
+    else if (TESTMODE) { licSet(prod, 'test', true); toast('Testmodus: ' + tierName(prod) + ' aktiv'); if (!licLocked()) closePaywall(); }
+    return;
+  }
+  if (d.pwt) {
+    if (d.pwt === 'ff') { if (LIC.endAt) { LIC.endAt -= KEEP[LIC.last] + DAY; licSave(); licCheck(); } else toast('Erst „Abgelaufen“ wählen'); return; }
+    licSet(d.pwt, 'test', true); if (d.pwt !== 'none') closePaywall(); return;
+  }
+  if (d.pwx === 'close') closePaywall();
+  if (d.pwx === 'restore' && NATIVE.billingRefresh) { NATIVE.billingRefresh(); toast('Prüfe Google Play …'); }
+  if (d.pwx === 'manage') licManage();
+  if (d.pwx === 'zip') exportZip();
+});
+function licManage() {
+  if (NATIVE && NATIVE.billingManage) NATIVE.billingManage(isPro() ? SUBS.pro : SUBS.basis);
+  else toast('Abo-Verwaltung gibt es in der Google-Play-App');
+}
+
+/* Start */
+initPanelEvents();
+DB.open().then(ok => { if (!ok) console.warn('IndexedDB nicht verfügbar – Medien nur temporär'); });
+updateRail();
+render();
+if (NATIVE && NATIVE.billingState) { try { const s0 = NATIVE.billingState(); if (s0) window.__billing(s0); } catch (e) {} try { NATIVE.billingRefresh(); } catch (e) {} }
+licCheck();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (NATIVE && NATIVE.billingRefresh) NATIVE.billingRefresh(); else licCheck(); } });
+if (S.toy.enabled) toyConnect();   // automatisch wieder verbinden
+</script>
+</body>
+</html>
