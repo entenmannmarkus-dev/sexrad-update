@@ -128,7 +128,7 @@
     animation:flashA 1s ease-out forwards}
   @keyframes flashA{0%{opacity:1}25%{opacity:.85}100%{opacity:0}}
   #result.show{display:block}
-  #rMedia{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  #rMedia{position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
   #rMedia video,#rMedia img{width:100%;height:100%;object-fit:contain}
   #rText{position:absolute;left:0;right:var(--rail);top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
     pointer-events:none;text-align:center;padding:4vh 3vw;font-family:Georgia,"Times New Roman",serif;font-weight:700;
@@ -174,6 +174,12 @@
   #mimpBox .mt{font:700 18px Georgia,serif;color:#ffe08a;margin-bottom:8px}
   #mimpView{background:#000;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:180px}
   #mimpView video,#mimpView img{max-width:100%;max-height:48vh;display:block}
+  #mimpFrame{position:relative;width:100%;margin:0 auto;overflow:hidden;background:#000;touch-action:none;cursor:grab;display:none;
+    outline:2px dashed rgba(255,224,138,.55);outline-offset:-2px}
+  #mimpFrame img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;max-width:none;max-height:none;transform-origin:50% 50%;pointer-events:none;user-select:none}
+  #mimpFrame::after{content:'';position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;pointer-events:none;
+    background:linear-gradient(#ffe08a,#ffe08a) center/2px 100% no-repeat,linear-gradient(#ffe08a,#ffe08a) center/100% 2px no-repeat;opacity:.55}
+  #mimpIctl{display:none;margin-top:8px}
   #mimpEmpty{color:#8a7a66;font-size:14px;display:flex;align-items:center;justify-content:center;height:180px}
   .mrow{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
   .mrow input[type=range]{flex:1;min-width:160px;accent-color:#c9a24e}
@@ -348,7 +354,11 @@
 
 <div id="mimp"><div id="mimpBox">
   <div id="mimpT" class="mt">Video / Foto</div>
-  <div id="mimpView"><div id="mimpEmpty">Noch kein Video oder Foto gewählt</div><video id="mimpVid" playsinline></video><img id="mimpImg" alt=""></div>
+  <div id="mimpView"><div id="mimpEmpty">Noch kein Video oder Foto gewählt</div><video id="mimpVid" playsinline></video><div id="mimpFrame"><img id="mimpImg" alt="" draggable="false"></div></div>
+  <div id="mimpIctl">
+    <div class="mrow"><span class="ml">Zoom <b id="mZL">100 %</b></span><input id="mZ" type="range" min="1" max="5" step="0.01" value="1"><button class="b" id="mZFill">⛶ Füllen</button><button class="b" id="mZMid">✛ Mittig</button><button class="b" id="mZReset">↺ Ganz</button></div>
+    <div class="hint">Bild mit dem Finger verschieben, mit zwei Fingern zoomen. Der Rahmen zeigt den Bildschirm beim Ergebnis.</div>
+  </div>
   <div id="mimpVctl">
     <div class="mrow"><button class="b" id="mPlay">▶</button><input id="mPos" type="range" min="0" max="1" step="0.05" value="0"><b id="mPosL">0.0 s / 0.0 s</b></div>
     <div id="mBar"><i id="mSel"></i><em id="mCur"></em></div>
@@ -1171,7 +1181,7 @@ function showResult(w, i, depth, fieldOverride) {
         $('#rvPos').oninput = () => seek(st + +$('#rvPos').value);
         box.appendChild(v);
         $('#result').classList.add('hasvid');
-      } else if (url) { const im = new Image(); im.src = url; box.appendChild(im); }
+      } else if (url) { const im = new Image(); im.src = url; im.style.transform = cropCss(f.media.crop); box.appendChild(im); }
     }
     toyPlay(f.toy);
     if (S.settings.speakMain) speak(resultLine(w, f, i));
@@ -1641,7 +1651,20 @@ function initPanelEvents() {
 /* =====================================================================
    Foto/Video-Import je Feld: Auswahl, Vorschau, Positions-Regler, Start/Stopp
    ===================================================================== */
-const MI = {t:null, f:null, file:null, url:null, type:null, name:'', mime:'', ownUrl:false, loop:false};
+const MI = {t:null, f:null, file:null, url:null, type:null, name:'', mime:'', ownUrl:false, loop:false, crop:{z:1, x:0, y:0}};
+// Bildausschnitt: z = Zoom (1 = ganzes Bild sichtbar), x/y = Verschiebung in Bildschirm-Anteilen
+const cropCss = c => c && (c.z !== 1 || c.x || c.y) ? `translate(${(c.x * 100).toFixed(2)}%,${(c.y * 100).toFixed(2)}%) scale(${(+c.z).toFixed(3)})` : '';
+function cropFill() {   // Zoom, bei dem das Bild den ganzen Rahmen füllt
+  const im = $('#mimpImg'), fr = $('#mimpFrame'); if (!im.naturalWidth || !fr.clientWidth) return 1;
+  const W = fr.clientWidth, H = fr.clientHeight, iw = im.naturalWidth, ih = im.naturalHeight;
+  return Math.max(W / iw, H / ih) / Math.min(W / iw, H / ih);
+}
+function cropApply() {
+  const c = MI.crop; c.z = clamp(c.z, 1, 5);
+  const lim = v => clamp(v, -c.z / 2 - 0.4, c.z / 2 + 0.4); c.x = lim(c.x); c.y = lim(c.y);
+  $('#mimpImg').style.transform = cropCss(c); $('#mZ').value = c.z; $('#mZL').textContent = Math.round(c.z * 100) + ' %';
+}
+function cropFrameSize() { const ar = innerWidth / innerHeight, fr = $('#mimpFrame'); fr.style.aspectRatio = ar.toFixed(4); fr.style.width = `min(100%, ${(52 * ar).toFixed(2)}vh)`; }
 const fieldOf = t => t.kind === 'joker' ? S.joker : S.wheels[t.w].fields[t.f];
 const fmtS = s => (+s || 0).toFixed(1) + ' s';
 function pickMedia(t) { openMediaDlg(t, true); }
@@ -1655,11 +1678,11 @@ async function openMediaDlg(t, pick) {
   if (!f.media && pick) { $('#fileMedia').value = ''; $('#fileMedia').click(); }
   if (f.media) {
     const url = await mediaURL(f.media.id);
-    if (url) mimpShow(url, f.media.type, f.media.name, f.media.mime, +f.media.start || 0, +f.media.end || 0, false);
+    if (url) mimpShow(url, f.media.type, f.media.name, f.media.mime, +f.media.start || 0, +f.media.end || 0, false, f.media.crop);
     else mimpShow(null);
   } else mimpShow(null);
 }
-function mimpShow(url, type, name, mime, st = 0, en = 0, own = false) {
+function mimpShow(url, type, name, mime, st = 0, en = 0, own = false, crop = null) {
   const v = $('#mimpVid'), im = $('#mimpImg');
   if (MI.ownUrl && MI.url) URL.revokeObjectURL(MI.url);
   MI.url = url; MI.type = type; MI.name = name || ''; MI.mime = mime || ''; MI.ownUrl = own;
@@ -1667,6 +1690,9 @@ function mimpShow(url, type, name, mime, st = 0, en = 0, own = false) {
   const isV = url && type === 'video', isI = url && type === 'image';
   $('#mimpEmpty').style.display = url ? 'none' : 'flex';
   v.style.display = isV ? 'block' : 'none'; im.style.display = isI ? 'block' : 'none';
+  $('#mimpFrame').style.display = isI ? 'block' : 'none'; $('#mimpIctl').style.display = isI ? 'block' : 'none';
+  MI.crop = crop ? {z:+crop.z || 1, x:+crop.x || 0, y:+crop.y || 0} : {z:1, x:0, y:0};
+  if (isI) { cropFrameSize(); cropApply(); }
   $('#mimpVctl').style.display = isV ? 'block' : 'none';
   $('#mOk').disabled = !url; $('#mDel').style.display = MI.f && MI.f.media ? '' : 'none';
   $('#mPick').textContent = url ? '📂 Anderes Video / Foto' : '📂 Video / Foto auswählen';
@@ -1727,6 +1753,27 @@ $('#mE').oninput = () => { const s = $('#mS'), e = $('#mE'); if (+e.value < +s.v
 $('#mSetS').onclick = () => { const v = $('#mimpVid'); $('#mS').value = Math.min(v.currentTime, +$('#mE').value - 0.2); mimpUpd(); };
 $('#mSetE').onclick = () => { const v = $('#mimpVid'); $('#mE').value = Math.max(v.currentTime, +$('#mS').value + 0.2); mimpUpd(); };
 $('#mCancel').onclick = () => closeMediaDlg(false);
+$('#mZ').oninput = () => { MI.crop.z = +$('#mZ').value; cropApply(); };
+$('#mZFill').onclick = () => { MI.crop = {z:cropFill(), x:0, y:0}; cropApply(); };
+$('#mZMid').onclick = () => { MI.crop.x = 0; MI.crop.y = 0; cropApply(); };
+$('#mZReset').onclick = () => { MI.crop = {z:1, x:0, y:0}; cropApply(); };
+(() => {   // Verschieben (1 Finger / Maus) und Zoomen (2 Finger / Mausrad) im Rahmen
+  const fr = $('#mimpFrame'), pts = new Map(); let last = null;
+  const state = () => { const a = [...pts.values()];
+    return a.length >= 2 ? {cx:(a[0].x + a[1].x) / 2, cy:(a[0].y + a[1].y) / 2, d:Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y)} : a.length ? {cx:a[0].x, cy:a[0].y, d:0} : null; };
+  fr.addEventListener('pointerdown', e => { fr.setPointerCapture(e.pointerId); pts.set(e.pointerId, {x:e.clientX, y:e.clientY}); last = state(); e.preventDefault(); });
+  fr.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    const now = state(); if (!now || !last) { last = now; return; }
+    const W = fr.clientWidth || 1, H = fr.clientHeight || 1;
+    MI.crop.x += (now.cx - last.cx) / W; MI.crop.y += (now.cy - last.cy) / H;
+    if (now.d && last.d) MI.crop.z *= now.d / last.d;
+    last = now; cropApply();
+  });
+  const up = e => { pts.delete(e.pointerId); last = state(); };
+  fr.addEventListener('pointerup', up); fr.addEventListener('pointercancel', up);
+  fr.addEventListener('wheel', e => { e.preventDefault(); MI.crop.z *= e.deltaY < 0 ? 1.08 : 1 / 1.08; cropApply(); }, {passive:false});
+})();
 $('#mDel').onclick = () => {
   const f = MI.f; if (!f || !f.media) return;
   const old = f.media.id; f.media = null; delMedia(old); save(); renderPanel(); toast('Video / Foto entfernt'); closeMediaDlg(false);
@@ -1744,9 +1791,11 @@ $('#mOk').onclick = async () => {
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
       const old = f.media && f.media.id;
       f.media = {id, type:MI.type, name:MI.name, mime:MI.mime, start:st, end};
+      if (MI.type === 'image') f.media.crop = {...MI.crop};
       delMedia(old);
       toast(DB.db ? 'Gespeichert' : 'Gespeichert (nur bis zum Schließen – Speicher nicht verfügbar)');
-    } else if (f.media) { f.media.start = st; f.media.end = end; toast('Start / Stopp gespeichert'); }
+    } else if (f.media) { f.media.start = st; f.media.end = end;
+      if (f.media.type === 'image') { f.media.crop = {...MI.crop}; toast('Bildausschnitt gespeichert'); } else toast('Start / Stopp gespeichert'); }
     save(); renderPanel(); closeMediaDlg(false);
   } catch (err) { toast('Fehler beim Speichern: ' + err.message); }
 };
@@ -2488,7 +2537,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110104;
+const APP_BUILD = 2026110105;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
