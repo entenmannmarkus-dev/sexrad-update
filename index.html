@@ -285,6 +285,29 @@
   .qbar i{height:10px;border-radius:5px;background:#1d1a16;overflow:hidden;border:1px solid #3a2e18}
   .qbar em{display:block;height:100%;background:linear-gradient(90deg,#8a1219,#e2b85e)}
   /* Joker: Abfolge wählen */
+  /* Ablauf-Schnellstart und Baukasten */
+  #fpick,#fbuild{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:56;display:none;align-items:center;justify-content:center}
+  #fpick.show,#fbuild.show{display:flex}
+  #fpickBox,#fbBox{width:min(760px,94vw);max-height:94vh;overflow:auto;padding:14px 16px;border-radius:16px;border:2px solid #c9a24e;background:#121214;color:#eee}
+  #fpickBox .jt,#fbBox .jt{font:700 22px Georgia,serif;color:#ffe08a;text-align:center;margin-bottom:10px;text-transform:uppercase}
+  .fpb{display:block;width:100%;text-align:left;margin:6px 0;padding:12px 14px;border-radius:12px;border:1px solid #5a4520;background:linear-gradient(#2a2118,#141012);color:#ffe8b0;font:700 17px system-ui}
+  .fpb small{display:block;color:#b9a27a;font:500 13px system-ui;margin-top:3px}
+  .fpsec{color:#c9b48a;font:700 13px system-ui;letter-spacing:1px;margin:12px 0 2px;text-transform:uppercase}
+  #fbBox input,#fbBox select,#panel textarea{background:#0d0d0f;color:#eee;border:1px solid #444;border-radius:8px;padding:8px;font:15px system-ui}
+  #panel textarea{width:100%;min-height:70px;box-sizing:border-box;resize:vertical}
+  .fbStep{border:1px solid #3a3a3e;border-radius:12px;padding:8px 10px;margin:8px 0;background:#18181b}
+  .fbHead{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .fbHead b{color:#ffe08a;min-width:52px}
+  .fbHead input{flex:1}
+  .fbRow{display:flex;gap:6px;margin:4px 0}
+  .fbRow input{flex:1;min-width:0}
+  .fbRow select{width:150px}
+  #fbBox .b,.fbx{padding:9px 12px;border-radius:9px;border:1px solid #555;background:#232326;color:#eee;font:600 14px system-ui}
+  #fbBox .b.pri{background:#6a1016;border-color:#c9a24e}
+  .fbx{padding:6px 10px;background:#2a1215;border-color:#6a2a2a}
+  .genw{border:1px solid #3a3a3e;border-radius:10px;padding:6px 8px;margin:5px 0;font-size:13px}
+  .genw b{color:#ffe08a}
+  .genw .both{color:#9fe39f}
   #jpick{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:55;display:none;align-items:center;justify-content:center}
   #jpick.show{display:flex}
   #jpickBox{width:min(560px,90vw);max-height:90vh;overflow:auto;padding:16px;border-radius:16px;border:2px solid #c9a24e;
@@ -320,6 +343,7 @@
   <button id="bSpin" class="spin">DREHEN</button>
   <button id="bTimer" class="mbtn">⏱ TIMER</button>
   <button id="bMode" class="mbtn gold">🎰 SLOT</button>
+  <button id="bFlow" class="mbtn">🔗 ABLAUF</button>
   <button id="bUndo" class="mbtn" style="display:none">↩ VORHER</button>
   <button id="bEnd" class="mbtn gold" style="display:none">🏁 SESSION<br>ENDE</button>
 </div>
@@ -383,6 +407,8 @@
   <div id="qHead"></div>
   <div id="qBody"></div>
 </div>
+<div id="fpick"><div id="fpickBox"><div class="jt">🔗 Ablauf starten</div><div id="fpickList"></div><button class="mbtn" id="fpickX" style="width:100%;margin-top:8px">Schließen</button></div></div>
+<div id="fbuild"><div id="fbBox"></div></div>
 <div id="jpick"><div id="jpickBox"><div class="jt">★ Joker – Abfolge wählen</div><div id="jpickList"></div><button class="mbtn" id="jpickX" style="width:100%">Abbrechen</button></div></div>
 <button id="bToyStop" title="Alle Spielzeuge sofort aus">■ NOT-AUS</button>
 <div id="paywall"></div>
@@ -432,6 +458,7 @@ function defaultState() {
     toy:{enabled:false, url:'ws://127.0.0.1:12345', master:100},
     quiz:{names:{a:'Er', b:'Sie'}, ans:{}, learn:{}, stufe:{}, stufeSel:0, lvlOv:{}, thr:2.5, map:{}, timer:true, custom:{}, session:null, fb:null, sessions:[]},   // Vorlieben-Fragebogen   // Sexspielzeug über Intiface Central
     joker:{num:'', text:'JOKER', weight:1, next:-1, card:null, media:null, seqs:[]},   // seqs = gespeicherte Abfolgen   // eigenständiges Joker-Feld
+    gen:{a:{wish:'', tabu:''}, b:{wish:'', tabu:''}, quiz:true, out:null, info:null},   // Ablauf-Generator
     presets:[],      // Speicherkarten: {id, name, kind:'single'|'combo', data}
     snapshot:null,   // Räder vor dem Laden einer Karte (für ↩ VORHER)
     wheels:Array.from({length:MAX_WHEELS}, (_, i) => newWheel(i)),
@@ -478,6 +505,9 @@ function normalize(o) {
   s.joker.seqs = (Array.isArray(s.joker.seqs) ? s.joker.seqs : []).map(q => ({id:String(q.id || 'q' + uid()), name:String(q.name || 'Abfolge'),
     steps:(Array.isArray(q.steps) ? q.steps : []).map(st => ({t:String(st.t || 'w0'), n:clamp(Math.round(+st.n || 1), 1, 50)}))}));
   s.presets = (Array.isArray(o.presets) ? o.presets : []).map(normCard).filter(Boolean);
+  const gp = x => ({wish:String((x && x.wish) || ''), tabu:String((x && x.tabu) || '')});
+  s.gen = {a:gp(o.gen && o.gen.a), b:gp(o.gen && o.gen.b), quiz:!(o.gen && o.gen.quiz === false),
+    out:o.gen && Array.isArray(o.gen.out) ? o.gen.out.map((w, i) => normWheel(w, i)) : null, info:o.gen && o.gen.info || null};
   // Abläufe: gespeicherte Rad-Ketten mit Beispiel-Durchläufen (null = Beispiel noch nicht angelegt)
   s.flows = Array.isArray(o.flows) ? o.flows.filter(x => x && Array.isArray(x.wheels) && x.wheels.length).map(x => ({id:String(x.id || 'f' + uid()),
     name:String(x.name || 'Ablauf'), created:+x.created || Date.now(), wheels:x.wheels.slice(0, MAX_WHEELS).map((w, i) => normWheel(w, i)),
@@ -1365,7 +1395,7 @@ function updateRail() {
   $('#bSpin').textContent = isSlot() ? 'ZIEHEN' : 'DREHEN';
 }
 function setBusy(b) {
-  ['#bSpin', '#bJoker', '#bTimer', '#bUndo', '#bMode'].forEach(s => $(s).disabled = b);
+  ['#bSpin', '#bJoker', '#bTimer', '#bUndo', '#bMode', '#bFlow'].forEach(s => $(s).disabled = b);
   document.querySelectorAll('.wspin').forEach(x => x.disabled = b);
 }
 function closePanel() { $('#panel').classList.remove('open'); $('#gear').classList.remove('on'); editHL = null; }
@@ -1487,6 +1517,7 @@ function renderPanel() {
     <div class="hint">Ein Ablauf ist eine Kette von Rädern (Feld → nächstes Rad). Speichere die aktuellen Räder als Ablauf, lade ihn später wieder und lege Beispiel-Durchläufe dazu ab.</div>
     <div class="mrow" style="display:flex;gap:6px;margin:6px 0"><input id="flowName" placeholder="Name des Ablaufs" style="flex:1">
       <button class="b pri" data-act="flowSave">＋ Aktuelle Räder speichern</button></div>
+    <button class="b" data-act="fbNew" style="margin-bottom:6px">🛠 Neuen Ablauf bauen (Baukasten)</button>
     ${(S.flows || []).map((fl, i) => { const ps = flowPaths(fl.wheels), lim = 60;
       return `<div class="flow" style="border:1px solid #3a3a3e;border-radius:10px;padding:8px;margin:6px 0">
       <b style="color:#ffe08a">${esc(fl.name)}</b>
@@ -1494,12 +1525,27 @@ function renderPanel() {
       <div style="margin-top:4px"><button class="b" data-act="flowLoad" data-i="${i}">▶ Laden</button>
         <button class="b" data-act="flowEx" data-i="${i}">💾 Letzten Durchlauf als Beispiel</button>
         <button class="b" data-act="flowRnd" data-i="${i}">🎲 Zufalls-Beispiel</button>
+        <button class="b" data-act="fbEdit" data-i="${i}">✏ Bearbeiten</button>
         <button class="b" data-act="flowDel" data-i="${i}">🗑</button></div>
       <details style="margin-top:4px"><summary>Beispiele (${fl.examples.length})</summary>
         ${fl.examples.map((e, j) => `<div class="hint" style="color:#ddd">${j + 1}. ${e.map(esc).join(' → ')} <button class="x" data-act="flowExDel" data-i="${i}" data-j="${j}">✕</button></div>`).join('') || '<div class="hint">Noch keine Beispiele – erst eine Runde drehen, dann „Letzten Durchlauf als Beispiel“.</div>'}</details>
       <details style="margin-top:4px"><summary>Alle Varianten (${ps.length})</summary>
         ${ps.slice(0, lim).map((e, j) => `<div class="hint" style="color:#ccc">${j + 1}. ${e.map(esc).join(' → ')}</div>`).join('')}${ps.length > lim ? `<div class="hint">… und ${ps.length - lim} weitere</div>` : ''}</details>
       </div>`; }).join('')}</details>
+
+  <details ${op('gen')} data-sec="gen"><summary>🧬 Ablauf-Generator</summary>
+    <div class="hint">Jeder beschreibt kurz, was er mag und wie er sich den Ablauf vorstellt. Schritte mit „dann“ oder „→“ trennen, Alternativen mit „/“ oder „oder“. Jede Zeile ist ein eigener Ablauf. Der Generator legt beides zusammen: Was beide wollen, kommt öfter dran, Tabus fliegen raus.</div>
+    ${['a', 'b'].map(k => `<div style="margin-top:8px"><b style="color:#ffe08a">${esc(QS().names[k] || (k === 'a' ? 'Er' : 'Sie'))}</b>
+      <textarea data-gen="${k}.wish" placeholder="z. B. Blasen kniend / seitlich dann 2× abspringen dann in den Mund oder ins Gesicht dann gurgeln">${esc(S.gen[k].wish)}</textarea>
+      <input data-gen="${k}.tabu" placeholder="Tabus, mit Komma getrennt" value="${esc(S.gen[k].tabu)}" style="width:100%;margin-top:4px"></div>`).join('')}
+    <label style="display:block;margin-top:6px"><input type="checkbox" data-gen="quiz" ${S.gen.quiz ? 'checked' : ''}> Antworten aus dem Vorlieben-Fragebogen einbeziehen</label>
+    <button class="b pri" data-act="genRun" style="margin-top:6px">🧬 Ablauf erzeugen</button>
+    ${S.gen.out ? `<div style="margin-top:8px">
+      ${S.gen.info ? `<div class="hint">${S.gen.info.both.length ? 'Gemeinsam: <span style="color:#9fe39f">' + S.gen.info.both.map(esc).join(', ') + '</span>' : 'Noch keine gemeinsamen Wünsche'}${S.gen.info.removed.length ? ' · Wegen Tabu entfernt: ' + S.gen.info.removed.map(esc).join(', ') : ''}</div>` : ''}
+      ${S.gen.out.map((w, k) => `<div class="genw"><b>Rad ${k + 1} – ${esc(w.title)}</b><br>${w.fields.map(f => `<span class="${f.weight >= 3 ? 'both' : ''}">${esc(f.text)}${f.weight > 1 ? ' ×' + f.weight : ''} ${f.next < 0 ? '■' : '→'}</span>`).join(' · ')}</div>`).join('')}
+      <div class="hint">${flowPaths(S.gen.out).length} Varianten · ×n = Häufigkeit · ■ = Ende · → = weiter</div>
+      <button class="b pri" data-act="genLoad">▶ Laden</button> <button class="b" data-act="genSave">💾 Als Ablauf speichern</button> <button class="b" data-act="genEdit">🛠 Im Baukasten anpassen</button></div>` : ''}
+  </details>
 
   <details ${op('themen')} data-sec="themen"><summary>🎯 Themen-Räder</summary>
     <div class="hint">Lädt fertige Räder zu einem Thema. Im Rad-Modus laufen sie nacheinander (Stellung → Technik → Heftigkeit), im Slot-Modus alle auf einmal. „↩ VORHER“ holt deine alten Räder zurück.</div>
@@ -1558,6 +1604,7 @@ function initPanelEvents() {
 
   P.addEventListener('input', e => {
     const el = e.target, w = S.wheels[S.active];
+    if (el.dataset.gen) { const [k, f] = el.dataset.gen.split('.'); if (f) S.gen[k][f] = el.value; else S.gen[k] = el.checked; save(); return; }
     if (el.dataset.fp) {
       const f = w.fields[+el.dataset.f], k = el.dataset.fp;
       if (k === 'num') f.num = el.value === '' ? '' : clamp(Math.round(+el.value), 0, 99);
@@ -1696,6 +1743,12 @@ function initPanelEvents() {
       case 'openQuiz': openQuiz('a'); break;
       case 'theme': loadTheme(+b.dataset.t); break;
       case 'flowSave': flowSave($('#flowName').value); break;
+      case 'fbNew': fbOpen(null); break;
+      case 'fbEdit': fbOpen(+b.dataset.i); break;
+      case 'genRun': genRun(); break;
+      case 'genLoad': if (S.gen.out) applyWheelSet('Generator', S.gen.out.map(w => strip(w)), true, 'Ablauf'); break;
+      case 'genSave': if (S.gen.out) flowStore('Generator ' + new Date().toLocaleDateString('de-DE'), S.gen.out.map(w => strip(w)), null); break;
+      case 'genEdit': if (S.gen.out) { fbFromWheels('Generator ' + new Date().toLocaleDateString('de-DE'), S.gen.out, null); } break;
       case 'flowLoad': { const fl = S.flows[+b.dataset.i]; if (fl) applyWheelSet(fl.name, fl.wheels.map(w => strip(w)), true, 'Ablauf'); break; }
       case 'flowEx': { const fl = S.flows[+b.dataset.i]; if (!fl) break;
         if (!LASTRUN.length) { toast('Erst eine Runde drehen, dann speichern'); break; }
@@ -2542,6 +2595,175 @@ function flowSave(name) {
   else S.flows.unshift({id:'f' + uid(), name, created:Date.now(), wheels:wheels.map((w, i) => normWheel(w, i)), examples:[]});
   openSecs.add('flows'); save(); renderPanel(); toast(`Ablauf „${name}“ gespeichert (${wheels.length} Räder)`);
 }
+// Ablauf speichern/ersetzen (id = vorhandener Ablauf)
+function flowStore(name, wheels, id) {
+  S.flows = S.flows || [];
+  const W = wheels.map((w, i) => normWheel(Object.assign({}, w, {enabled:true, history:[]}), i));
+  let fl = id ? S.flows.find(f => f.id === id) : S.flows.find(f => f.name === name);
+  if (fl) { fl.name = name; fl.wheels = W; }
+  else { fl = {id:'f' + uid(), name, created:Date.now(), wheels:W, examples:[]}; S.flows.unshift(fl); }
+  openSecs.add('flows'); save(); renderPanel(); toast(`Ablauf „${name}“ gespeichert (${W.length} Räder, ${flowPaths(W).length} Varianten)`, 4000);
+  return fl;
+}
+
+/* ---------- Schnellstart: Ablauf per Knopf laden ---------- */
+function openFlowPick() {
+  closePanel();
+  const fl = (S.flows || []).map((f, i) => `<button class="fpb" data-fp="f${i}">🔗 ${esc(f.name)}<small>${f.wheels.map(w => esc(w.title)).join(' → ')} · ${flowPaths(f.wheels).length} Varianten</small></button>`).join('');
+  const th = THEMES.map((t, i) => `<button class="fpb" data-fp="t${i}">${t.icon} ${esc(t.name)}<small>${t.wheels.map(w => esc(w.title)).join(' → ')}</small></button>`).join('');
+  $('#fpickList').innerHTML = (fl ? '<div class="fpsec">Gespeicherte Abläufe</div>' + fl : '') + '<div class="fpsec">Themen</div>' + th
+    + '<div class="fpsec">Neu</div><button class="fpb" data-fp="new">🛠 Neuen Ablauf bauen<small>Räder und Folgen selbst zusammenstellen</small></button>';
+  $('#fpick').classList.add('show');
+}
+$('#fpickList').addEventListener('click', e => {
+  const b = e.target.closest('[data-fp]'); if (!b) return;
+  const v = b.dataset.fp; $('#fpick').classList.remove('show');
+  if (v === 'new') { fbOpen(null); return; }
+  if (v[0] === 't') { loadTheme(+v.slice(1)); return; }
+  const f = S.flows[+v.slice(1)]; if (f) applyWheelSet(f.name, f.wheels.map(w => strip(w)), true, 'Ablauf');
+});
+$('#fpickX').onclick = () => $('#fpick').classList.remove('show');
+
+/* ---------- Ablauf-Baukasten ---------- */
+// go: 'n' = nächstes Rad, 'e' = Ende, Zahl = bestimmtes Rad
+const FB = {id:null, name:'', steps:[]};
+function fbFromWheels(name, wheels, id) {
+  FB.id = id; FB.name = name;
+  FB.steps = wheels.map((w, k) => ({title:w.title || 'Rad ' + (k + 1), src:w, fields:w.fields.map(f => ({text:f.text, src:f,
+    go:f.next < 0 ? 'e' : f.next === k + 1 ? 'n' : String(f.next)}))}));
+  if (!FB.steps.length) FB.steps = [fbNewStep(0)];
+  $('#fbuild').classList.add('show'); closePanel(); fbRender();
+}
+const fbNewStep = k => ({title:'Rad ' + (k + 1), fields:[{text:'', go:'n'}, {text:'', go:'n'}]});
+function fbOpen(i) {
+  if (i == null) fbFromWheels('', [], null);
+  else { const f = S.flows[i]; if (f) fbFromWheels(f.name, f.wheels, f.id); }
+}
+function fbWheels() {
+  const n = FB.steps.length;
+  return FB.steps.map((st, k) => ({title:st.title || 'Rad ' + (k + 1), unit:'', palette:st.src ? st.src.palette : undefined,
+    fields:st.fields.filter(f => f.text.trim()).map(f => Object.assign({}, f.src ? strip(f.src) : {}, {text:f.text.trim(),
+      next:f.go === 'e' ? -1 : f.go === 'n' ? (k + 1 < n ? k + 1 : -1) : (+f.go < n ? +f.go : -1)}))}));
+}
+function fbCount() { const el = $('#fbCount'); if (el) el.textContent = flowPaths(fbWheels()).length + ' mögliche Varianten'; }
+function fbRender() {
+  const n = FB.steps.length;
+  $('#fbBox').innerHTML = `<div class="jt">🛠 Ablauf-Baukasten</div>
+    <div class="fbHead"><b>Name</b><input data-fb="name" value="${esc(FB.name)}" placeholder="z. B. Unser Abend"></div>
+    <div class="hint">Jedes Rad ist ein Schritt. Pro Feld wählst du, was danach passiert: nächstes Rad, Ende oder ein bestimmtes Rad.</div>
+    ${FB.steps.map((st, k) => `<div class="fbStep"><div class="fbHead"><b>Rad ${k + 1}</b><input data-fb="title" data-k="${k}" value="${esc(st.title)}" placeholder="Titel">
+      ${k ? `<button class="fbx" data-fbact="up" data-k="${k}">▲</button>` : ''}<button class="fbx" data-fbact="delStep" data-k="${k}">✕</button></div>
+      ${st.fields.map((f, j) => `<div class="fbRow"><input data-fb="text" data-k="${k}" data-j="${j}" value="${esc(f.text)}" placeholder="Feld ${j + 1}">
+        <select data-fb="go" data-k="${k}" data-j="${j}"><option value="n" ${f.go === 'n' ? 'selected' : ''}>${k + 1 < n ? '→ Rad ' + (k + 2) : '■ Ende'}</option>
+          <option value="e" ${f.go === 'e' ? 'selected' : ''}>■ Ende</option>
+          ${FB.steps.map((_, m) => m !== k && m !== k + 1 ? `<option value="${m}" ${f.go === String(m) ? 'selected' : ''}>→ Rad ${m + 1}</option>` : '').join('')}</select>
+        <button class="fbx" data-fbact="delField" data-k="${k}" data-j="${j}">✕</button></div>`).join('')}
+      <button class="b" data-fbact="addField" data-k="${k}" ${st.fields.length >= MAX_FIELDS ? 'disabled' : ''}>＋ Feld</button></div>`).join('')}
+    <button class="b" data-fbact="addStep" ${n >= MAX_CHAIN ? 'disabled' : ''}>＋ Rad</button> <span class="hint" id="fbCount"></span>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:10px">
+      <button class="b" data-fbact="cancel">Abbrechen</button><button class="b" data-fbact="save">💾 Speichern</button><button class="b pri" data-fbact="saveLoad">▶ Speichern & laden</button></div>`;
+  fbCount();
+}
+$('#fbuild').addEventListener('input', e => {
+  const el = e.target, d = el.dataset; if (!d.fb) return;
+  if (d.fb === 'name') FB.name = el.value;
+  else if (d.fb === 'title') FB.steps[+d.k].title = el.value;
+  else if (d.fb === 'text') FB.steps[+d.k].fields[+d.j].text = el.value;
+  else if (d.fb === 'go') FB.steps[+d.k].fields[+d.j].go = el.value;
+  fbCount();
+});
+$('#fbuild').addEventListener('click', e => {
+  const b = e.target.closest('[data-fbact]'); if (!b || b.disabled) return;
+  const a = b.dataset.fbact, k = +b.dataset.k;
+  // Verweise auf Räder nach Löschen/Verschieben anpassen
+  const remap = fn => FB.steps.forEach(st => st.fields.forEach(f => { if (/^\d+$/.test(f.go)) { const m = fn(+f.go); f.go = m < 0 ? 'e' : String(m); } }));
+  if (a === 'addField') FB.steps[k].fields.push({text:'', go:'n'});
+  else if (a === 'delField') FB.steps[k].fields.splice(+b.dataset.j, 1);
+  else if (a === 'addStep') FB.steps.push(fbNewStep(FB.steps.length));
+  else if (a === 'delStep') { if (FB.steps.length <= 1) { toast('Mindestens ein Rad'); return; } FB.steps.splice(k, 1); remap(m => m === k ? -1 : m > k ? m - 1 : m); }
+  else if (a === 'up') { const t = FB.steps[k]; FB.steps[k] = FB.steps[k - 1]; FB.steps[k - 1] = t; remap(m => m === k ? k - 1 : m === k - 1 ? k : m); }
+  else if (a === 'cancel') { $('#fbuild').classList.remove('show'); return; }
+  else if (a === 'save' || a === 'saveLoad') {
+    const W = fbWheels(), bad = W.findIndex(w => w.fields.length < MIN_FIELDS);
+    if (bad >= 0) { toast(`Rad ${bad + 1} braucht mindestens ${MIN_FIELDS} Felder mit Text`); return; }
+    const name = FB.name.trim() || W.map(w => w.title).slice(0, 2).join(' → ');
+    const fl = flowStore(name, W, FB.id); FB.id = fl.id;
+    $('#fbuild').classList.remove('show');
+    if (a === 'saveLoad') applyWheelSet(fl.name, fl.wheels.map(w => strip(w)), true, 'Ablauf');
+    return;
+  }
+  fbRender();
+});
+
+/* ---------- Ablauf-Generator: Beschreibungen beider Partner zusammenführen ---------- */
+// Zeile = ein Ablauf; Schritte getrennt mit „dann“, „danach“, „→“, „->“, „;“; Alternativen mit „/“ oder „oder“
+function genParse(text) {
+  return String(text || '').split(/\n+/).map(l => l.trim()).filter(Boolean).map(l =>
+    l.split(/\s*(?:→|->|=>|;|\bdann\b|\bdanach\b|\banschließend\b|\bzum schluss\b|\bam ende\b)\s*/i).map(x => x.trim().replace(/^[,.\s]+|[,.\s]+$/g, '')).filter(Boolean)
+      .map(st => st.split(/\s*(?:\/|\boder\b)\s*/i).map(o => o.trim()).filter(Boolean)));
+}
+const GEN_CATS = [
+  ['Stellung', /knie|liegend|seitlich|stellung|reit|doggy|missionar|steh|rücken|bauch|bettkante|zwischen/i],
+  ['Abschluss', /spritz|sperma|abspring|komm|orgasmus|cum|gurgel|schluck|spuck|glas/i],
+  ['Oral', /blas|lutsch|deepthroat|zunge|leck|oral|mund/i],
+  ['Fesseln', /fessel|handschell|knebel|augenbinde|tape|klebeband|gestell|schaukel/i],
+  ['Spielzeug', /dildo|plug|vibrat|toy|spielzeug|dehner|haken|ring/i],
+  ['Heftigkeit', /soft|middle|hard|heavy|sanft|hart|langsam|schnell|tief/i],
+  ['Vorspiel', /küss|kuss|massage|strip|streichel|dusch|dirty/i],
+];
+function genTitle(texts, k) {
+  const sc = GEN_CATS.map(([n, re]) => [n, texts.filter(t => re.test(t)).length]).sort((a, b) => b[1] - a[1]);
+  return sc[0][1] ? sc[0][0] : 'Schritt ' + (k + 1);
+}
+function genQuizInfo(text) {   // passendes Fragebogen-Thema: {tabu, score}
+  if (!S.gen.quiz) return null;
+  const t = text.toLowerCase();
+  for (const c of QUIZ) for (const it of c.items) {
+    const id = c.id + '.' + it[0], an = QS().ans[id]; if (!an || !an.a || !an.b) continue;
+    const ws = [it[1], it[2]].map(x => x.toLowerCase()).filter(x => x.length >= 4);
+    if (ws.some(x => t.includes(x) || x.includes(t))) return {tabu:an.a === 1 || an.b === 1, score:Math.sqrt(an.a * an.b)};
+  }
+  return null;
+}
+function genBuild(A, B) {
+  const lines = [...genParse(A.wish).map(l => ({who:'a', l})), ...genParse(B.wish).map(l => ({who:'b', l}))];
+  const tabus = [A.tabu, B.tabu].join(',').split(/[,;\n]+/).map(x => x.trim().toLowerCase()).filter(x => x.length >= 3);
+  const n = Math.min(MAX_CHAIN, Math.max(0, ...lines.map(x => x.l.length)));
+  const steps = Array.from({length:n}, () => new Map()), removed = new Set(), both = new Set();
+  lines.forEach(({who, l}) => l.slice(0, n).forEach((opts, k) => opts.forEach(o => {
+    const key = o.toLowerCase();
+    let e = steps[k].get(key);
+    if (!e) { e = {text:o.charAt(0).toUpperCase() + o.slice(1), who:new Set(), cont:false}; steps[k].set(key, e); }
+    e.who.add(who); if (k < l.length - 1) e.cont = true;
+  })));
+  const wheels = [];
+  for (let k = 0; k < n; k++) {
+    const fields = [];
+    for (const e of steps[k].values()) {
+      const low = e.text.toLowerCase(), q = genQuizInfo(e.text);
+      if (tabus.some(t => low.includes(t)) || (q && q.tabu)) { removed.add(e.text); continue; }
+      let weight = e.who.size === 2 ? 3 : 1;
+      if (e.who.size === 2) both.add(e.text);
+      if (q) weight = clamp(weight + Math.round(q.score) - 3, 1, 6);
+      fields.push({text:e.text, weight, next:e.cont && k < n - 1 ? k + 1 : -1});
+    }
+    if (!fields.length) { if (wheels.length) wheels[wheels.length - 1].fields.forEach(f => f.next = -1); break; }
+    if (fields.length < MIN_FIELDS) fields.push({text:'Freie Wahl', weight:1, next:fields[0].next});
+    wheels.push({title:genTitle(fields.map(f => f.text), k), fields});
+  }
+  // Verweise auf weggefallene Räder beenden
+  wheels.forEach(w => w.fields.forEach(f => { if (f.next >= wheels.length) f.next = -1; }));
+  return {wheels, both:[...both], removed:[...removed]};
+}
+function genRun() {
+  const r = genBuild(S.gen.a, S.gen.b);
+  if (!r.wheels.length) { toast('Bitte erst bei mindestens einem Partner einen Ablauf beschreiben'); return; }
+  S.gen.out = r.wheels.map((w, i) => normWheel(Object.assign({enabled:true}, w, {fields:w.fields.map(f => normField(f))}), i));
+  S.gen.info = {both:r.both, removed:r.removed};
+  openSecs.add('gen'); save(); renderPanel();
+  toast(`${r.wheels.length} Räder erzeugt · ${flowPaths(S.gen.out).length} Varianten`, 3500);
+}
+
 // Beispiel-Ablauf einmalig anlegen (aus dem Test)
 function seedFlows() {
   if (S.flows) return;
@@ -2696,6 +2918,7 @@ $('#bJoker').onclick = async () => {
   else if (next) await runNext(next, 1);
 };
 $('#bTimer').onclick = openTimer;
+$('#bFlow').onclick = openFlowPick;
 $('#bUndo').onclick = undoCard;
 $('#wbtns').addEventListener('click', e => { const b = e.target.closest('[data-spin]'); if (b && !b.disabled) doSpin(+b.dataset.spin); });
 $('#gear').onclick = () => {
@@ -2734,7 +2957,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110109;
+const APP_BUILD = 2026110110;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -2792,7 +3015,7 @@ $('#updReset').onclick = e => { const b = e.currentTarget; if (!updNative()) ret
 setTimeout(() => { if (navigator.onLine !== false) updCheck(true); }, 4000);
 
 seedFlows();
-window.SexRad = window.FickRad = {drawWheel, newWheel, THEMES, themePaths, loadTheme, flowPaths, flowSave, applyWheelSet, LASTRUN, get state() { return S; }};
+window.SexRad = window.FickRad = {drawWheel, newWheel, genBuild, genParse, fbOpen, THEMES, themePaths, loadTheme, flowPaths, flowSave, applyWheelSet, LASTRUN, get state() { return S; }};
 
 /* =====================================================================
    Abo über Google Play
