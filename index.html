@@ -1099,10 +1099,12 @@ async function slotSpin() {
   const fs = wl.map((w, k) => w.fields[targets[k]]);
   S.settings.slotHist = [lines.join(' · '), ...(S.settings.slotHist || [])].slice(0, 5);
   save();
-  const act = fs.find(f => f.card || f.next >= 0) || {};
+  // Folge-Rad nur, wenn es nicht schon im Slot mitgelaufen ist
+  const act = fs.find(f => f.card || (f.next >= 0 && !wl.includes(S.wheels[f.next]))) || {};
+  const nl = lines.join('\n').split('\n').length;
   const toy = fs.filter(f => f.toy && +f.toy.lvl > 0).sort((a, b) => b.toy.lvl - a.toy.lvl)[0];
   const combo = {num:'', text:lines.join('\n'), media:(fs.find(f => f.media) || {}).media || null,
-    toy:toy ? toy.toy : {lvl:0, sec:5, pat:'konstant', dev:''}, _fs:lines.length > 3 ? `min(${Math.floor(60 / lines.length)}vh, 7vw)` : '', card:act.card || null, next:act.card ? -1 : (act.next ?? -1)};
+    toy:toy ? toy.toy : {lvl:0, sec:5, pat:'konstant', dev:''}, _fs:nl > 3 ? `min(${Math.floor(60 / nl)}vh, ${Math.max(3, Math.floor(21 / nl))}vw)` : '', card:act.card || null, next:act.card ? -1 : (act.next ?? -1)};
   const next = await showResult({unit:''}, 0, 0, combo);
   SLOT.win = -1; render(); busy = false; setBusy(false); renderPanel(); updateRail();
   if (next) await runNext(next, 1);
@@ -1419,6 +1421,10 @@ function renderPanel() {
     <button class="b" data-act="testVoice">🔊 Stimme testen</button>
     <button class="b pri" data-act="openTimer">⏱ Timer öffnen</button></details>
 
+  <details ${op('themen')} data-sec="themen"><summary>🎯 Themen-Räder</summary>
+    <div class="hint">Lädt fertige Räder zu einem Thema. Im Rad-Modus laufen sie nacheinander (Stellung → Technik → Heftigkeit), im Slot-Modus alle auf einmal. „↩ VORHER“ holt deine alten Räder zurück.</div>
+    ${THEMES.map((t, i) => `<button class="b" data-act="theme" data-t="${i}" style="margin:4px 6px 0 0">${t.icon} ${esc(t.name)}</button>`).join('')}</details>
+
   <details ${op('quiz')} data-sec="quiz"><summary>💞 Vorlieben-Fragebogen</summary>
     <div class="hint">Beide bewerten getrennt von 1 (tabu) bis 5 (unbedingt). Daraus berechnet die App, was ihr beide mögt, lässt Tabus weg und trägt es mit passender Häufigkeit in die Räder ein.</div>
     <button class="b pri" data-act="openQuiz">💞 Fragebogen öffnen</button></details>
@@ -1606,6 +1612,7 @@ function initPanelEvents() {
       case 'jtrim': openMediaDlg({kind:'joker'}, false); break;
       case 'junmedia': { const mid = S.joker.media && S.joker.media.id; S.joker.media = null; delMedia(mid); save(); renderPanel(); break; }
       case 'openQuiz': openQuiz('a'); break;
+      case 'theme': loadTheme(+b.dataset.t); break;
       case 'toyConnect': S.toy.enabled = true; save(); toyConnect(); renderPanel(); break;
       case 'toyScan': if (TOY.ws) { toySend('StartScanning'); toast('Suche Spielzeug …'); } else toast('Erst verbinden'); break;
       case 'toyTest': if (TOY.devices.size) toyPlay({lvl:50, sec:2, pat:'konstant'}); else toast('Kein Spielzeug verbunden'); break;
@@ -2361,6 +2368,47 @@ function renderQuiz() {
     <div class="qlegend">Beim Speichern lernt der Algorithmus: Jedes Erlebnis fließt zu 40 % in eure Vorlieben ein. Auch die Stufe (Soft, Middle, Hard, Heavy Duty) wird neu eingeschätzt: Wer harte Punkte gut bewertet, wird eine Stufe höher vorgeschlagen. Danach könnt ihr die Räder neu berechnen lassen.</div>
     <button class="qbtn" data-fblearn="1">💾 Speichern & Algorithmus lernen lassen</button>`;
 }
+/* =====================================================================
+   Themen-Räder: fertige Rad-Sätze zu einem Thema (verkettet)
+   ===================================================================== */
+const THEMES = [
+  {name:'Blowjob', icon:'💋', wheels:[
+    {title:'Blowjob · Stellung', fields:[
+      'Rücken liegend\nHals gestreckt',
+      'Kniend vor ihm',
+      'Liegend zwischen\nseinen Füßen',
+      'Seitlich liegend']},
+    {title:'Blowjob · Technik', fields:[
+      'Ohne Hände',
+      'Deepthroat\nhandfrei',
+      'Mit Hand\nMund offen – Zunge raus',
+      'Nur Zunge & Lippen']},
+    {title:'Blowjob · Heftigkeit', stufe:true, fields:[
+      'Soft',
+      'Middle',
+      'Hard',
+      'Heavy Duty']},
+  ]},
+];
+function loadTheme(ti) {
+  const t = THEMES[ti]; if (!t) return;
+  if (!S.snapshot) S.snapshot = {active:S.active, wheels:strip(S.wheels)};   // für ↩ VORHER
+  const used = t.wheels.map((tw, k) => {
+    const old = S.wheels[k];
+    S.wheels[k] = normWheel({title:tw.title, unit:'', palette:old.palette, enabled:true, history:[],
+      fields:tw.fields.map(x => normField({text:x, next:k < t.wheels.length - 1 ? k + 1 : -1,
+        toy:tw.stufe ? {lvl:STUFE_TOY[Math.min(4, tw.fields.indexOf(x) + 1)], sec:30, pat:tw.fields.indexOf(x) >= 2 ? 'steigernd' : 'welle', dev:''} : undefined}))}, k);
+    return k;
+  });
+  S.wheels.forEach((w, i) => w.enabled = used.includes(i));
+  S.active = 0;
+  const name = 'Thema ' + t.name;
+  const data = {active:0, slots:used.map(i => ({slot:i, wheel:strip(S.wheels[i])}))};
+  const ex = S.presets.find(c => c.kind === 'combo' && c.name === name);
+  if (ex) ex.data = data; else S.presets.push({id:'c' + uid(), name, kind:'combo', created:Date.now(), data});
+  save(); render(); updateRail(); renderPanel();
+  toast(`Thema ${t.name}: ${used.length} Räder geladen · auch als Karte „${name}“ gespeichert`, 4500);
+}
 function quizApply() {
   if (!S.snapshot) S.snapshot = {active:S.active, wheels:strip(S.wheels)};
   const used = [], skipped = [];
@@ -2537,7 +2585,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110105;
+const APP_BUILD = 2026110106;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
