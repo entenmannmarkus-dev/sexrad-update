@@ -428,6 +428,8 @@
 <div id="fbuild"><div id="fbBox"></div></div>
 <div id="vgal"><div id="vgHead"><span class="t">🗂 Video-Galerie</span>
   <button class="b" id="vgDir">📁 Ordner wählen</button><button class="b" id="vgFiles">🎬 Videos / Fotos wählen</button>
+  <select id="vgCat" style="display:none;padding:9px;border-radius:10px;background:#0d0d0f;color:#eee;border:1px solid #555;font:15px system-ui"></select>
+  <button class="b pri" id="vgLibBtn" style="display:none">🏷 In Kategorie speichern</button>
   <button class="b pri" id="vgSpread" style="display:none">Auf Felder verteilen</button><button class="b" id="vgClose">Schließen</button></div>
   <div class="hint" id="vgInfo" style="padding:4px 14px;color:#b9a27a"></div>
   <div id="vgGrid"></div></div>
@@ -482,6 +484,7 @@ function defaultState() {
     toy:{enabled:false, url:'ws://127.0.0.1:12345', master:100},
     quiz:{names:{a:'Er', b:'Sie'}, ans:{}, learn:{}, stufe:{}, stufeSel:0, lvlOv:{}, thr:2.5, map:{}, timer:true, custom:{}, session:null, fb:null, sessions:[]},   // Vorlieben-Fragebogen   // Sexspielzeug über Intiface Central
     joker:{num:'', text:'JOKER', weight:1, next:-1, card:null, media:null, seqs:[]},   // seqs = gespeicherte Abfolgen   // eigenständiges Joker-Feld
+    vcats:null, vlib:[], flags:{},   // Video-Kategorien, Video-Bibliothek, Merker über Sessions (z. B. eingefroren)
     gen:{a:{wish:'', tabu:''}, b:{wish:'', tabu:''}, quiz:true, out:null, info:null},   // Ablauf-Generator
     presets:[],      // Speicherkarten: {id, name, kind:'single'|'combo', data}
     snapshot:null,   // Räder vor dem Laden einer Karte (für ↩ VORHER)
@@ -529,6 +532,9 @@ function normalize(o) {
   s.joker.seqs = (Array.isArray(s.joker.seqs) ? s.joker.seqs : []).map(q => ({id:String(q.id || 'q' + uid()), name:String(q.name || 'Abfolge'),
     steps:(Array.isArray(q.steps) ? q.steps : []).map(st => ({t:String(st.t || 'w0'), n:clamp(Math.round(+st.n || 1), 1, 50)}))}));
   s.presets = (Array.isArray(o.presets) ? o.presets : []).map(normCard).filter(Boolean);
+  s.vcats = Array.isArray(o.vcats) ? o.vcats.filter(c => c && c.name).map(c => ({name:String(c.name), subs:(Array.isArray(c.subs) ? c.subs : []).map(String)})) : null;
+  s.vlib = (Array.isArray(o.vlib) ? o.vlib : []).filter(x => x && x.media && x.media.id).map(x => ({cat:String(x.cat || ''), media:x.media}));
+  s.flags = o.flags && typeof o.flags === 'object' ? o.flags : {};
   const gp = x => ({wish:String((x && x.wish) || ''), tabu:String((x && x.tabu) || '')});
   s.gen = {a:gp(o.gen && o.gen.a), b:gp(o.gen && o.gen.b), quiz:!(o.gen && o.gen.quiz === false),
     out:o.gen && Array.isArray(o.gen.out) ? o.gen.out.map((w, i) => normWheel(w, i)) : null, info:o.gen && o.gen.info || null};
@@ -962,9 +968,10 @@ function tween(ms, fn) {
    Drehen: gewichteter Zufall, Animation, Tick pro Feld
    ===================================================================== */
 function segAt(w) { const n = w.fields.length; let a = (-(w.rot || 0)) % TAU; if (a < 0) a += TAU; return Math.floor(a / (TAU / n)) % n; }
+const fieldOk = f => !f.need || (S.flags && S.flags[f.need]);   // Feld nur möglich, wenn Merker gesetzt (z. B. eingefroren)
 function pickWeighted(fields) {
-  const ws = fields.map(f => Math.max(0, +f.weight || 0)), tot = ws.reduce((a, b) => a + b, 0);
-  if (tot <= 0) return Math.floor(Math.random() * fields.length);
+  const ws = fields.map(f => fieldOk(f) ? Math.max(0, +f.weight || 0) : 0), tot = ws.reduce((a, b) => a + b, 0);
+  if (tot <= 0) { const ok = fields.map((f, i) => i).filter(i => fieldOk(fields[i])); return ok.length ? ok[Math.floor(Math.random() * ok.length)] : Math.floor(Math.random() * fields.length); }
   let r = Math.random() * tot;
   for (let i = 0; i < ws.length; i++) { r -= ws[i]; if (r < 0) return i; }
   return ws.length - 1;
@@ -1015,7 +1022,12 @@ async function flashWin(w, idx, redraw) {
 }
 
 let busy = false;
-const LASTRUN = [];   // Ergebnisse des letzten Durchlaufs (für Abläufe)
+const LASTRUN = [];
+function fieldFlags(f) {
+  if (!f) return;
+  if (f.set) { S.flags[f.set] = Date.now(); toast('❄ Gemerkt für die nächste Session', 3500); }
+  if (f.clear && S.flags[f.clear]) delete S.flags[f.clear];
+}   // Ergebnisse des letzten Durchlaufs (für Abläufe)
 async function doSpin(idx, depth = 0, jockey = false) {
   if (busy) return;
   busy = true; ac(); setBusy(true); closePanel();
@@ -1028,6 +1040,7 @@ async function doSpin(idx, depth = 0, jockey = false) {
   await flashWin(w, res, render);
   w.history = [resultLine(w, w.fields[res], res), ...(w.history || [])].slice(0, 5);
   if (depth === 0) LASTRUN.length = 0;
+  fieldFlags(w.fields[res]);
   LASTRUN.push(String(w.fields[res].text || resultLine(w, w.fields[res], res)).replace(/\n/g, ' '));
   quizLog(w.fields[res]);
   save();
@@ -1216,9 +1229,16 @@ function setMode(m) {
 function resultLine(w, f, i) {
   return [f.num !== '' ? f.num : '', f.text, w.unit].filter(Boolean).join(' ') || ('Feld ' + (i + 1));
 }
+// zufälliges Video aus der Bibliothek passend zur Kategorie („Kategorie/Unterkategorie“ oder nur „Kategorie“)
+function vlibPick(cat) {
+  if (!cat) return null;
+  const c = cat.toLowerCase(), list = S.vlib.filter(x => { const k = x.cat.toLowerCase(); return k === c || k.startsWith(c + '/'); });
+  return list.length ? list[Math.floor(Math.random() * list.length)].media : null;
+}
 function showResult(w, i, depth, fieldOverride) {
   return new Promise(async resolve => {
-    const f = fieldOverride || w.fields[i], box = $('#rMedia');
+    let f = fieldOverride || w.fields[i]; const box = $('#rMedia');
+    if (!f.media && f.vcat) { const m = vlibPick(f.vcat); if (m) f = Object.assign({}, f, {media:m}); }
     box.innerHTML = '';
     $('#rNum').textContent = f.num !== '' ? f.num : '';
     $('#rTxt').textContent = f.text || (f.num === '' ? 'Feld ' + (i + 1) : '');
@@ -1467,6 +1487,7 @@ function renderPanel() {
           ? `<span>${f.media.type === 'video' ? '🎬' : '🖼'} ${esc(f.media.name || 'Medium')}${f.media.type === 'video' && f.media.end > f.media.start ? ` (${(+f.media.start).toFixed(1)}–${(+f.media.end).toFixed(1)} s)` : ''}</span>
              <button class="medbtn" data-fa="trim" data-f="${i}">${f.media.type === 'video' ? '🎬 Vorschau · Start/Stopp' : '🖼 Ansehen / ändern'}</button><button data-fa="unmedia" data-f="${i}">🗑</button>`
           : `<button class="medbtn" data-fa="media" data-f="${i}">🎬 Video / Foto importieren</button>`}</div>
+        <label style="margin:4px 0 0;display:block;width:100%">${f.media ? 'Sonst' : 'Oder'} Video aus Kategorie<select data-f="${i}" data-fp="vcat" style="width:100%;display:block">${vcatOpts(f.vcat)}</select></label>
         ${toyRow(`data-f="${i}"`, f.toy)}
       </div></div>`).join('');
   const tw = S.timer.wheel;
@@ -1537,6 +1558,16 @@ function renderPanel() {
     <button class="b" data-ta="add" ${tw.fields.length >= T_MAX ? 'disabled' : ''}>+ Feld</button> <span class="hint">${tw.fields.length} / ${T_MAX} Felder (min. ${T_MIN})</span>
     <button class="b" data-act="testVoice">🔊 Stimme testen</button>
     <button class="b pri" data-act="openTimer">⏱ Timer öffnen</button></details>
+
+  <details ${op('vcat')} data-sec="vcat"><summary>🏷 Video-Kategorien (${S.vlib.length} Videos)</summary>
+    <div class="hint">Videos in der Bibliothek haben eine Kategorie. Ein Feld mit „Video aus Kategorie“ spielt dann zufällig eines davon. Videos fügst du über die 🗂 Video-Galerie hinzu.</div>
+    <button class="b" data-act="vgLib" style="margin:4px 0">🗂 Galerie öffnen und Videos einsortieren</button>
+    ${vcats().map(c => { const all = S.vlib.filter(x => x.cat.split('/')[0] === c.name);
+      return `<div class="genw"><b>${esc(c.name)}</b> · ${all.length} Videos<br>${c.subs.map(sb => { const n = S.vlib.filter(x => x.cat === c.name + '/' + sb).length;
+        return `<span style="display:inline-block;margin:2px 8px 2px 0">${esc(sb)} <b style="color:${n ? '#9fe39f' : '#888'}">${n}</b></span>`; }).join('')}
+        ${all.length ? `<details style="margin-top:4px"><summary>Videos ansehen</summary>${all.map(x => `<div class="hint" style="color:#ddd">${esc(x.cat.split('/')[1] || '–')} · ${esc(x.media.name || '')} <button class="x" data-act="vlibDel" data-id="${esc(x.media.id)}">✕</button></div>`).join('')}</details>` : ''}</div>`; }).join('')}
+    <div style="display:flex;gap:6px;margin-top:6px"><input id="vcatNew" placeholder="Neu: Kategorie / Unterkategorie" style="flex:1"><button class="b" data-act="vcatAdd">＋</button></div>
+  </details>
 
   <details ${op('flows')} data-sec="flows"><summary>🔗 Abläufe (${(S.flows || []).length})</summary>
     <div class="hint">Ein Ablauf ist eine Kette von Rädern (Feld → nächstes Rad). Speichere die aktuellen Räder als Ablauf, lade ihn später wieder und lege Beispiel-Durchläufe dazu ab.</div>
@@ -1635,6 +1666,7 @@ function initPanelEvents() {
       if (k === 'num') f.num = el.value === '' ? '' : clamp(Math.round(+el.value), 0, 99);
       else if (k === 'text') f.text = el.value;
       else if (k === 'weight') f.weight = clamp(+el.value || 0, 0, 100);
+      else if (k === 'vcat') { if (el.value) f.vcat = el.value; else delete f.vcat; }
       else if (k === 'next') { const v = el.value; f.next = v[0] === 'w' ? +v.slice(1) : -1; f.card = v[0] === 'c' ? v.slice(1) : null; }
       save(); return;
     }
@@ -1770,6 +1802,12 @@ function initPanelEvents() {
       case 'flowSave': flowSave($('#flowName').value); break;
       case 'fbNew': fbOpen(null); break;
       case 'vgOpen': vgOpen(null); break;
+      case 'vgLib': vgOpen(null); break;
+      case 'vcatAdd': { const [c, sb] = String($('#vcatNew').value).split('/').map(x => x.trim()); if (!c) break;
+        const L = vcats(); let e = L.find(x => x.name.toLowerCase() === c.toLowerCase()); if (!e) { e = {name:c, subs:[]}; L.push(e); }
+        if (sb && !e.subs.some(x => x.toLowerCase() === sb.toLowerCase())) e.subs.push(sb);
+        S.vcats = L; save(); renderPanel(); break; }
+      case 'vlibDel': { const id = b.dataset.id; S.vlib = S.vlib.filter(x => x.media.id !== id); delMedia(id); save(); renderPanel(); break; }
       case 'fbEdit': fbOpen(+b.dataset.i); break;
       case 'genRun': genRun(); break;
       case 'genLoad': if (S.gen.out) applyWheelSet('Generator', S.gen.out.map(w => strip(w)), true, 'Ablauf'); break;
@@ -2004,6 +2042,7 @@ let vgObs = null;
 function vgRender() {
   const g = $('#vgGrid'), tgt = GAL.target;
   $('#vgSpread').style.display = !tgt && GAL.sel.size ? '' : 'none';
+  vgCatUi();
   $('#vgSpread').textContent = `${GAL.sel.size} auf Felder von „${S.wheels[S.active].title || 'Rad ' + (S.active + 1)}“ verteilen`;
   $('#vgInfo').textContent = GAL.items.length
     ? `${GAL.items.length} Dateien · Antippen = Vorschau abspielen · ${tgt ? '„Nehmen“ übernimmt das Video für das Feld' : 'Häkchen wählen, dann auf die Felder verteilen'}`
@@ -2032,7 +2071,7 @@ $('#vgGrid').addEventListener('click', e => {
   const i = +card.dataset.i;
   if (ck || (!GAL.target && GAL.items[i].type === 'image')) { GAL.sel.has(i) ? GAL.sel.delete(i) : GAL.sel.add(i);
     card.classList.toggle('sel', GAL.sel.has(i)); const c = card.querySelector('.ck'); if (c) c.textContent = GAL.sel.has(i) ? '✓' : '';
-    $('#vgSpread').style.display = GAL.sel.size ? '' : 'none'; $('#vgSpread').textContent = `${GAL.sel.size} auf Felder von „${S.wheels[S.active].title || 'Rad ' + (S.active + 1)}“ verteilen`; return; }
+    vgCatUi(); $('#vgSpread').style.display = GAL.sel.size ? '' : 'none'; $('#vgSpread').textContent = `${GAL.sel.size} auf Felder von „${S.wheels[S.active].title || 'Rad ' + (S.active + 1)}“ verteilen`; return; }
   const v = card.querySelector('video'); if (!v) return;
   if (!v.src) vgThumb(v);
   $('#vgGrid').querySelectorAll('video').forEach(x => { if (x !== v) x.pause(); });
@@ -2055,6 +2094,24 @@ $('#vgSpread').onclick = async () => {
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   GAL.sel.clear(); save(); render(); renderPanel(); vgClose();
   toast(`${n} Videos/Fotos auf die Felder verteilt${n < idx.length ? ' (Rad voll)' : ''} · Start/Stopp je Feld über „Vorschau“`, 5000);
+};
+function vgCatUi() {
+  const on = !GAL.target && GAL.sel.size > 0, sel = $('#vgCat');
+  sel.style.display = $('#vgLibBtn').style.display = on ? '' : 'none';
+  if (on && !sel.options.length) sel.innerHTML = vcatOpts('', true);
+  $('#vgLibBtn').textContent = `🏷 ${GAL.sel.size} in Kategorie speichern`;
+}
+$('#vgLibBtn').onclick = async () => {
+  const cat = $('#vgCat').value; if (!cat) { toast('Bitte Kategorie wählen'); return; }
+  let n = 0; toast('Speichere …', 2000);
+  for (const i of [...GAL.sel]) {
+    const it = GAL.items[i], id = 'm' + uid();
+    try { await DB.put(id, it.file); } catch (e) { toast('Fehler beim Speichern: ' + e.message); break; }
+    S.vlib.push({cat, media:{id, type:it.type, name:it.file.name, mime:it.file.type || '', start:0, end:0}}); n++;
+  }
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  GAL.sel.clear(); save(); vgRender(); renderPanel();
+  toast(`${n} in „${cat.replace('/', ' › ')}“ gespeichert`, 3500);
 };
 $('#vgFiles').onclick = () => { $('#vgIn').value = ''; $('#vgIn').click(); };
 $('#vgDir').onclick = () => { const d = $('#vgInDir'); d.value = '';
@@ -2645,7 +2702,25 @@ const THEMES = [
     {title:'Sperma-Spiel', fields:['Gurgeln', 'Ablecken', 'Im Mund behalten', 'In ein Glas spucken', 'Aus dem Glas trinken',
       'Mund offen zeigen', 'Vom Löffel essen']},
   ]},
-  {name:'Spielzeug & Fesseln', icon:'⛓', hint:'Bei Knebel, Klebeband und Halsband vorher ein Stoppzeichen ohne Worte ausmachen. Gleitgel bereitlegen.', wheels:[
+  // Spermerei: verzweigter Ablauf – Gesicht oder Mund führen zu eigenen Rädern, „Einfrieren“ merkt sich das für die nächste Session
+  {name:'Spermerei', icon:'💧', rad:true, wheels:[
+    {title:'Blasen', fields:[{t:'Auf Knien blasen', cat:'Blasen/Auf Knien', w:3}, {t:'Auf Knien\nnur Schwanz rubbeln', cat:'Blasen/Auf Knien – nur Schwanz rubbeln', w:2},
+      {t:'Gefrorenes Sperma im Mund\ndabei blasen', need:'frozen', cat:'Abspritzen/Auf gefrorenes Sperma im Mund', w:3}]},
+    {title:'Abspritzen', fields:[{t:'Ins Gesicht', to:2, cat:'Abspritzen/Ins Gesicht'}, {t:'In den Mund', to:3, cat:'Abspritzen/In den Mund'},
+      {t:'In den offenen Mund', to:3, cat:'Abspritzen/In den offenen Mund'}, {t:'Selbst ins Gesicht\nspritzen lassen', to:2, cat:'Abspritzen/Selbst ins Gesicht spritzen lassen'},
+      {t:'Auf das gefrorene Sperma\nin den Mund', to:3, need:'frozen', clear:'frozen', cat:'Abspritzen/Auf gefrorenes Sperma im Mund', w:3}]},
+    {title:'Spiel im Gesicht', fields:[{t:'Im Gesicht verreiben', end:true, cat:'Spermaspiele/Im Gesicht verreiben'},
+      {t:'Mit Löffel aus dem Gesicht\nfüttern', to:3, cat:'Spermaspiele/Mit Löffel aus dem Gesicht füttern'}]},
+    {title:'Spiel im Mund', fields:[{t:'Im Mund hin und her\nsprudeln', end:true, cat:'Spermaspiele/Im Mund hin und her sprudeln'},
+      {t:'Gurgeln', end:true, cat:'Spermaspiele/Gurgeln'}, {t:'Im Mund behalten', end:true, cat:'Spermaspiele/Im Mund behalten'},
+      {t:'Aus dem Mund\nins Glas tropfen lassen', to:4, cat:'Spermaspiele/Aus dem Mund ins Glas tropfen lassen', w:2}]},
+    {title:'Glas-Spiel', fields:[{t:'Aus dem Glas trinken', cat:'Glas-Spiele/Aus dem Glas trinken'},
+      {t:'Aus dem Glas in den Mund\nund zurück', cat:'Glas-Spiele/Aus dem Glas in den Mund und zurück'},
+      {t:'Immer wieder Mund ins Glas leeren\nSchwanz in den Mund', cat:'Glas-Spiele/Mund ins Glas leeren – Schwanz in den Mund'},
+      {t:'Einfrieren für die\nnächste Session', set:'frozen', cat:'Spermaspiele/Einfrieren für die nächste Session'}]},
+  ]},
+  
+{name:'Spielzeug & Fesseln', icon:'⛓', hint:'Bei Knebel, Klebeband und Halsband vorher ein Stoppzeichen ohne Worte ausmachen. Gleitgel bereitlegen.', wheels:[
     {title:'Spielzeug', fields:['Dildo', 'Glasdildo', 'Dildo mit\nSchwingfunktion', 'Analplug', 'Analdehner', 'Analhaken', 'Vibrator', 'Penisring']},
     {title:'Fesseln', fields:['Handschellen', 'Hand- &\nFußfesseln', 'Hüftfesselgurt', 'Ans Bettgestell\ngefesselt', 'Bondagegestell',
       'Liebesschaukel', 'Bondage-Tape', 'Halsband\nmit Kette']},
@@ -2653,17 +2728,32 @@ const THEMES = [
     {title:'Heftigkeit', stufe:true, fields:['Soft', 'Middle', 'Hard', 'Heavy Duty']},
   ]},
 ];
+// Video-Kategorien (anpassbar); Standard nach Markus' Vorgabe
+const VCATS_DEFAULT = [
+  {name:'Blasen', subs:['Auf Knien', 'Auf Knien – nur Schwanz rubbeln']},
+  {name:'Abspritzen', subs:['Ins Gesicht', 'In den Mund', 'In den offenen Mund', 'Selbst ins Gesicht spritzen lassen', 'Auf gefrorenes Sperma im Mund']},
+  {name:'Spermaspiele', subs:['Im Gesicht verreiben', 'Im Mund hin und her sprudeln', 'Gurgeln', 'Mit Löffel aus dem Gesicht füttern',
+    'Im Mund behalten', 'Aus dem Mund ins Glas tropfen lassen', 'Einfrieren für die nächste Session']},
+  {name:'Glas-Spiele', subs:['Aus dem Glas trinken', 'Aus dem Glas in den Mund und zurück', 'Mund ins Glas leeren – Schwanz in den Mund']},
+];
+const vcats = () => S.vcats || (S.vcats = JSON.parse(JSON.stringify(VCATS_DEFAULT)));
+const vcatOpts = (cur, req) => `<option value="">${req ? 'Kategorie wählen …' : '— keine'}</option>` + vcats().map(c =>
+  `<optgroup label="${esc(c.name)}"><option value="${esc(c.name)}" ${cur === c.name ? 'selected' : ''}>${esc(c.name)} (alle)</option>` +
+  c.subs.map(sb => `<option value="${esc(c.name + '/' + sb)}" ${cur === c.name + '/' + sb ? 'selected' : ''}>${esc(sb)}</option>`).join('') + '</optgroup>').join('');
+
 // Feld eines Themas: Text oder {t, end:true} (= hier endet die Kette)
 const thText = x => typeof x === 'string' ? x : x.t;
 function themeWheels(t) {
-  return t.wheels.map((tw, k) => ({title:tw.title, fields:tw.fields.map((x, j) => ({text:thText(x),
-    next:(typeof x === 'object' && x.end) || k >= t.wheels.length - 1 ? -1 : k + 1,
+  return t.wheels.map((tw, k) => ({title:tw.title, fields:tw.fields.map((x, j) => Object.assign({text:thText(x),
+    next:typeof x === 'object' && x.to != null ? x.to : (typeof x === 'object' && x.end) || k >= t.wheels.length - 1 ? -1 : k + 1,
+    weight:typeof x === 'object' && x.w ? x.w : 1},
+    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
     toy:tw.stufe ? {lvl:STUFE_TOY[Math.min(4, j + 1)], sec:30, pat:j >= 2 ? 'steigernd' : 'welle', dev:''} : undefined}))}));
 }
 // alle möglichen Abläufe eines Themas (für Liste und Test)
 function themePaths(t) {
   const W = themeWheels(t), out = [];
-  const walk = (k, acc) => W[k].fields.forEach(f => { const a = [...acc, f.text.replace(/\n/g, ' ')]; f.next >= 0 ? walk(f.next, a) : out.push(a); });
+  const walk = (k, acc) => W[k].fields.forEach(f => { const a = [...acc, f.text.replace(/\n/g, ' ')]; f.next >= 0 && a.length < MAX_CHAIN ? walk(f.next, a) : out.push(a); });
   walk(0, []); return out;
 }
 // Räder-Satz auf die ersten Räder legen (Folge-Verweise zeigen auf die Position im Satz)
@@ -3068,7 +3158,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110111;
+const APP_BUILD = 2026110112;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -3126,7 +3216,7 @@ $('#updReset').onclick = e => { const b = e.currentTarget; if (!updNative()) ret
 setTimeout(() => { if (navigator.onLine !== false) updCheck(true); }, 4000);
 
 seedFlows();
-window.SexRad = window.FickRad = {drawWheel, newWheel, GAL, vgOpen, genBuild, genParse, fbOpen, THEMES, themePaths, loadTheme, flowPaths, flowSave, applyWheelSet, LASTRUN, get state() { return S; }};
+window.SexRad = window.FickRad = {drawWheel, newWheel, vlibPick, pickWeighted, themeWheels, GAL, vgOpen, genBuild, genParse, fbOpen, THEMES, themePaths, loadTheme, flowPaths, flowSave, applyWheelSet, LASTRUN, get state() { return S; }};
 
 /* =====================================================================
    Abo über Google Play
