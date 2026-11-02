@@ -326,27 +326,57 @@
   .vgc .ck{position:absolute;top:6px;left:6px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.7);border:2px solid #ffe08a;color:#ffe08a;font:800 16px system-ui;display:flex;align-items:center;justify-content:center}
   .vgc .dur{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.75);color:#fff;font:600 12px system-ui;padding:2px 6px;border-radius:6px}
   .vgc .take{white-space:nowrap;padding:6px 10px;border-radius:8px;border:1px solid #c9a24e;background:#6a1016;color:#fff;font:700 12px system-ui}
-  .vgc .snip{position:absolute;left:6px;right:6px;bottom:38px;display:flex;gap:2px;pointer-events:none}
-  .vgc .snip s{flex:1;height:4px;border-radius:2px;background:rgba(0,0,0,.55);box-shadow:0 0 0 1px rgba(255,255,255,.35)}
-  .vgc .snip s.on{background:#ffe08a}
-  .vgc .zoom{padding:4px 8px;border-radius:8px;border:1px solid #666;background:#232326;color:#fff;font-size:14px}
-  .vgc .ck{pointer-events:none}
-  #vgCatRow{gap:8px;padding:8px 14px;background:#18120c;border-bottom:1px solid #5a4520;flex-wrap:wrap}
-  #vgCatRow input{flex:1;min-width:160px;padding:10px;border-radius:10px;border:1px solid #555;background:#0d0d0f;color:#eee;font:15px system-ui;-webkit-user-select:text;user-select:text}
-  #vgPrev{position:absolute;inset:0;background:#000;display:none;flex-direction:column;z-index:3}
-  #vgPrev.show{display:flex}
-  #gpMedia{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-  #gpMedia video,#gpMedia img{max-width:100%;max-height:100%;object-fit:contain}
-  #gpBar{padding:8px 14px 12px;background:#121214;border-top:1px solid #5a4520;color:#eee;font:14px system-ui}
-  #gpName{display:block;margin-bottom:6px;color:#ffe08a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  #gpCtl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  #gpCtl input{flex:1;min-width:200px;accent-color:#c9a24e;height:30px}
-  #vgPrev button{padding:10px 14px;border-radius:10px;border:1px solid #555;background:#232326;color:#eee;font:600 15px system-ui}
-  #vgPrev button.pri{background:#6a1016;border-color:#c9a24e}
-  #vgPrev button.on{background:#2e5a1c;border-color:#9fe39f}
-  #gpSnips{display:flex;gap:4px;flex-wrap:wrap;width:100%}
-  #gpSnips button{padding:6px 8px;font-size:12px}
-  .gpRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .vgTabs{display:flex;gap:6px;margin-right:auto}
+  .vgTabs button{padding:9px 14px;border-radius:10px;border:1px solid #555;background:#1a1a1c;color:#ccc;font:600 15px system-ui}
+  .vgTabs button.on{background:#6a1016;border-color:#c9a24e;color:#fff}
+  #vgHead .t{margin-right:8px}
+  #vgFilter{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 0}
+  .chip{padding:7px 12px;border-radius:999px;border:1px solid #555;background:#1a1a1c;color:#ddd;font:600 13px system-ui}
+  .chip.on{background:#6a1016;border-color:#c9a24e;color:#fff}
+  #vgSelBar{display:none;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 14px;background:#1b130c;border-bottom:1px solid #5a4520}
+  #vgSelBar b{color:#ffe08a;font:700 15px system-ui;margin-right:4px}
+  #vgSelBar select,#vgEd select,#vgEd input:not([type]),#vgCatRow input{padding:9px;border-radius:10px;background:#0d0d0f;color:#eee;border:1px solid #555;font:15px system-ui;-webkit-user-select:text;user-select:text}
+  #vgCatRow{display:none;gap:8px;align-items:center;padding:8px 14px;background:#18120c;border-bottom:1px solid #5a4520;flex-wrap:wrap}
+  #vgCatRow b{color:#ffe08a}
+  #vgCatRow input{flex:1;min-width:150px}
+  #vgSaveRow{padding:0 14px}
+  #vgBody{flex:1;min-height:0;display:flex}
+  #vgBody #vgGrid{flex:1}
+  #vgEd{display:none;width:58%;max-width:900px;overflow:auto;border-left:1px solid #5a4520;background:#0c0b0c;padding:10px 14px 16px;color:#eee;font:14px system-ui}
+  #vgal.editing #vgEd{display:block}
+  #vgal.editing #vgGrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .edHead{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .edHead b{flex:1;color:#ffe08a;font:700 17px system-ui;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #edMedia{background:#000;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;max-height:52vh}
+  #edMedia video,#edMedia img{max-width:100%;max-height:52vh;display:block}
+  .edRow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+  .edRow input:not([type]){flex:1;min-width:150px}
+  #edTime,#edAB{color:#ddd;font:600 14px system-ui;margin:0 4px}
+  #edPos{width:100%;margin-top:8px;accent-color:#c9a24e;height:28px}
+  .edLab{margin:12px 0 4px;color:#b9a27a;font:700 12px system-ui;letter-spacing:.08em;text-transform:uppercase}
+  #edSnips{display:flex;gap:4px;flex-wrap:wrap}
+  #edSnips button{padding:6px 8px;border-radius:8px;border:1px solid #555;background:#1a1a1c;color:#ddd;font:12px system-ui}
+  .trim{position:relative;height:40px}
+  .trim .trk{position:absolute;left:0;right:0;top:15px;height:10px;border-radius:5px;background:#333}
+  .trim .rng{position:absolute;top:15px;height:10px;border-radius:5px;background:linear-gradient(90deg,#c9a24e,#e0464e)}
+  .trim input{position:absolute;left:0;top:0;width:100%;height:40px;margin:0;background:none;pointer-events:none;-webkit-appearance:none;appearance:none}
+  .trim input::-webkit-slider-runnable-track{background:none;border:0}
+  .trim input::-webkit-slider-thumb{pointer-events:auto;-webkit-appearance:none;width:26px;height:38px;border-radius:7px;background:#ffe08a;border:3px solid #6a1016;box-shadow:0 2px 6px #000}
+  .trim input::-moz-range-thumb{pointer-events:auto;width:22px;height:34px;border-radius:7px;background:#ffe08a;border:3px solid #6a1016}
+  .trim input::-moz-range-track{background:none}
+  .edChk{display:flex;gap:8px;align-items:center;margin-top:8px}
+  .edActs{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+  .edCat{display:flex;gap:6px;align-items:center}
+  .edPart{display:flex;gap:6px;align-items:center;padding:6px 8px;border:1px solid #333;border-radius:8px;margin-top:4px}
+  .edPart.on{border-color:#c9a24e}
+  .edPart span{flex:1}
+  #vgEd .b,#vgSaveRow .b,#vgCatRow .b,#vgSelBar .b{padding:9px 13px;border-radius:10px;border:1px solid #555;background:#232326;color:#eee;font:600 14px system-ui}
+  #vgEd .b.pri,#vgSaveRow .b.pri,#vgCatRow .b.pri,#vgSelBar .b.pri{background:#6a1016;border-color:#c9a24e}
+  #vgEd .b.on{background:#2e5a1c;border-color:#9fe39f}
+  .vgc{transition:transform .15s}
+  .vgc.on{border-color:#e0464e;box-shadow:0 0 18px rgba(224,70,78,.7);transform:scale(1.04);z-index:1}
+  .vgc .ck{pointer-events:auto;width:34px;height:34px}
+  .vgc .vi small{color:#b9a27a;white-space:nowrap}
   #vgEmpty{grid-column:1/-1;color:#aaa;text-align:center;padding:12vh 0;font:16px system-ui}
   #jpick{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:55;display:none;align-items:center;justify-content:center}
   #jpick.show{display:flex}
@@ -535,7 +565,7 @@
   <div class="hint" id="mInfo"></div>
 </div></div>
 
-<input id="fileMedia" type="file" accept="video/*,image/*" hidden>
+<input id="fileMedia" type="file" accept="video/*,image/*" multiple hidden>
 <input id="fileCard" type="file" accept=".json,.zip,application/json,application/zip" hidden>
 <input id="fileImport" type="file" accept=".json,.zip,application/json,application/zip" hidden>
 <div id="quiz">
@@ -544,22 +574,18 @@
 </div>
 <div id="fpick"><div id="fpickBox"><div class="jt">🔗 Ablauf starten</div><div id="fpickList"></div><button class="mbtn" id="fpickX" style="width:100%;margin-top:8px">Schließen</button></div></div>
 <div id="fbuild"><div id="fbBox"></div></div>
-<div id="vgal"><div id="vgHead"><span class="t">🗂 Video-Galerie</span>
-  <button class="b" id="vgDir">📁 Ordner wählen</button><button class="b" id="vgFiles">🎬 Videos / Fotos wählen</button>
-  <select id="vgCat" style="display:none;padding:9px;border-radius:10px;background:#0d0d0f;color:#eee;border:1px solid #555;font:15px system-ui"></select>
-  <button class="b" id="vgCatNewBtn" style="display:none" title="Neue Kategorie anlegen">＋ Kategorie</button>
-  <button class="b pri" id="vgLibBtn" style="display:none">🏷 In Kategorie speichern</button>
-  <button class="b" id="vgAll" style="display:none">☑ Alle</button>
-  <button class="b pri" id="vgSpread" style="display:none">Auf Felder verteilen</button><button class="b" id="vgClose">Schließen</button></div>
-  <div id="vgCatRow" style="display:none"><input id="vgCatName" placeholder="Neue Kategorie, z. B. Blowjob"><input id="vgCatSub" placeholder="Unterkategorie (optional)"><button class="b pri" id="vgCatOk">✔ Anlegen</button></div>
+<div id="vgal"><div id="vgHead"><span class="t">🗂 Galerie</span>
+  <div class="vgTabs"><button data-tab="vid" id="tabVid">🎬 Videos & Fotos</button><button data-tab="seq" id="tabSeq">✂ Sequenzen</button></div>
+  <button class="b" id="vgFiles">＋ Videos / Fotos</button><button class="b" id="vgDir">📁 Ordner</button><button class="b" id="vgClose">Schließen</button></div>
+  <div id="vgFilter"></div>
+  <div id="vgSelBar"><b id="vgSelN"></b>
+    <button class="b pri" id="vgSpread"></button><button class="b pri" id="vgJoin">🎞 Zu einer Sequenz zusammensetzen</button>
+    <select id="vgCat"></select><button class="b" id="vgCatNewBtn">＋ Kategorie</button><button class="b" id="vgLibBtn">🏷 In Kategorie</button>
+    <button class="b" id="vgAll">☑ Alle</button><button class="b" id="vgNone">✕ Auswahl aufheben</button></div>
+  <div id="vgCatRow"><b id="vgCatTitle"></b><input id="vgCatName" placeholder="Kategorie, z. B. Blowjob"><input id="vgCatSub" placeholder="Unterkategorie (optional)"><button class="b pri" id="vgCatOk">✔ Anlegen</button><button class="b" id="vgCatX">✕</button></div>
+  <div id="vgSaveRow"></div>
   <div class="hint" id="vgInfo" style="padding:4px 14px;color:#b9a27a"></div>
-  <div id="vgGrid"></div>
-  <div id="vgPrev"><div id="gpMedia"></div>
-    <div id="gpBar"><b id="gpName"></b>
-      <div id="gpCtl"><button id="gpBack">⏪ 10</button><button id="gpBack1">◀ 1</button><button id="gpPlay">❚❚</button><button id="gpFwd1">1 ▶</button><button id="gpFwd">10 ⏩</button>
-        <input id="gpPos" type="range" min="0" max="1" step="0.1" value="0"><b id="gpTime">0:00 / 0:00</b>
-        <div id="gpSnips"></div></div>
-      <div class="gpRow"><button id="gpPrevI">◀ Voriges</button><button id="gpSel" class="pri">☐ Auswählen</button><button id="gpNextI">Nächstes ▶</button><button id="gpClose">✕ Zurück zur Übersicht</button></div></div></div></div>
+  <div id="vgBody"><div id="vgGrid"></div><div id="vgEd"></div></div></div>
 <input id="vgIn" type="file" accept="video/*,image/*" multiple hidden>
 <input id="vgInDir" type="file" webkitdirectory multiple hidden>
 <div id="jpick"><div id="jpickBox"><div class="jt">★ Joker – Abfolge wählen</div><div id="jpickList"></div><button class="mbtn" id="jpickX" style="width:100%">Abbrechen</button></div></div>
@@ -622,7 +648,7 @@ function defaultState() {
     toy:{enabled:false, url:'ws://127.0.0.1:12345', master:100},
     quiz:{names:{a:'Er', b:'Sie'}, ans:{}, learn:{}, stufe:{}, stufeSel:0, lvlOv:{}, thr:2.5, map:{}, timer:true, custom:{}, session:null, fb:null, sessions:[]},   // Vorlieben-Fragebogen   // Sexspielzeug über Intiface Central
     joker:{num:'', text:'JOKER', weight:1, next:-1, card:null, media:null, seqs:[]},   // seqs = gespeicherte Abfolgen   // eigenständiges Joker-Feld
-    vcats:null, vlib:[], flags:{},   // Video-Kategorien, Video-Bibliothek, Merker über Sessions (z. B. eingefroren)
+    vcats:null, vlib:[], gal:[], seqs:[], seqCats:[{name:'Sequenzen', subs:[]}], flags:{},   // Video-Kategorien, Video-Bibliothek, Merker über Sessions (z. B. eingefroren)
     gen:{a:{wish:'', tabu:''}, b:{wish:'', tabu:''}, quiz:true, out:null, info:null},   // Ablauf-Generator
     presets:[],      // Speicherkarten: {id, name, kind:'single'|'combo', data}
     snapshot:null,   // Räder vor dem Laden einer Karte (für ↩ VORHER)
@@ -672,6 +698,10 @@ function normalize(o) {
   s.presets = (Array.isArray(o.presets) ? o.presets : []).map(normCard).filter(Boolean);
   s.vcats = Array.isArray(o.vcats) ? o.vcats.filter(c => c && c.name).map(c => ({name:String(c.name), subs:(Array.isArray(c.subs) ? c.subs : []).map(String)})) : null;
   s.vlib = (Array.isArray(o.vlib) ? o.vlib : []).filter(x => x && x.media && x.media.id).map(x => ({cat:String(x.cat || ''), media:x.media}));
+  s.gal = (Array.isArray(o.gal) ? o.gal : []).filter(x => x && x.media && x.media.id).map(x => ({gid:String(x.gid || 'g' + uid()), media:{id:x.media.id, type:x.media.type === 'image' ? 'image' : 'video', name:String(x.media.name || 'Medium'), mime:String(x.media.mime || '')}, size:+x.size || 0, added:+x.added || 0}));
+  s.seqs = (Array.isArray(o.seqs) ? o.seqs : []).filter(q => q && Array.isArray(q.parts) && q.parts.length).map(q => ({id:String(q.id || 'q' + uid()), name:String(q.name || 'Sequenz'), cat:String(q.cat || 'Sequenzen'), added:+q.added || 0,
+    parts:q.parts.filter(p => p && p.mid).map(p => ({mid:String(p.mid), type:'video', mime:String(p.mime || ''), name:String(p.name || ''), start:+p.start || 0, end:+p.end || 0}))})).filter(q => q.parts.length);
+  s.seqCats = Array.isArray(o.seqCats) ? o.seqCats.filter(c => c && c.name).map(c => ({name:String(c.name), subs:(Array.isArray(c.subs) ? c.subs : []).map(String)})) : [{name:'Sequenzen', subs:[]}];
   s.flags = o.flags && typeof o.flags === 'object' ? o.flags : {};
   const gp = x => ({wish:String((x && x.wish) || ''), tabu:String((x && x.tabu) || '')});
   s.gen = {a:gp(o.gen && o.gen.a), b:gp(o.gen && o.gen.b), quiz:!(o.gen && o.gen.quiz === false),
@@ -704,6 +734,7 @@ try { S = normalize(JSON.parse(localStorage.getItem(STORE_KEY))); } catch (e) { 
 
 let saveT = 0;
 function save() {
+  try { galSync(); } catch (e) { }
   clearTimeout(saveT);
   saveT = setTimeout(() => {
     // Felder mit "_" (Laufzeit-Infos) nicht speichern
@@ -1370,6 +1401,8 @@ function resultLine(w, f, i) {
 // zufälliges Video aus der Bibliothek passend zur Kategorie („Kategorie/Unterkategorie“ oder nur „Kategorie“)
 function vlibPick(cat) {
   if (!cat) return null;
+  if (cat.startsWith('seq:')) { const c = cat.slice(4).toLowerCase(), L = S.seqs.filter(q => { const k = q.cat.toLowerCase(); return k === c || k.startsWith(c + '/'); });
+    return L.length ? seqMedia(L[Math.floor(Math.random() * L.length)]) : null; }
   const c = cat.toLowerCase(), list = S.vlib.filter(x => { const k = x.cat.toLowerCase(); return k === c || k.startsWith(c + '/'); });
   return list.length ? list[Math.floor(Math.random() * list.length)].media : null;
 }
@@ -1415,13 +1448,24 @@ function showResult(w, i, depth, fieldOverride) {
       if (url && f.media.type === 'video') {
         const v = vid = document.createElement('video');
         v.src = url; v.playsInline = true; v.autoplay = true; v.setAttribute('playsinline', ''); v.loop = false;
-        const st = +f.media.start || 0;
-        const endAt = () => { const en = +f.media.end || 0; return en > st ? en : (v.duration || 0); };
+        // Sequenz aus mehreren Teilen: Teile nacheinander abspielen
+        const parts = Array.isArray(f.media.parts) && f.media.parts.length > 1 ? f.media.parts : null;
+        let pi = 0, st = +f.media.start || 0, en0 = +f.media.end || 0;
+        const endAt = () => en0 > st ? en0 : (v.duration || 0);
+        const nextPart = async () => {
+          if (!parts || pi >= parts.length - 1) return false;
+          pi++; const p = parts[pi], u = await mediaURL(p.mid); if (!u) return false;
+          st = +p.start || 0; en0 = +p.end || 0;
+          if (v.src !== u) v.src = u; else { v.currentTime = st; v.play().catch(() => {}); }
+          return true;
+        };
         const mm = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
         const upd = () => { const d = endAt() - st; $('#rvPos').max = Math.max(0.1, d).toFixed(1); $('#rvPos').value = Math.max(0, v.currentTime - st);
           $('#rvTime').textContent = mm(v.currentTime - st) + ' / ' + mm(d); $('#rvPlay').textContent = v.paused ? '▶' : '❚❚'; };
         let finished = false;
-        const fin = () => { if (finished) return; finished = true; v.pause(); upd(); videoDone(); };
+        const fin = async () => { if (finished) return; finished = true; v.pause();
+          if (await nextPart()) { finished = false; return; }
+          upd(); videoDone(); };
         v.addEventListener('loadedmetadata', () => { v.currentTime = st; upd(); v.play().catch(() => { v.muted = true; v.play().catch(() => {}); }); });
         v.addEventListener('timeupdate', () => { upd(); if (endAt() > 0 && v.currentTime >= endAt() - 0.05) fin(); });
         v.addEventListener('ended', fin);
@@ -2099,6 +2143,8 @@ function closeMediaDlg(keep) {
 }
 $('#fileMedia').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file || !MI.t) return;
+  // mehrere gewählt: alle in die Galerie speichern und ab diesem Feld einsetzen
+  if (e.target.files.length > 1) { const t = MI.t, added = await vgAdd(e.target.files, true); galInsert(t, added.map(g => ({...g.media, start:0, end:0}))); closeMediaDlg(false); return; }
   // keine feste Größengrenze – nur prüfen, ob auf dem Gerät noch Platz ist
   try { const est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null;
     if (est && est.quota && file.size > est.quota - (est.usage || 0)) { toast('Zu wenig Speicher auf dem Gerät für dieses Video (' + (file.size / 1048576).toFixed(0) + ' MB)'); return; }
@@ -2170,197 +2216,331 @@ $('#mOk').onclick = async () => {
 };
 
 /* =====================================================================
-   Video-Galerie: mehrere Videos/Fotos oder einen ganzen Ordner sichten, mit Vorschau auswählen
-   (Dateien bleiben bis zum Übernehmen nur im Speicher, nichts wird vorher gespeichert)
+   Galerie: alle Videos/Fotos bleiben dauerhaft gespeichert.
+   Antippen = groß im Bearbeitungsfeld (Vorschau, Spulen, Bereich zuschneiden),
+   nur dieses Video läuft. Bereiche lassen sich als Sequenzen mit eigener
+   Kategorie speichern und zu neuen Sequenzen zusammensetzen.
    ===================================================================== */
-const GAL = {items:[], target:null, sel:new Set()};
+const GAL = {tab:'vid', target:null, sel:[], ed:null, filt:''};
 const galExt = /\.(mp4|m4v|mov|webm|mkv|3gp|jpe?g|png|gif|webp|heic)$/i;
 function galType(f) { const m = f.type || ''; return m.startsWith('video') || /\.(mp4|m4v|mov|webm|mkv|3gp)$/i.test(f.name) ? 'video' : m.startsWith('image') || galExt.test(f.name) ? 'image' : null; }
-function vgOpen(target) {   // target = Feld aus dem Import-Dialog (dann: antippen = übernehmen)
-  GAL.target = target; GAL.sel.clear();
+const mmss = s => { s = Math.round(s || 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const SNIP_N = 10;
+// Alles, was irgendwo in der App als Video/Foto steckt, kommt auch in die Galerie (und wird dadurch nie gelöscht)
+function galSync() {
+  if (!S || !Array.isArray(S.gal)) return;
+  const have = new Set(S.gal.map(g => g.media.id)); let add = 0;
+  walkMedia({w:S.wheels, j:S.joker, t:S.timer, p:S.presets, s:S.snapshot, l:S.vlib}, f => {
+    const m = f.media; if (!m || have.has(m.id) || !/^(video|image)$/.test(m.type)) return;
+    have.add(m.id); S.gal.push({gid:'g' + uid(), media:{id:m.id, type:m.type, name:m.name || 'Medium', mime:m.mime || ''}, size:0, added:Date.now()}); add++;
+  });
+  return add;
+}
+const galByKey = k => k[0] === 'g' ? S.gal.find(x => 'g:' + x.gid === k) : S.seqs.find(x => 's:' + x.id === k);
+function seqMedia(q) {
+  const p = q.parts[0];
+  const m = {id:p.mid, type:'video', name:q.name, mime:p.mime || '', start:+p.start || 0, end:+p.end || 0, seq:q.id};
+  if (q.parts.length > 1) m.parts = q.parts.map(x => ({...x}));
+  return m;
+}
+const keyMedia = k => { const it = galByKey(k); if (!it) return null; return k[0] === 'g' ? {...it.media, start:0, end:0} : seqMedia(it); };
+const seqLen = q => q.parts.reduce((a, p) => a + Math.max(0, (+p.end || 0) - (+p.start || 0)), 0);
+function galList() {
+  if (GAL.tab === 'vid') return S.gal.slice().reverse().map(g => ({k:'g:' + g.gid, it:g, type:g.media.type, mid:g.media.id, name:g.media.name, t0:0}));
+  const f = GAL.filt;
+  return S.seqs.filter(q => !f || q.cat === f || q.cat.startsWith(f + '/')).slice().reverse()
+    .map(q => ({k:'s:' + q.id, it:q, type:'video', mid:q.parts[0].mid, name:q.name, t0:+q.parts[0].start || 0}));
+}
+function vgOpen(target) {   // target = Feld aus dem Import-Dialog
+  GAL.target = target; GAL.sel = []; GAL.ed = null;
   if (!target) closePanel();
+  if (galSync()) save();
   $('#vgal').classList.add('show'); vgRender();
 }
-function vgClose() { if (GP.v || GP.i >= 0) gpClose(); $('#vgal').classList.remove('show'); $('#vgGrid').querySelectorAll('video').forEach(v => v.pause()); }
-function vgAdd(files) {
-  const seen = new Set(GAL.items.map(x => x.name + '|' + x.file.size));
-  [...files].filter(f => galType(f) && !seen.has(f.name + '|' + f.size)).forEach(f => GAL.items.push({file:f, name:f.webkitRelativePath || f.name, type:galType(f), url:URL.createObjectURL(f)}));
-  GAL.items.sort((a, b) => a.name.localeCompare(b.name, 'de', {numeric:true}));
-  vgRender();
-}
-const mmss = s => { s = Math.round(s || 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
-let vgObs = null;
-const SNIP_N = 10, SNIP_MS = 1100;   // Mini-Vorschau: 10 kurze Ausschnitte nacheinander, in Schleife
-const vgTargetWheel = () => GAL.target && GAL.target.kind === 'wheel' ? GAL.target : null;
-const vgWheelName = () => { const w = S.wheels[vgTargetWheel() ? GAL.target.w : S.active]; return w.title || 'Rad ' + (S.wheels.indexOf(w) + 1); };
-function vgRender() {
-  const g = $('#vgGrid'), tgt = GAL.target;
-  vgBar();
-  $('#vgInfo').textContent = GAL.items.length
-    ? `${GAL.items.length} Dateien · Antippen = auswählen (mehrere möglich) · 🔍 = groß ansehen und spulen`
-    : '';
-  g.innerHTML = GAL.items.length ? GAL.items.map((it, i) => `<div class="vgc ${GAL.sel.has(i) ? 'sel' : ''}" data-i="${i}">
-      ${it.type === 'video' ? `<video data-src="${it.url}" muted playsinline preload="none"></video><b class="dur" data-d="${i}"></b><i class="snip">${'<s></s>'.repeat(SNIP_N)}</i>` : `<img src="${it.url}" loading="lazy" alt="">`}
-      <b class="ck">${GAL.sel.has(i) ? '✓' : ''}</b>
-      <div class="vi"><span>${esc(it.name)}</span>${(it.file.size / 1048576).toFixed(0)} MB<button class="zoom" data-zoom="${i}" title="Groß ansehen und spulen">🔍</button>${tgt ? `<button class="take" data-take="${i}">✔ Nur dieses</button>` : ''}</div></div>`).join('')
-    : `<div id="vgEmpty">Wähle einen Ordner oder mehrere Videos und Fotos.<br>Hier laufen sie dann als kleine Vorschau, und du suchst aus.</div>`;
-  // Vorschau nur für sichtbare Karten: laden, abspielen; unsichtbare anhalten
-  if (vgObs) vgObs.disconnect();
-  vgObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => {
-    const v = e.target; v._vis = e.isIntersecting;
-    if (e.isIntersecting) { if (!v.src) vgThumb(v); else if (v._ok && !GP.v) v.play().catch(() => {}); } else v.pause();
-  }), {root:g, rootMargin:'100px'}) : null;
-  g.querySelectorAll('video[data-src]').forEach(v => vgObs ? vgObs.observe(v) : (v._vis = true, vgThumb(v)));
-}
-function vgThumb(v) {
-  v.preload = 'metadata'; v.src = v.dataset.src; v.muted = true; v.loop = true;
-  v.addEventListener('loadedmetadata', () => {
-    v._ok = true; v._k = 0;
-    const d = v.parentNode.querySelector('.dur'); if (d) d.textContent = mmss(v.duration);
-    try { v.currentTime = vgSnipAt(v, 0); } catch (e) { }
-    if (v._vis && !GP.v) v.play().catch(() => {});
-  }, {once:true});
-}
-const vgSnipAt = (v, k) => (v.duration || 0) * (k + 0.5) / SNIP_N;
-// Ein Takt für alle sichtbaren Vorschauen: zum nächsten Ausschnitt springen
-setInterval(() => {
-  if (!$('#vgal').classList.contains('show') || GP.v) return;
-  $('#vgGrid').querySelectorAll('video').forEach(v => {
-    if (!v._ok || !v._vis || !isFinite(v.duration) || v.duration < 2) return;
-    v._k = ((v._k || 0) + 1) % SNIP_N;
-    try { v.currentTime = vgSnipAt(v, v._k); } catch (e) { }
-    if (v.paused) v.play().catch(() => {});
-    const bars = v.parentNode.querySelectorAll('.snip s'); bars.forEach((b, j) => b.classList.toggle('on', j === v._k));
-  });
-}, SNIP_MS);
-function vgBar() {
-  const n = GAL.sel.size, tw = vgTargetWheel();
-  $('#vgSpread').style.display = n && (!GAL.target || tw) ? '' : 'none';
-  $('#vgSpread').textContent = tw ? `${n} ab Feld ${GAL.target.f + 1} einfügen` : `${n} auf Felder von „${vgWheelName()}“ verteilen`;
-  $('#vgAll').style.display = GAL.items.length ? '' : 'none';
-  $('#vgAll').textContent = n === GAL.items.length && n ? '☐ Keins' : '☑ Alle';
-  vgCatUi();
-}
-function vgToggle(i) {
-  GAL.sel.has(i) ? GAL.sel.delete(i) : GAL.sel.add(i);
-  const card = $('#vgGrid').querySelector(`.vgc[data-i="${i}"]`);
-  if (card) { card.classList.toggle('sel', GAL.sel.has(i)); card.querySelector('.ck').textContent = GAL.sel.has(i) ? '✓' : ''; }
-  vgBar(); if (GP.i === i) gpUi();
-}
-$('#vgGrid').addEventListener('click', e => {
-  const take = e.target.closest('[data-take]'), zoom = e.target.closest('[data-zoom]'), card = e.target.closest('.vgc');
-  if (take) { const it = GAL.items[+take.dataset.take]; vgClose();
-    mimpShow(URL.createObjectURL(it.file), it.type, it.file.name, it.file.type || '', 0, 0, true); MI.file = it.file;
-    $('#mInfo').textContent = `${it.file.name} · ${(it.file.size / 1048576).toFixed(1)} MB · noch nicht gespeichert`; return; }
-  if (zoom) { gpOpen(+zoom.dataset.zoom); return; }
-  if (card) vgToggle(+card.dataset.i);
-});
-$('#vgAll').onclick = () => { if (GAL.sel.size === GAL.items.length) GAL.sel.clear(); else GAL.items.forEach((x, i) => GAL.sel.add(i)); vgRender(); };
-
-/* ---------- Große Vorschau mit Spulen ---------- */
-const GP = {i:-1, v:null};
-function gpOpen(i) {
-  const it = GAL.items[i]; GP.i = i;
-  $('#vgGrid').querySelectorAll('video').forEach(v => v.pause());
-  const box = $('#gpMedia');
-  box.innerHTML = it.type === 'video' ? `<video src="${it.url}" playsinline autoplay></video>` : `<img src="${it.url}" alt="">`;
-  GP.v = box.querySelector('video');
-  $('#gpCtl').style.display = GP.v ? '' : 'none';
-  $('#gpName').textContent = it.name;
-  if (GP.v) {
-    GP.v.addEventListener('loadedmetadata', () => { $('#gpPos').max = GP.v.duration || 1; gpChips(); gpUi(); });
-    GP.v.addEventListener('timeupdate', gpUi); GP.v.addEventListener('play', gpUi); GP.v.addEventListener('pause', gpUi);
-  }
-  $('#vgPrev').classList.add('show'); gpUi();
-}
-function gpChips() {
-  const v = GP.v; if (!v || !isFinite(v.duration)) return;
-  $('#gpSnips').innerHTML = Array.from({length:SNIP_N}, (_, k) => `<button data-gk="${k}">${mmss(vgSnipAt(v, k))}</button>`).join('');
-}
-function gpUi() {
-  const v = GP.v, sel = GAL.sel.has(GP.i);
-  $('#gpSel').textContent = sel ? '✓ Ausgewählt' : '☐ Auswählen'; $('#gpSel').classList.toggle('on', sel);
-  if (!v) return;
-  $('#gpPlay').textContent = v.paused ? '▶' : '❚❚';
-  if (!GP.drag) $('#gpPos').value = v.currentTime;
-  $('#gpTime').textContent = mmss(v.currentTime) + ' / ' + mmss(v.duration);
-}
-function gpClose() {
-  if (GP.v) GP.v.pause(); $('#gpMedia').innerHTML = ''; GP.v = null; GP.i = -1; $('#vgPrev').classList.remove('show');
-  $('#vgGrid').querySelectorAll('video').forEach(v => { if (v._ok && v._vis) v.play().catch(() => {}); });
-}
-const gpSeek = d => { if (GP.v) GP.v.currentTime = clamp(GP.v.currentTime + d, 0, GP.v.duration || 0); };
-$('#gpPlay').onclick = () => GP.v && (GP.v.paused ? GP.v.play().catch(() => {}) : GP.v.pause());
-$('#gpBack').onclick = () => gpSeek(-10); $('#gpFwd').onclick = () => gpSeek(10);
-$('#gpBack1').onclick = () => gpSeek(-1); $('#gpFwd1').onclick = () => gpSeek(1);
-$('#gpPos').addEventListener('input', e => { GP.drag = true; if (GP.v) GP.v.currentTime = +e.target.value; $('#gpTime').textContent = mmss(+e.target.value) + ' / ' + mmss(GP.v && GP.v.duration); });
-$('#gpPos').addEventListener('change', () => { GP.drag = false; });
-$('#gpSnips').addEventListener('click', e => { const b = e.target.closest('[data-gk]'); if (b && GP.v) { GP.v.currentTime = vgSnipAt(GP.v, +b.dataset.gk); GP.v.play().catch(() => {}); } });
-$('#gpSel').onclick = () => vgToggle(GP.i);
-$('#gpPrevI').onclick = () => { const i = GP.i; gpClose(); gpOpen((i - 1 + GAL.items.length) % GAL.items.length); };
-$('#gpNextI').onclick = () => { const i = GP.i; gpClose(); gpOpen((i + 1) % GAL.items.length); };
-$('#gpClose').onclick = gpClose;
-
-/* ---------- Ausgewählte auf Felder verteilen bzw. ab einem Feld einfügen ---------- */
-$('#vgSpread').onclick = async () => {
-  const tw = vgTargetWheel(), wi = tw ? tw.w : S.active, w = S.wheels[wi], idx = [...GAL.sel].sort((a, b) => a - b);
-  let fi = tw ? tw.f : 0, n = 0, first = !!tw;
-  toast('Speichere …', 2000);
-  for (const i of idx) {
-    if (!first) while (fi < w.fields.length && w.fields[fi].media) fi++;   // sonst nur Felder ohne Video/Foto
-    first = false;
-    if (fi >= w.fields.length) { if (w.fields.length >= MAX_FIELDS) break; w.fields.push(newField()); }
-    const it = GAL.items[i], id = 'm' + uid();
-    try { await DB.put(id, it.file); } catch (e) { toast('Fehler beim Speichern: ' + e.message); break; }
-    const f = w.fields[fi], old = f.media && f.media.id;
-    f.media = {id, type:it.type, name:it.file.name, mime:it.file.type || '', start:0, end:0};
-    if (old) delMedia(old);
-    if (!f.text) f.text = it.file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').slice(0, 40);
-    fi++; n++;
+function vgClose() { edClose(); $('#vgal').classList.remove('show'); }
+async function vgAdd(files, quiet) {
+  const seen = new Map(S.gal.map(g => [g.media.name + '|' + g.size, g])), out = [];
+  const all = [...files].filter(f => galType(f));
+  all.forEach(f => { const g = seen.get(f.name + '|' + f.size); if (g) out.push(g); });   // schon in der Galerie
+  const list = all.filter(f => !seen.has(f.name + '|' + f.size));
+  if (!list.length) { if (!quiet) toast(out.length ? 'Schon alle in der Galerie' : 'Keine Videos oder Fotos gefunden'); return out; }
+  let n = 0;
+  for (const f of list) {
+    toast(`Speichere ${n + 1} von ${list.length} …`, 4000);
+    const id = 'm' + uid();
+    try { await DB.put(id, f); } catch (e) { toast('Fehler beim Speichern: ' + e.message); break; }
+    const g = {gid:'g' + uid(), media:{id, type:galType(f), name:f.name, mime:f.type || ''}, size:f.size, added:Date.now()};
+    S.gal.push(g); out.push(g); n++;
   }
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
-  GAL.sel.clear(); save(); render(); vgClose();
-  if (tw) closeMediaDlg(false);
-  renderPanel();
-  toast(`${n} Videos/Fotos eingefügt${n < idx.length ? ' (Rad voll)' : ''} · Start/Stopp je Feld über „Vorschau“`, 5000);
+  save();
+  if (!quiet) { GAL.tab = 'vid'; vgRender(); toast(`${n} in der Galerie gespeichert – antippen zum Bearbeiten, Kreis zum Auswählen`, 3500); }
+  return out;
+}
+// Medien ab einem Feld einsetzen (Rad: dieses und folgende Felder; Joker/Timer: nur das erste)
+function galInsert(t, ms) {
+  let n = 0;
+  if (t && t.kind !== 'wheel') { const f = fieldOf(t); f.media = ms[0]; n = 1; }
+  else {
+    const wi = t ? t.w : S.active, w = S.wheels[wi]; let fi = t ? t.f : 0, first = !!t;
+    for (const m of ms) {
+      if (!first) while (fi < w.fields.length && w.fields[fi].media) fi++;   // sonst nur Felder ohne Video/Foto
+      first = false;
+      if (fi >= w.fields.length) { if (w.fields.length >= MAX_FIELDS) break; w.fields.push(newField()); }
+      const f = w.fields[fi]; f.media = m;
+      if (!f.text) f.text = String(m.name).replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').slice(0, 40);
+      fi++; n++;
+    }
+  }
+  save(); render(); renderPanel();
+  toast(`${n} eingefügt${n < ms.length ? ' (Rad voll, max. ' + MAX_FIELDS + ' Felder)' : ''} · alle liegen auch in der Galerie`, 4000);
+  return n;
+}
+
+/* ---------- Übersicht ---------- */
+let vgObs = null;
+function vgRender() {
+  const g = $('#vgGrid'), L = galList();
+  $('#tabVid').classList.toggle('on', GAL.tab === 'vid'); $('#tabSeq').classList.toggle('on', GAL.tab === 'seq');
+  $('#tabVid').textContent = `🎬 Videos & Fotos (${S.gal.length})`; $('#tabSeq').textContent = `✂ Sequenzen (${S.seqs.length})`;
+  $('#vgFilter').innerHTML = GAL.tab !== 'seq' ? '' : [['', 'Alle']].concat(seqCats().flatMap(c => [[c.name, c.name]].concat(c.subs.map(sb => [c.name + '/' + sb, '› ' + sb]))))
+    .map(([v, l]) => `<button class="chip ${GAL.filt === v ? 'on' : ''}" data-filt="${esc(v)}">${esc(l)}</button>`).join('') + `<button class="chip" data-act="scNew">＋ Kategorie</button>`;
+  $('#vgFilter').style.display = GAL.tab === 'seq' ? '' : 'none';
+  $('#vgInfo').textContent = GAL.tab === 'vid'
+    ? (S.gal.length ? 'Antippen = groß ansehen und bearbeiten · Kreis oben links = auswählen (mehrere möglich) · alles bleibt dauerhaft gespeichert' : '')
+    : (S.seqs.length ? 'Sequenzen sind gespeicherte Ausschnitte. Mehrere auswählen = zu einer neuen Sequenz zusammensetzen.' : '');
+  g.innerHTML = L.length ? L.map(x => `<div class="vgc ${GAL.sel.includes(x.k) ? 'sel' : ''} ${GAL.ed === x.k ? 'on' : ''}" data-k="${x.k}">
+      ${x.type === 'video' ? `<video data-mid="${x.mid}" data-t0="${x.t0}" muted playsinline preload="none"></video>` : `<img data-mid="${x.mid}" alt="">`}
+      <b class="dur">${x.k[0] === 's' ? (x.it.parts.length > 1 ? x.it.parts.length + ' Teile · ' : '') + mmss(seqLen(x.it)) : ''}</b>
+      <b class="ck" data-ck="${x.k}">${GAL.sel.includes(x.k) ? GAL.sel.indexOf(x.k) + 1 : ''}</b>
+      <div class="vi"><span>${esc(x.name)}</span>${x.k[0] === 's' ? `<small>${esc(x.it.cat.replace('/', ' › '))}</small>` : ''}</div></div>`).join('')
+    : `<div id="vgEmpty">${GAL.tab === 'vid' ? 'Noch nichts in der Galerie.<br>Mit „＋ Videos / Fotos“ oder „📁 Ordner“ hinzufügen – alles wird dauerhaft gespeichert.' : 'Noch keine Sequenzen.<br>Video antippen, Anfang und Ende einstellen, „✂ Als Sequenz speichern“.'}</div>`;
+  if (vgObs) vgObs.disconnect();
+  vgObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { vgObs.unobserve(e.target); vgThumb(e.target); } }), {root:g, rootMargin:'200px'}) : null;
+  g.querySelectorAll('[data-mid]').forEach(v => vgObs ? vgObs.observe(v) : vgThumb(v));
+  vgBar();
+}
+// Vorschaubild: nur ein stehendes Bild, kein Abspielen
+async function vgThumb(el) {
+  const u = await mediaURL(el.dataset.mid); if (!u) return;
+  if (el.tagName === 'IMG') { el.src = u; return; }
+  el.preload = 'metadata'; el.src = u;
+  el.addEventListener('loadedmetadata', () => {
+    const d = el.parentNode.querySelector('.dur'); if (d && !d.textContent) d.textContent = mmss(el.duration);
+    try { el.currentTime = +el.dataset.t0 || Math.min(2, (el.duration || 0) * 0.15); } catch (e) { }
+  }, {once:true});
+}
+function vgBar() {
+  const n = GAL.sel.length, tw = GAL.target && GAL.target.kind === 'wheel' ? GAL.target : null;
+  $('#vgSelBar').style.display = n ? 'flex' : 'none';
+  $('#vgSelN').textContent = `${n} ausgewählt`;
+  $('#vgSpread').textContent = tw ? `In Feld ${tw.f + 1}${n > 1 ? ' und folgende' : ''} einfügen` : GAL.target ? 'Übernehmen' : `Auf Felder von „${S.wheels[S.active].title || 'Rad ' + (S.active + 1)}“ verteilen`;
+  $('#vgJoin').style.display = GAL.tab === 'seq' && n >= 2 ? '' : 'none';
+  const sel = $('#vgCat'), keep = sel.value; sel.innerHTML = vcatOpts('', true, true); if (keep) sel.value = keep;
+}
+$('#vgGrid').addEventListener('click', e => {
+  const ck = e.target.closest('[data-ck]'), card = e.target.closest('.vgc');
+  if (ck) { vgToggle(ck.dataset.ck); return; }
+  if (card) edOpen(card.dataset.k);
+});
+function vgToggle(k) {
+  const i = GAL.sel.indexOf(k); i >= 0 ? GAL.sel.splice(i, 1) : GAL.sel.push(k);
+  $('#vgGrid').querySelectorAll('.vgc').forEach(c => { const j = GAL.sel.indexOf(c.dataset.k); c.classList.toggle('sel', j >= 0); c.querySelector('.ck').textContent = j >= 0 ? j + 1 : ''; });
+  vgBar(); if (GAL.ed === k) edSelUi();
+}
+$('#vgHead').addEventListener('click', e => { const t = e.target.closest('[data-tab]'); if (!t) return; GAL.tab = t.dataset.tab; GAL.sel = []; edClose(); vgRender(); });
+$('#vgFilter').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.act === 'scNew') { catRow('seq'); return; }
+  GAL.filt = b.dataset.filt; vgRender();
+});
+$('#vgAll').onclick = () => { const L = galList().map(x => x.k); GAL.sel = GAL.sel.length === L.length ? [] : L; vgRender(); };
+$('#vgNone').onclick = () => { GAL.sel = []; vgRender(); };
+
+/* ---------- Auswahl einsetzen ---------- */
+$('#vgSpread').onclick = () => {
+  const t = GAL.target, ms = GAL.sel.map(keyMedia).filter(Boolean); if (!ms.length) return;
+  GAL.sel = []; vgClose(); if (t) closeMediaDlg(false);
+  galInsert(t, ms);
+};
+$('#vgLibBtn').onclick = () => {
+  const cat = $('#vgCat').value; if (!cat) { toast('Bitte Kategorie wählen oder mit ＋ neu anlegen'); return; }
+  const ms = GAL.sel.map(keyMedia).filter(Boolean);
+  if (cat.startsWith('seq:')) {   // ausgewählte Sequenzen in eine Sequenz-Kategorie verschieben
+    const c = cat.slice(4); GAL.sel.forEach(k => { if (k[0] === 's') galByKey(k).cat = c; });
+  } else ms.forEach(m => S.vlib.push({cat, media:m}));
+  GAL.sel = []; save(); vgRender(); renderPanel();
+  toast(`${ms.length} in „${cat.replace('seq:', '✂ ').replace('/', ' › ')}“`, 3000);
+};
+$('#vgJoin').onclick = () => {
+  const qs = GAL.sel.map(galByKey).filter(q => q && q.parts); if (qs.length < 2) return;
+  edClose(); seqSaveDlg(qs.map(q => q.name).join(' + ').slice(0, 60), qs[0].cat, name => ({parts:qs.flatMap(q => q.parts.map(p => ({...p})))}), 'zusammengesetzt');
 };
 
-/* ---------- Kategorie wählen oder direkt neu anlegen ---------- */
-function vgCatUi() {
-  const on = !GAL.target && GAL.sel.size > 0, sel = $('#vgCat'), keep = sel.value;
-  sel.style.display = $('#vgLibBtn').style.display = $('#vgCatNewBtn').style.display = on ? '' : 'none';
-  if (!on) $('#vgCatRow').style.display = 'none';
-  if (on) { sel.innerHTML = vcatOpts('', true); if (keep) sel.value = keep; }
-  $('#vgLibBtn').textContent = `🏷 ${GAL.sel.size} in Kategorie speichern`;
-}
-$('#vgCatNewBtn').onclick = () => { const r = $('#vgCatRow'); r.style.display = r.style.display === 'none' ? 'flex' : 'none'; if (r.style.display === 'flex') $('#vgCatName').focus(); };
-$('#vgCatOk').onclick = () => {
-  const name = $('#vgCatName').value.trim(), sub = $('#vgCatSub').value.trim();
-  if (!name) { toast('Bitte einen Namen für die Kategorie eingeben'); return; }
-  const v = vcatAdd(name, sub);
-  $('#vgCatName').value = $('#vgCatSub').value = ''; $('#vgCatRow').style.display = 'none';
-  vgCatUi(); $('#vgCat').value = v; toast(`Kategorie „${v.replace('/', ' › ')}“ angelegt`);
-};
-// legt Kategorie (und optional Unterkategorie) an und gibt den Wert für die Auswahl zurück
-function vcatAdd(c, sb) {
-  const L = vcats(); let e = L.find(x => x.name.toLowerCase() === c.toLowerCase()); if (!e) { e = {name:c, subs:[]}; L.push(e); }
+/* ---------- Kategorien (Video- und Sequenz-Kategorien) ---------- */
+const seqCats = () => S.seqCats;
+function catAdd(list, c, sb) {
+  let e = list.find(x => x.name.toLowerCase() === c.toLowerCase()); if (!e) { e = {name:c, subs:[]}; list.push(e); }
   if (sb && !e.subs.some(x => x.toLowerCase() === sb.toLowerCase())) e.subs.push(sb);
-  S.vcats = L; save();
   const s2 = sb ? e.subs.find(x => x.toLowerCase() === sb.toLowerCase()) : '';
   return s2 ? e.name + '/' + s2 : e.name;
 }
-$('#vgLibBtn').onclick = async () => {
-  const cat = $('#vgCat').value; if (!cat) { toast('Bitte Kategorie wählen oder mit ＋ neu anlegen'); return; }
-  let n = 0; toast('Speichere …', 2000);
-  for (const i of [...GAL.sel]) {
-    const it = GAL.items[i], id = 'm' + uid();
-    try { await DB.put(id, it.file); } catch (e) { toast('Fehler beim Speichern: ' + e.message); break; }
-    S.vlib.push({cat, media:{id, type:it.type, name:it.file.name, mime:it.file.type || '', start:0, end:0}}); n++;
-  }
-  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
-  GAL.sel.clear(); save(); vgRender(); renderPanel();
-  toast(`${n} in „${cat.replace('/', ' › ')}“ gespeichert`, 3500);
+function vcatAdd(c, sb) { const L = vcats(); const v = catAdd(L, c, sb); S.vcats = L; save(); return v; }
+let catRowFor = 'vid', catRowCb = null;
+function catRow(kind, cb) {
+  catRowFor = kind; catRowCb = cb || null; const r = $('#vgCatRow');
+  $('#vgCatTitle').textContent = kind === 'seq' ? 'Neue Sequenz-Kategorie' : 'Neue Video-Kategorie';
+  r.style.display = 'flex'; $('#vgCatName').focus();
+}
+$('#vgCatNewBtn').onclick = () => catRow('vid');
+$('#vgCatX').onclick = () => { $('#vgCatRow').style.display = 'none'; };
+$('#vgCatOk').onclick = () => {
+  const name = $('#vgCatName').value.trim(), sub = $('#vgCatSub').value.trim();
+  if (!name) { toast('Bitte einen Namen eingeben'); return; }
+  const v = catRowFor === 'seq' ? catAdd(S.seqCats, name, sub) : vcatAdd(name, sub);
+  save(); $('#vgCatName').value = $('#vgCatSub').value = ''; $('#vgCatRow').style.display = 'none';
+  vgRender(); if (catRowFor === 'vid') $('#vgCat').value = v;
+  if (catRowCb) catRowCb(v);
+  toast(`Kategorie „${v.replace('/', ' › ')}“ angelegt`);
 };
+const seqCatOpts = cur => seqCats().map(c => `<optgroup label="${esc(c.name)}"><option value="${esc(c.name)}" ${cur === c.name ? 'selected' : ''}>${esc(c.name)}</option>` +
+  c.subs.map(sb => `<option value="${esc(c.name + '/' + sb)}" ${cur === c.name + '/' + sb ? 'selected' : ''}>› ${esc(sb)}</option>`).join('') + '</optgroup>').join('');
+
+/* ---------- Bearbeitungsfeld ---------- */
+const ED = {v:null, k:null, it:null, A:0, B:0, pi:0, loop:true};
+function edOpen(k) {
+  edClose(true);
+  const it = galByKey(k); if (!it) return;
+  GAL.ed = k; ED.k = k; ED.it = it; ED.pi = 0;
+  $('#vgGrid').querySelectorAll('.vgc').forEach(c => c.classList.toggle('on', c.dataset.k === k));
+  const isSeq = k[0] === 's', multi = isSeq && it.parts.length > 1, type = isSeq ? 'video' : it.media.type, name = isSeq ? it.name : it.media.name;
+  const tw = GAL.target, tgtTxt = tw ? (tw.kind === 'joker' ? 'für den Joker' : `in Feld ${tw.f + 1}`) : '';
+  $('#vgEd').innerHTML = `<div class="edHead"><b>${isSeq ? '✂ ' : type === 'video' ? '🎬 ' : '🖼 '}${esc(name)}</b><button class="b" id="edX">✕</button></div>
+    <div id="edMedia"></div>
+    ${type === 'video' ? `<div class="edRow"><button class="b" id="edB10">⏪ 10</button><button class="b" id="edB1">◀ 1</button><button class="b pri" id="edPlay">❚❚</button><button class="b" id="edF1">1 ▶</button><button class="b" id="edF10">10 ⏩</button><b id="edTime">0:00</b></div>
+      <input id="edPos" type="range" min="0" max="1" step="0.05" value="0">
+      <div class="edLab">Vorschau-Sprünge</div><div id="edSnips"></div>
+      ${multi ? `<div class="edLab">Teile dieser Sequenz</div><div id="edParts"></div>` : `
+      <div class="edLab">Bereich – nur dieser Teil wird gezeigt</div>
+      <div class="trim"><i class="trk"></i><i class="rng" id="edRng"></i><input id="edA" type="range" min="0" max="1" step="0.05" value="0"><input id="edBB" type="range" min="0" max="1" step="0.05" value="1"></div>
+      <div class="edRow"><button class="b" id="edSetA">⟦ Anfang = jetzt</button><b id="edAB">0:00 – 0:00</b><button class="b" id="edSetB">Ende = jetzt ⟧</button><button class="b" id="edAll">↺ Ganzes Video</button></div>
+      <label class="edChk"><input type="checkbox" id="edLoop" checked> Nur den Bereich abspielen (Schleife)</label>`}` : ''}
+    <div class="edActs">
+      <button class="b" id="edSel"></button>
+      ${tw ? `<button class="b pri" id="edTake">✔ ${type === 'video' && !multi ? 'Bereich ' : ''}${tgtTxt} übernehmen</button>` : ''}
+      ${type === 'video' && !multi ? `<button class="b pri" id="edSeq">✂ ${isSeq ? 'Als neue Sequenz' : 'Bereich als Sequenz'} speichern</button>` : ''}
+      ${isSeq && !multi ? '<button class="b" id="edUpd">💾 Bereich dieser Sequenz ändern</button>' : ''}
+      ${isSeq ? `<label class="edCat">Kategorie <select id="edCat">${seqCatOpts(it.cat)}</select></label><button class="b" id="edDel">🗑 Sequenz löschen</button>` : ''}
+    </div>
+    <div id="edSave"></div>`;
+  $('#vgal').classList.add('editing');
+  edSelUi();
+  $('#edX').onclick = () => edClose();
+  $('#edSel').onclick = () => vgToggle(k);
+  if ($('#edTake')) $('#edTake').onclick = edTake;
+  if ($('#edSeq')) $('#edSeq').onclick = () => seqSaveDlg(isSeq ? it.name + ' (Teil)' : name.replace(/\.[^.]+$/, ''), isSeq ? it.cat : (GAL.filt || (seqCats()[0] && seqCats()[0].name) || ''),
+      () => ({parts:[{mid:ED.mid, type:'video', mime:ED.mime, name:ED.srcName, start:+ED.A.toFixed(2), end:+ED.B.toFixed(2)}]}), 'gespeichert');
+  if ($('#edUpd')) $('#edUpd').onclick = () => { Object.assign(it.parts[0], {start:+ED.A.toFixed(2), end:+ED.B.toFixed(2)}); save(); vgRender(); edOpen(k); toast('Bereich der Sequenz geändert'); };
+  if ($('#edCat')) $('#edCat').onchange = e => { it.cat = e.target.value; save(); vgRender(); };
+  if ($('#edDel')) $('#edDel').onclick = e => { const b = e.target; if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Wirklich löschen? (Video bleibt)'; return; }
+    S.seqs = S.seqs.filter(q => q !== it); GAL.sel = GAL.sel.filter(x => x !== k); save(); edClose(); vgRender(); toast('Sequenz gelöscht – das Video bleibt in der Galerie'); };
+  if (type === 'video') edVideo(); else edImage();
+}
+async function edImage() { const u = await mediaURL(ED.it.media.id); if (u) $('#edMedia').innerHTML = `<img src="${u}" alt="">`; }
+const edPart = () => ED.k[0] === 's' ? ED.it.parts[ED.pi] : null;
+async function edVideo() {
+  const isSeq = ED.k[0] === 's', p = edPart();
+  ED.mid = p ? p.mid : ED.it.media.id; ED.mime = p ? p.mime : ED.it.media.mime; ED.srcName = p ? p.name : ED.it.media.name;
+  const u = await mediaURL(ED.mid); if (!u || !$('#edMedia')) return;
+  const v = ED.v = document.createElement('video'); v.src = u; v.playsInline = true; v.setAttribute('playsinline', ''); v.autoplay = true;
+  $('#edMedia').innerHTML = ''; $('#edMedia').appendChild(v);
+  v.addEventListener('loadedmetadata', () => {
+    const d = v.duration || 0;
+    ED.A = p ? +p.start || 0 : 0; ED.B = p && +p.end > ED.A ? +p.end : d;
+    ['#edPos', '#edA', '#edBB'].forEach(s => { if ($(s)) $(s).max = d.toFixed(2); });
+    if ($('#edA')) { $('#edA').value = ED.A; $('#edBB').value = ED.B; }
+    v.currentTime = ED.A; v.play().catch(() => { v.muted = true; v.play().catch(() => {}); });
+    $('#edSnips').innerHTML = Array.from({length:SNIP_N}, (_, k) => { const t = ED.A + (ED.B - ED.A) * (k + 0.5) / SNIP_N; return `<button data-t="${t.toFixed(2)}">${mmss(t)}</button>`; }).join('');
+    if ($('#edParts')) edPartsUi();
+    edUi();
+  });
+  v.addEventListener('timeupdate', () => {
+    const multi = isSeq && ED.it.parts.length > 1, loop = multi || !$('#edLoop') || $('#edLoop').checked;
+    if (loop && ED.B > ED.A && v.currentTime >= ED.B - 0.04) {
+      if (multi) { ED.pi = (ED.pi + 1) % ED.it.parts.length; edVideo(); return; }
+      v.currentTime = ED.A;
+    }
+    edUi();
+  });
+  v.addEventListener('play', edUi); v.addEventListener('pause', edUi);
+  const seek = t => { v.currentTime = clamp(t, 0, v.duration || 0); edUi(); };
+  $('#edPlay').onclick = () => v.paused ? v.play().catch(() => {}) : v.pause();
+  $('#edB10').onclick = () => seek(v.currentTime - 10); $('#edF10').onclick = () => seek(v.currentTime + 10);
+  $('#edB1').onclick = () => seek(v.currentTime - 1); $('#edF1').onclick = () => seek(v.currentTime + 1);
+  $('#edPos').oninput = e => seek(+e.target.value);
+  $('#edSnips').onclick = e => { const b = e.target.closest('[data-t]'); if (b) { seek(+b.dataset.t); v.play().catch(() => {}); } };
+  if ($('#edA')) {
+    $('#edA').oninput = e => { ED.A = Math.min(+e.target.value, ED.B - 0.3); e.target.value = ED.A; seek(ED.A); };
+    $('#edBB').oninput = e => { ED.B = Math.max(+e.target.value, ED.A + 0.3); e.target.value = ED.B; seek(Math.max(ED.A, ED.B - 1.5)); };
+    $('#edSetA').onclick = () => { ED.A = Math.min(v.currentTime, ED.B - 0.3); $('#edA').value = ED.A; edUi(); };
+    $('#edSetB').onclick = () => { ED.B = Math.max(v.currentTime, ED.A + 0.3); $('#edBB').value = ED.B; edUi(); };
+    $('#edAll').onclick = () => { ED.A = 0; ED.B = v.duration || 0; $('#edA').value = 0; $('#edBB').value = ED.B; edUi(); };
+  }
+}
+function edUi() {
+  const v = ED.v; if (!v || !$('#edPlay')) return;
+  $('#edPlay').textContent = v.paused ? '▶' : '❚❚';
+  $('#edPos').value = v.currentTime;
+  $('#edTime').textContent = mmss(v.currentTime) + ' / ' + mmss(v.duration);
+  if ($('#edRng')) { const d = v.duration || 1; $('#edRng').style.left = (ED.A / d * 100) + '%'; $('#edRng').style.width = ((ED.B - ED.A) / d * 100) + '%';
+    $('#edAB').textContent = `${mmss(ED.A)} – ${mmss(ED.B)} (${(ED.B - ED.A).toFixed(1)} s)`; }
+}
+function edPartsUi() {
+  const q = ED.it;
+  $('#edParts').innerHTML = q.parts.map((p, i) => `<div class="edPart ${i === ED.pi ? 'on' : ''}"><span>${i + 1}. ${esc(p.name)} · ${mmss(p.start)}–${mmss(p.end)}</span>
+    <button class="b" data-pp="up" data-i="${i}" ${i ? '' : 'disabled'}>▲</button><button class="b" data-pp="dn" data-i="${i}" ${i < q.parts.length - 1 ? '' : 'disabled'}>▼</button>
+    <button class="b" data-pp="del" data-i="${i}" ${q.parts.length > 1 ? '' : 'disabled'}>✕</button></div>`).join('');
+  $('#edParts').onclick = e => {
+    const b = e.target.closest('[data-pp]'); if (!b || b.disabled) return; const i = +b.dataset.i, P = q.parts;
+    if (b.dataset.pp === 'del') P.splice(i, 1); else { const j = b.dataset.pp === 'up' ? i - 1 : i + 1; [P[i], P[j]] = [P[j], P[i]]; }
+    save(); vgRender(); edOpen(ED.k);
+  };
+}
+function edSelUi() { const on = GAL.sel.includes(ED.k); $('#edSel').textContent = on ? '✓ Ausgewählt' : '☐ Auswählen'; $('#edSel').classList.toggle('on', on); }
+function edClose(keepLayout) {
+  if (ED.v) { ED.v.pause(); ED.v.removeAttribute('src'); ED.v.load(); }
+  ED.v = null; ED.k = null; GAL.ed = null; $('#vgEd').innerHTML = '';
+  if (!keepLayout) { $('#vgal').classList.remove('editing'); $('#vgGrid').querySelectorAll('.vgc.on').forEach(c => c.classList.remove('on')); }
+}
+function edTake() {
+  const t = GAL.target, f = fieldOf(t), isSeq = ED.k[0] === 's';
+  let m;
+  if (isSeq && ED.it.parts.length > 1) m = seqMedia(ED.it);
+  else if (ED.k[0] === 'g' && ED.it.media.type === 'image') m = {...ED.it.media, start:0, end:0};
+  else { const d = ED.v ? ED.v.duration || 0 : 0; m = {id:ED.mid, type:'video', name:isSeq ? ED.it.name : ED.srcName, mime:ED.mime || '', start:+ED.A.toFixed(2), end:ED.B >= d - 0.05 ? 0 : +ED.B.toFixed(2)}; }
+  f.media = m; if (!f.text && t.kind === 'wheel') f.text = String(m.name).replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').slice(0, 40);
+  save(); render(); vgClose(); closeMediaDlg(false); renderPanel(); toast('Übernommen');
+}
+// Fragt Name und Kategorie ab und legt eine neue Sequenz an
+function seqSaveDlg(name, cat, make, word) {
+  const box = $('#edSave') || $('#vgSaveRow');
+  const html = `<div class="edLab">Neue Sequenz</div><div class="edRow">
+    <input id="sqName" value="${esc(name)}" placeholder="Name der Sequenz">
+    <select id="sqCat"><option value="">Kategorie wählen …</option>${seqCatOpts(cat)}</select>
+    <button class="b" id="sqNew">＋ Kategorie</button><button class="b pri" id="sqOk">💾 Speichern</button><button class="b" id="sqX">✕</button></div>`;
+  const host = $('#vgEd').innerHTML ? $('#edSave') : $('#vgSaveRow');
+  host.innerHTML = html; host.style.display = 'block';
+  $('#sqNew').onclick = () => catRow('seq', v => { $('#sqCat').innerHTML = '<option value="">Kategorie wählen …</option>' + seqCatOpts(v); });
+  $('#sqX').onclick = () => { host.innerHTML = ''; };
+  $('#sqOk').onclick = () => {
+    const c = $('#sqCat').value; if (!c) { toast('Bitte Kategorie wählen oder mit ＋ anlegen'); return; }
+    const q = Object.assign({id:'q' + uid(), name:$('#sqName').value.trim() || 'Sequenz', cat:c, added:Date.now()}, make());
+    S.seqs.push(q); save(); host.innerHTML = '';
+    GAL.tab = 'seq'; GAL.filt = ''; GAL.sel = []; edClose(); vgRender();
+    toast(`Sequenz „${q.name}“ ${word} (${c.replace('/', ' › ')})`, 3500);
+  };
+}
+
 $('#vgFiles').onclick = () => { $('#vgIn').value = ''; $('#vgIn').click(); };
 $('#vgDir').onclick = () => { const d = $('#vgInDir'); d.value = '';
   if (!('webkitdirectory' in d) || window.AndroidApp) { $('#vgIn').value = ''; $('#vgIn').click(); toast('Im Auswahlfenster den Ordner öffnen und mehrere Videos markieren', 4000); }
@@ -2985,7 +3165,9 @@ const VCATS_DEFAULT = [
   {name:'Glas-Spiele', subs:['Aus dem Glas trinken', 'Aus dem Glas in den Mund und zurück', 'Mund ins Glas leeren – Schwanz in den Mund']},
 ];
 const vcats = () => S.vcats || (S.vcats = JSON.parse(JSON.stringify(VCATS_DEFAULT)));
-const vcatOpts = (cur, req) => `<option value="">${req ? 'Kategorie wählen …' : '— keine'}</option>` + vcats().map(c =>
+const vcatOpts = (cur, req, noSeq) => `<option value="">${req ? 'Kategorie wählen …' : '— keine'}</option>` + (noSeq ? '' : (S.seqCats || []).map(c =>
+  `<optgroup label="✂ Sequenzen: ${esc(c.name)}"><option value="${esc('seq:' + c.name)}" ${cur === 'seq:' + c.name ? 'selected' : ''}>✂ ${esc(c.name)} (alle)</option>` +
+  c.subs.map(sb => `<option value="${esc('seq:' + c.name + '/' + sb)}" ${cur === 'seq:' + c.name + '/' + sb ? 'selected' : ''}>✂ ${esc(sb)}</option>`).join('') + '</optgroup>').join('')) + vcats().map(c =>
   `<optgroup label="${esc(c.name)}"><option value="${esc(c.name)}" ${cur === c.name ? 'selected' : ''}>${esc(c.name)} (alle)</option>` +
   c.subs.map(sb => `<option value="${esc(c.name + '/' + sb)}" ${cur === c.name + '/' + sb ? 'selected' : ''}>${esc(sb)}</option>`).join('') + '</optgroup>').join('');
 
@@ -3406,7 +3588,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110203;
+const APP_BUILD = 2026110204;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
