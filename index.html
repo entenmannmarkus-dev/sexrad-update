@@ -345,6 +345,48 @@
   #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#222;border:1px solid var(--bronze);color:var(--cream);
     padding:10px 16px;border-radius:10px;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none;max-width:80vw;text-align:center}
   #toast.show{opacity:1}
+  /* ---------- Einfache Bedienung: Menü, Startbildschirm, Schnell-Bearbeiten ---------- */
+  #bMenu{font-size:16px;padding:14px 0;position:relative}
+  #bMenu.new::after{content:'';position:absolute;top:6px;right:8px;width:12px;height:12px;border-radius:50%;background:#ff4d4d;box-shadow:0 0 8px #ff4d4d}
+  #bMenu,#bHome{display:none}
+  body.simple #bMenu,body.simple #bHome{display:block}
+  body.simple #bTimer,body.simple #bMode,body.simple #bFlow,body.simple #bUpd,body.simple #gear{display:none}
+  body.simple.setupOpen #gear{display:block}
+  .ov{position:fixed;inset:0;z-index:48;display:none;overflow:auto;background:radial-gradient(ellipse at top,#2a0c10 0,#0a0507 55%,#050505 100%);
+    color:var(--cream);padding:26px 22px 30px}
+  .ov.show{display:block}
+  .ovin{max-width:860px;margin:0 auto}
+  .ovx{position:fixed;top:14px;right:16px;width:54px;height:54px;border-radius:50%;border:1px solid #6d5531;background:#18110f;font-size:22px;z-index:2}
+  .hTitle{font-size:56px;margin:0;font-weight:800;letter-spacing:1px;color:#f6e8c6}
+  .hTitle em{color:#e0464e;font-style:normal}
+  .hMotto{margin:4px 0 18px;color:#c9a97a;font-size:19px;font-style:italic}
+  .hLab{margin:20px 0 8px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#a8988a}
+  .hGrid,.mGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+  .tile,.mb{text-align:left;border-radius:16px;border:1px solid #5a3a2a;padding:18px 16px;min-height:120px;
+    background:linear-gradient(160deg,#2b1316,#140a0b);box-shadow:0 8px 20px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08)}
+  .mb{min-height:84px;padding:14px;font-weight:700;font-size:17px}
+  .tile:active,.mb:active{transform:scale(.98)}
+  .tile .ti{font-size:34px;display:block;margin-bottom:6px}
+  .tile b{display:block;font-size:20px;color:#f6e8c6}
+  .tile small,.mb small{display:block;margin-top:5px;font-size:14px;font-weight:400;color:#bba98f;line-height:1.35}
+  .tile.main{border-color:#c9a24e;background:linear-gradient(160deg,#5a1218,#22090b)}
+  .mb.new{border-color:#ff4d4d}
+  .hRow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+  .hbtn{padding:14px 22px;border-radius:30px;border:0;font-weight:800;font-size:17px;color:#f6e8c6;
+    background:radial-gradient(circle at 40% 30%,#d0343a,#8a1219 60%,#3d0408)}
+  .hbtn.alt{background:#1d1d20;border:1px solid #4a4a4e;font-weight:600}
+  .wizIn{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+  .wizIn input{flex:1;min-width:160px;padding:14px;border-radius:12px;border:1px solid #5a3a2a;background:#120a0b;color:#f6e8c6;font-size:18px}
+  .tip{margin-top:18px;font-size:15px;color:#bba98f;line-height:1.5}
+  #qedit{position:fixed;z-index:47;display:none;width:min(440px,92vw);background:rgba(18,12,13,.98);border:1px solid #c9a24e;border-radius:14px;
+    padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.85);color:#eee}
+  #qedit.show{display:block}
+  #qedit h5{margin:0 0 8px;font-size:15px;color:#f2c45a}
+  #qedit textarea{width:100%;min-height:70px;border-radius:10px;border:1px solid #4a4a4e;background:#0c0c0e;color:#fff;padding:10px;font:inherit;font-size:16px;resize:vertical;-webkit-user-select:text;user-select:text}
+  .qeRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:9px;font-size:14px}
+  .qeRow select{padding:8px;border-radius:8px;background:#0c0c0e;color:#fff;border:1px solid #4a4a4e}
+  .qeRow .b{padding:9px 12px;border-radius:9px;border:1px solid #4a4a4e;background:#1d1d20;font-size:14px}
+  .qeRow .b.pri{background:#8a1219;border-color:#c9a24e}
   #portrait{display:none}
   @media (orientation:portrait){
     #portrait{display:block;position:fixed;top:8px;left:50%;transform:translateX(-50%);font-size:13px;color:#a8988a;z-index:5;pointer-events:none}
@@ -358,11 +400,13 @@
 <div id="rail">
   <div id="wlabel"></div>
   <button id="bSpin" class="spin">DREHEN</button>
+  <button id="bMenu" class="mbtn">☰ MENÜ</button>
   <button id="bTimer" class="mbtn">⏱ TIMER</button>
   <button id="bMode" class="mbtn gold">🎰 SLOT</button>
   <button id="bFlow" class="mbtn">🔗 ABLAUF</button>
   <button id="bUndo" class="mbtn" style="display:none">↩ VORHER</button>
   <button id="bEnd" class="mbtn gold" style="display:none">🏁 SESSION<br>ENDE</button>
+  <button id="bHome" class="mbtn">🏠 START</button>
 </div>
 <button id="bJoker" title="Joker">★<span>JOKER</span></button>
 <button id="bUpd" title="Update laden">⟳</button>
@@ -375,6 +419,9 @@
   <div class="ub"><button id="updReset" style="display:none">Original-Version</button><button id="updClose">Schließen</button><button id="updGo" class="pri" style="display:none">Jetzt laden</button></div>
 </div></div>
 <div id="panel"></div>
+<div id="home" class="ov"></div>
+<div id="menu" class="ov"></div>
+<div id="qedit"></div>
 
 <div id="result">
   <div id="rMedia"></div>
@@ -480,7 +527,7 @@ function newWheel(i) {
 function defaultState() {
   return {
     active:0,
-    settings:{sound:true, spinSec:6, speakMain:false, autoNext:5, resultSec:3, mode:'rad', slotHist:[]},
+    settings:{simple:true, home:true, named:false, sound:true, spinSec:6, speakMain:false, autoNext:5, resultSec:3, mode:'rad', slotHist:[]},
     toy:{enabled:false, url:'ws://127.0.0.1:12345', master:100},
     quiz:{names:{a:'Er', b:'Sie'}, ans:{}, learn:{}, stufe:{}, stufeSel:0, lvlOv:{}, thr:2.5, map:{}, timer:true, custom:{}, session:null, fb:null, sessions:[]},   // Vorlieben-Fragebogen   // Sexspielzeug über Intiface Central
     joker:{num:'', text:'JOKER', weight:1, next:-1, card:null, media:null, seqs:[]},   // seqs = gespeicherte Abfolgen   // eigenständiges Joker-Feld
@@ -1028,14 +1075,14 @@ function fieldFlags(f) {
   if (f.set) { S.flags[f.set] = Date.now(); toast('❄ Gemerkt für die nächste Session', 3500); }
   if (f.clear && S.flags[f.clear]) delete S.flags[f.clear];
 }   // Ergebnisse des letzten Durchlaufs (für Abläufe)
-async function doSpin(idx, depth = 0, jockey = false) {
+async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   if (busy) return;
   busy = true; ac(); setBusy(true); closePanel();
   S.active = idx; updateRail();
   const w = S.wheels[idx], vis = visibleIdx();
   const useFocus = jockey || isSlot() || vis.length > 1 || !vis.includes(idx);
   if (useFocus) { focus = {idx, p:0, jockey}; await tween(450, (t, now) => { focus.p = t; render(now); }); }
-  const res = await spinAnim(w, render, S.settings.spinSec * (jockey ? 1.3 : 1));
+  const res = await spinAnim(w, render, (secs || S.settings.spinSec) * (jockey ? 1.3 : 1));
   stopSound();
   await flashWin(w, res, render);
   w.history = [resultLine(w, w.fields[res], res), ...(w.history || [])].slice(0, 5);
@@ -1453,10 +1500,10 @@ function renderPanel() {
   const op = k => openSecs.has(k) ? 'open' : '';
   const chips = S.wheels.map((x, i) => `<div class="wchip ${i === S.active ? 'on' : ''}" data-act="sel" data-w="${i}">
       <input type="checkbox" data-act="en" data-w="${i}" ${x.enabled ? 'checked' : ''}><span>${esc(x.title || 'Rad ' + (i + 1))}</span></div>`).join('');
-  const nextOpts = (f, all) => `<option value="-1">— keine Aktion</option><optgroup label="Rad drehen">` +
+  const nextOpts = (f, all) => `<option value="-1">— danach nichts</option><optgroup label="Rad drehen">` +
       S.wheels.map((x, i) => (i === S.active && !all) ? '' :
       `<option value="w${i}" ${!f.card && f.next === i ? 'selected' : ''}>→ ${esc(x.title || 'Rad ' + (i + 1))}</option>`).join('') +
-      `</optgroup>` + (S.presets.length ? `<optgroup label="Speicherkarte laden &amp; drehen">` + S.presets.map(c =>
+      `</optgroup>` + (S.presets.length ? `<optgroup label="Gespeichertes Spiel laden &amp; drehen">` + S.presets.map(c =>
       `<option value="c${esc(c.id)}" ${f.card === c.id ? 'selected' : ''}>▶ ${c.kind === 'combo' ? '🎰' : '🎡'} ${esc(c.name)}</option>`).join('') + `</optgroup>` : '');
   const stepOpts = t => `<optgroup label="Rad drehen">` + S.wheels.map((x, i) =>
       `<option value="w${i}" ${t === 'w' + i ? 'selected' : ''}>🎡 ${esc(x.title || 'Rad ' + (i + 1))}</option>`).join('') + `</optgroup>` +
@@ -1468,7 +1515,7 @@ function renderPanel() {
     return `<div class="card ${c.kind}"><b>${c.kind === 'combo' ? '🎰' : '🎡'} ${esc(c.name)}</b><div class="meta">${meta}</div>
       <button data-ca="load" data-c="${esc(c.id)}">Laden</button><button class="go" data-ca="run" data-c="${esc(c.id)}">▶ Laden &amp; drehen</button>
       <button data-ca="share" data-c="${esc(c.id)}">📤 Übermitteln${lockTag()}</button><button data-ca="del" data-c="${esc(c.id)}">🗑</button></div>`;
-  }).join('') || '<div class="hint">Noch keine Speicherkarten.</div>';
+  }).join('') || '<div class="hint">Noch keine gespeicherten Spiele.</div>';
   const toyRow = (attr, t) => !S.toy.enabled ? '' : `<div class="toyrow">📳 <input type="number" min="0" max="100" ${attr} data-ty="lvl" value="${t.lvl}" title="Stärke in %, 0 = aus">%
       <input type="number" min="0.5" max="600" step="0.5" ${attr} data-ty="sec" value="${t.sec}" title="Dauer in Sekunden">s
       <select ${attr} data-ty="pat">${Object.entries(TOY_PATS).map(([k, v]) => `<option value="${k}" ${t.pat === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
@@ -1481,8 +1528,8 @@ function renderPanel() {
         <button class="x" data-fa="del" data-f="${i}" title="Feld löschen">✕</button>
       </div>
       <div class="fsub">
-        <label style="margin:0">Gewicht<input type="number" min="0" max="100" step="1" data-f="${i}" data-fp="weight" value="${f.weight}"></label>
-        <label style="margin:0">Aktion<select data-f="${i}" data-fp="next">${nextOpts(f)}</select></label>
+        <label style="margin:0">Wie oft?<input type="number" min="0" max="100" step="1" data-f="${i}" data-fp="weight" value="${f.weight}"></label>
+        <label style="margin:0">Danach weiter mit<select data-f="${i}" data-fp="next">${nextOpts(f)}</select></label>
         <div class="fmed">${f.media
           ? `<span>${f.media.type === 'video' ? '🎬' : '🖼'} ${esc(f.media.name || 'Medium')}${f.media.type === 'video' && f.media.end > f.media.start ? ` (${(+f.media.start).toFixed(1)}–${(+f.media.end).toFixed(1)} s)` : ''}</span>
              <button class="medbtn" data-fa="trim" data-f="${i}">${f.media.type === 'video' ? '🎬 Vorschau · Start/Stopp' : '🖼 Ansehen / ändern'}</button><button data-fa="unmedia" data-f="${i}">🗑</button>`
@@ -1507,7 +1554,7 @@ function renderPanel() {
     <div class="wgrid">${chips}</div></details>
 
   <details ${op('joker')} data-sec="joker"><summary>★ Joker</summary>
-    <div class="hint">Der Joker-Button oben rechts zeigt sein Video/Foto mit Text und startet danach die zugewiesene Aktion (Rad oder Speicherkarte).</div>
+    <div class="hint">Der Joker-Button oben rechts zeigt sein Video/Foto mit Text und startet danach das zugewiesene Rad oder gespeicherte Spiel.</div>
     <div class="row2"><label>Zahl<input type="number" min="0" max="99" data-jp="num" value="${S.joker.num}"></label>
       <label>Text<input type="text" data-jp="text" value="${esc(S.joker.text)}"></label></div>
     <label>Zuweisung<select data-jp="next">${nextOpts(S.joker, true)}</select></label>
@@ -1516,7 +1563,7 @@ function renderPanel() {
          ${S.joker.media.type === 'video' ? '<button data-act="jtrim">✂ Schnitt</button>' : ''}
          <button data-act="jmedia">Ersetzen</button><button data-act="junmedia">🗑</button>`
       : '<button data-act="jmedia">📎 Video / Foto für Joker</button>'}</div>
-    <div class="hint" style="margin-top:12px"><b style="color:#ffe08a">Abfolgen</b> – Beim Drücken des Jokers startet eine Abfolge (bei mehreren erscheint eine Auswahl). Jeder Schritt = Rad oder Speicherkarte + Anzahl Drehungen. Ohne Abfolge gilt die Zuweisung oben.</div>
+    <div class="hint" style="margin-top:12px"><b style="color:#ffe08a">Joker-Überraschungen</b> – Beim Drücken des Jokers startet eine Überraschung (bei mehreren erscheint eine Auswahl). Jeder Schritt = Rad oder gespeichertes Spiel + Anzahl Drehungen. Ohne Überraschung gilt die Zuweisung oben.</div>
     ${S.joker.seqs.map((q, qi) => `<div class="card combo">
       <label style="margin:0">Name<input type="text" data-q="${qi}" data-qp="name" value="${esc(q.name)}"></label>
       ${q.steps.map((st, si) => `<div class="ftop" style="grid-template-columns:22px 1fr 74px 38px;margin:6px 0">
@@ -1524,10 +1571,10 @@ function renderPanel() {
         <input type="number" min="1" max="50" data-q="${qi}" data-s="${si}" data-stp="n" value="${st.n}" title="Anzahl Drehungen">
         <button class="x" data-qa="delstep" data-q="${qi}" data-s="${si}">✕</button></div>`).join('') || '<div class="hint">Noch keine Schritte.</div>'}
       <button data-qa="addstep" data-q="${qi}">+ Schritt</button><button class="go" data-qa="run" data-q="${qi}">▶ Starten</button><button data-qa="del" data-q="${qi}">🗑</button></div>`).join('')}
-    <button class="b pri" data-act="addseq">+ Neue Abfolge</button></details>
+    <button class="b pri" data-act="addseq">+ Neue Joker-Überraschung</button></details>
 
-  <details ${op('cards')} data-sec="cards"><summary>Speicherkarten (${S.presets.length})</summary>
-    <div class="hint">Eine Karte speichert ein Rad oder eine Kombination aus allen sichtbaren Rädern mit allen Einstellungen (Felder, Gewichte, Folgen, Medien). Im Feld unter „Aktion“ kann eine Karte direkt abgerufen und automatisch gedreht werden.</div>
+  <details ${op('cards')} data-sec="cards"><summary>💾 Gespeicherte Spiele (${S.presets.length})</summary>
+    <div class="hint">Eine Karte speichert ein Rad oder eine Kombination aus allen sichtbaren Rädern mit allen Einstellungen (Felder, Gewichte, Folgen, Medien). Im Feld unter „Danach weiter mit“ kann eine Karte direkt abgerufen und automatisch gedreht werden.</div>
     <label>Name der Karte<input type="text" id="cardName" placeholder="z. B. Vorspiel-Runde"></label>
     <button class="b pri" data-act="saveSingle">💾 Aktuelles Rad speichern</button>
     <button class="b pri" data-act="saveCombo">💾 Kombination speichern (${visibleIdx().length} Räder)</button>
@@ -1540,7 +1587,7 @@ function renderPanel() {
     <div class="row2"><label>Überschrift<input type="text" data-wp="title" value="${esc(w.title)}"></label>
       <label>Einheit<input type="text" data-wp="unit" value="${esc(w.unit)}" placeholder="z. B. Minuten"></label></div>
     <label>Farben<select data-wp="palette">${palOpts(w.palette)}</select></label>
-    <div class="hint">Gewicht = Häufigkeit (2 = doppelt so oft, 0 = nie). Aktion = danach automatisch anbieten, Kette max. ${MAX_CHAIN} Schritte.</div>
+    <div class="hint">Wie oft? = 1 normal, 2 doppelt so oft, 0 nie. Danach weiter mit = dieses Rad oder Spiel kommt danach automatisch, Kette max. ${MAX_CHAIN} Schritte.</div>
     ${rows}
     <button class="b pri" data-act="addf" ${n >= MAX_FIELDS ? 'disabled' : ''}>+ Feld</button>
     <span class="hint">${n} / ${MAX_FIELDS} Felder</span></details>
@@ -1631,6 +1678,8 @@ function renderPanel() {
     ${NATIVE && !TESTMODE ? '<button class="b" data-act="pwManage">Abo verwalten / kündigen</button>' : ''}</details>${ABO_ACTIVE ? '' : '-->'}
 
   <details ${op('opts')} data-sec="opts"><summary>Optionen &amp; Export</summary>
+    <label class="chk"><input type="checkbox" data-sp="simple" ${S.settings.simple !== false ? 'checked' : ''}> Einfache Ansicht (nur DREHEN, Joker, ☰ MENÜ und 🏠 in der Leiste)</label>
+    <label class="chk"><input type="checkbox" data-sp="home" ${S.settings.home !== false ? 'checked' : ''}> Startbildschirm beim Öffnen zeigen</label>
     <label class="chk"><input type="checkbox" data-sp="sound" ${S.settings.sound ? 'checked' : ''}> Tick- und Stopp-Ton</label>
     <label class="chk"><input type="checkbox" data-sp="speakMain" ${S.settings.speakMain ? 'checked' : ''}> Ergebnisse der Räder auch vorlesen</label>
     <label>Ergebnis groß anzeigen für (Sekunden, 0 = bis Schließen; mit Video bleibt es offen)<input type="number" min="0" max="60" data-sp="resultSec" value="${S.settings.resultSec}"></label>
@@ -1723,6 +1772,7 @@ function initPanelEvents() {
       const k = el.dataset.sp;
       S.settings[k] = el.type === 'checkbox' ? el.checked : +el.value;
       if (k === 'spinSec') $('#spinSecL').textContent = el.value + ' s';
+      if (k === 'simple') applySimple();
       save(); return;
     }
   });
@@ -3158,7 +3208,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110112;
+const APP_BUILD = 2026110201;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -3359,6 +3409,206 @@ function licManage() {
   if (NATIVE && NATIVE.billingManage) NATIVE.billingManage(isPro() ? SUBS.pro : SUBS.basis);
   else toast('Abo-Verwaltung gibt es in der Google-Play-App');
 }
+
+/* =====================================================================
+   Einfache Bedienung: Spielen und Einrichten getrennt, Menü ☰,
+   Startbildschirm mit Namen, Rad anschubsen, Feld direkt am Rad bearbeiten
+   ===================================================================== */
+const NM = () => ({A:(S.quiz.names && S.quiz.names.a) || 'Er', B:(S.quiz.names && S.quiz.names.b) || 'Sie'});
+function applySimple() {
+  document.body.classList.toggle('simple', S.settings.simple !== false);
+}
+function openSetup(sec) {
+  closeHome(); $('#menu').classList.remove('show');
+  if (sec) openSecs.add(sec);
+  const P = $('#panel'); P.classList.add('open'); $('#gear').classList.add('on'); renderPanel();
+}
+// Im einfachen Modus ist das Zahnrad versteckt: Panel über ☰ öffnen und mit ✕ im Panel schließen
+function closeSetup() { closePanel(); render(); }
+
+/* ---------- Startbildschirm ---------- */
+let wizOn = false;
+function openHome() { closePanel(); $('#menu').classList.remove('show'); renderHome(); $('#home').classList.add('show'); }
+function closeHome() { $('#home').classList.remove('show'); }
+function renderHome() {
+  const H = $('#home'), n = NM();
+  if (!S.settings.named || wizOn) {
+    H.innerHTML = `<div class="ovin"><h1 class="hTitle">Sex<em>Rad</em></h1><p class="hMotto">Wenn es sich um das eine dreht</p>
+      <div class="hLab">Wer spielt heute?</div>
+      <div class="wizIn"><input id="wzA" value="${esc(n.A)}" placeholder="Name 1"><input id="wzB" value="${esc(n.B)}" placeholder="Name 2"></div>
+      <div class="hRow"><button class="hbtn alt" data-wzp="Er|Sie">Er & Sie</button><button class="hbtn alt" data-wzp="Sie|Sie">Sie & Sie</button><button class="hbtn alt" data-wzp="Er|Er">Er & Er</button></div>
+      <div class="hRow"><button class="hbtn" data-h="wzok">Weiter ▶</button></div>
+      <div class="tip"><b>So geht's:</b> Rad mit dem Finger anschubsen = drehen · lange auf ein Feld drücken = Feld bearbeiten ·
+        ☰ MENÜ = Spielarten, Fragebogen und Einrichten.</div></div>`;
+    return;
+  }
+  H.innerHTML = `<button class="ovx" data-h="close" title="Zum Rad">✕</button><div class="ovin">
+    <h1 class="hTitle">Sex<em>Rad</em></h1><p class="hMotto">Wenn es sich um das eine dreht · ${esc(n.A)} & ${esc(n.B)}</p>
+    <div class="hLab">Was habt ihr heute vor?</div>
+    <div class="hGrid">
+      <button class="tile main" data-h="quick"><span class="ti">⚡</span><b>Schnell & spontan</b><small>Sofort drehen mit euren Rädern.</small></button>
+      <button class="tile" data-h="quiz"><span class="ti">💞</span><b>Uns kennenlernen</b><small>Vorlieben-Fragebogen: jeder bewertet für sich, Tabus bleiben draußen.</small></button>
+      <button class="tile" data-h="themen"><span class="ti">🎯</span><b>Fertige Themen</b><small>Vorlagen-Räder laden und los.</small></button>
+      <button class="tile" data-h="setup"><span class="ti">⚙</span><b>Eigenes Spiel</b><small>Felder, Videos und Räder selbst einrichten.</small></button>
+    </div>
+    <div class="hRow" style="margin-top:22px"><button class="hbtn" data-h="close">Direkt zum Rad ▸</button>
+      <button class="hbtn alt" data-h="names">👥 Namen ändern</button>
+      <button class="hbtn alt" data-h="nohome">${S.settings.home !== false ? 'Beim Öffnen nicht mehr zeigen' : 'Beim Öffnen wieder zeigen'}</button></div>
+    <div class="tip">Tipp: Rad anschubsen = drehen · lange auf ein Feld drücken = bearbeiten · 🏠 in der Leiste bringt euch hierher zurück.</div></div>`;
+}
+$('#home').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset;
+  if (d.wzp) { const [a, c] = d.wzp.split('|'); $('#wzA').value = a; $('#wzB').value = c; return; }
+  switch (d.h) {
+    case 'wzok':
+      S.quiz.names = S.quiz.names || {};
+      S.quiz.names.a = $('#wzA').value.trim() || 'Er'; S.quiz.names.b = $('#wzB').value.trim() || 'Sie';
+      S.settings.named = true; wizOn = false; save(); renderHome(); break;
+    case 'close': closeHome(); break;
+    case 'quick': closeHome(); setTimeout(() => isSlot() ? slotSpin() : doSpin(S.active), 250); break;
+    case 'quiz': closeHome(); openQuiz('a'); break;
+    case 'themen': openSetup('themen'); break;
+    case 'setup': openSetup('fields'); break;
+    case 'names': wizOn = true; renderHome(); break;
+    case 'nohome': S.settings.home = S.settings.home === false; save(); renderHome();
+      toast(S.settings.home ? 'Startbildschirm kommt beim Öffnen' : 'Startbildschirm nur noch über 🏠', 2500); break;
+  }
+});
+
+/* ---------- Menü ☰ ---------- */
+function openMenu() { closePanel(); renderMenu(); $('#menu').classList.add('show'); }
+function renderMenu() {
+  const nw = $('#bUpd').classList.contains('new');
+  $('#menu').innerHTML = `<button class="ovx" data-m="close">✕</button><div class="ovin">
+    <h2 class="hTitle" style="font-size:46px">Menü</h2><p class="hMotto">Spielart wählen und einrichten</p>
+    <div class="hLab">Spielen</div><div class="mGrid">
+      <button class="mb" data-m="mode">${isSlot() ? '🎡 Glücksrad' : '🎰 Slotmaschine'}<small>${isSlot() ? 'Ein Rad nach dem anderen drehen' : 'Alle Räder auf einmal ziehen'}</small></button>
+      <button class="mb" data-m="timer">⏱ Timer-Rad<small>Alle paar Sekunden eine neue Ansage</small></button>
+      <button class="mb" data-m="flow">🔗 Spielablauf<small>Mehrere Räder nacheinander</small></button>
+      <button class="mb" data-m="quiz">💞 Fragebogen<small>Vorlieben, Stufen, Rückblick</small></button>
+      <button class="mb" data-m="themen">🎯 Fertige Themen<small>Vorlagen-Räder laden</small></button>
+      <button class="mb" data-m="home">🏠 Startbildschirm<small>Was habt ihr heute vor?</small></button></div>
+    <div class="hLab">Einrichten</div><div class="mGrid">
+      <button class="mb" data-m="setup">⚙ Felder & Räder<small>Texte, Videos, wie oft, danach weiter mit</small></button>
+      <button class="mb" data-m="cards">💾 Gespeicherte Spiele<small>Speichern, laden, teilen</small></button>
+      <button class="mb" data-m="opts">🔧 Optionen<small>Ton, Drehdauer, Export</small></button>
+      <button class="mb ${nw ? 'new' : ''}" data-m="upd">⟳ Update<small>${nw ? 'Neue Version verfügbar!' : 'Neue Version suchen'}</small></button>
+      <button class="mb" data-m="pro">🛠 Profi-Ansicht<small>Alle Knöpfe wie früher in der Leiste</small></button></div></div>`;
+}
+$('#menu').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const m = b.dataset.m; if (!m) return;
+  const close = () => $('#menu').classList.remove('show');
+  switch (m) {
+    case 'close': close(); break;
+    case 'mode': close(); setMode(isSlot() ? 'rad' : 'slot'); break;
+    case 'timer': close(); openTimer(); break;
+    case 'flow': close(); openFlowPick(); break;
+    case 'quiz': close(); openQuiz('a'); break;
+    case 'themen': openSetup('themen'); break;
+    case 'home': openHome(); break;
+    case 'setup': openSetup('fields'); break;
+    case 'cards': openSetup('cards'); break;
+    case 'opts': openSetup('opts'); break;
+    case 'upd': close(); updOpen(); break;
+    case 'pro': S.settings.simple = false; save(); applySimple(); close();
+      toast('Profi-Ansicht: alle Knöpfe in der Leiste. Zurück unter ⚙ → Optionen → Einfache Ansicht.', 5000); break;
+  }
+});
+$('#bMenu').onclick = openMenu;
+// Einrichten offen: Zahnrad zum Schließen auch im einfachen Modus zeigen
+new MutationObserver(() => document.body.classList.toggle('setupOpen', $('#panel').classList.contains('open'))).observe($('#panel'), {attributes:true, attributeFilter:['class']});
+$('#bHome').onclick = openHome;
+// Roter Punkt am Menü, wenn ein Update bereitliegt
+new MutationObserver(() => $('#bMenu').classList.toggle('new', $('#bUpd').classList.contains('new'))).observe($('#bUpd'), {attributes:true, attributeFilter:['class']});
+
+/* ---------- Gesten am Rad: anschubsen und lange drücken ---------- */
+function wheelHit(e) {
+  if (!lastLayout || isSlot()) return null;
+  const r = $('#cv').getBoundingClientRect(), d = lastLayout.d, x = (e.clientX - r.left) * d, y = (e.clientY - r.top) * d;
+  for (let k = 0; k < lastLayout.rects.length; k++) {
+    const q = lastLayout.rects[k];
+    if (Math.hypot(x - q.cx, y - q.cy) <= q.R) {
+      const idx = lastLayout.vis[k], w = S.wheels[idx], n = w.fields.length;
+      let a = (Math.atan2(y - q.cy, x - q.cx) + Math.PI / 2 - (w.rot || 0)) % TAU; if (a < 0) a += TAU;
+      return {idx, seg:Math.floor(a / (TAU / n)) % n};
+    }
+  }
+  return null;
+}
+let GEST = null;
+$('#cv').style.touchAction = 'none';
+$('#cv').addEventListener('pointerdown', e => {
+  if (busy) return; const hit = wheelHit(e); if (!hit) return;
+  GEST = {hit, x0:e.clientX, y0:e.clientY, t0:performance.now(), moved:false, done:false, path:[[e.clientX, e.clientY, performance.now()]]};
+  GEST.lp = setTimeout(() => { if (GEST && !GEST.moved) { GEST.done = true; quickEdit(hit.idx, hit.seg, e.clientX, e.clientY); } }, 650);
+});
+$('#cv').addEventListener('pointermove', e => {
+  if (!GEST) return;
+  GEST.path.push([e.clientX, e.clientY, performance.now()]); if (GEST.path.length > 6) GEST.path.shift();
+  if (Math.hypot(e.clientX - GEST.x0, e.clientY - GEST.y0) > 14) { GEST.moved = true; clearTimeout(GEST.lp); }
+});
+$('#cv').addEventListener('pointerup', e => {
+  if (!GEST) return; const g = GEST; GEST = null; clearTimeout(g.lp);
+  if (g.done || !g.moved || busy) return;
+  const p0 = g.path[0], now = performance.now(), dist = Math.hypot(e.clientX - p0[0], e.clientY - p0[1]), dt = Math.max(16, now - p0[2]);
+  if (dist < 50 || now - g.t0 > 1200) return;
+  doSpin(g.hit.idx, 0, false, clamp(2.5 + dist / dt * 4.5, 3, 13));   // kräftiger wischen = länger drehen
+});
+$('#cv').addEventListener('pointercancel', () => { if (GEST) clearTimeout(GEST.lp); GEST = null; });
+
+/* ---------- Feld direkt am Rad bearbeiten ---------- */
+const OFT = [[0, 'Nie'], [1, 'Normal'], [2, 'Öfter'], [3, 'Oft'], [5, 'Sehr oft']];
+const oftOpts = v => (OFT.some(o => o[0] === +v) ? '' : `<option value="${+v}" selected>Eigener Wert (${+v})</option>`) +
+  OFT.map(([n, l]) => `<option value="${n}" ${+v === n ? 'selected' : ''}>${l}</option>`).join('');
+function nextOptsQ(f, self) {
+  return `<option value="-1">— nichts</option>` + S.wheels.map((x, i) => i === self ? '' : `<option value="w${i}" ${!f.card && f.next === i ? 'selected' : ''}>🎡 ${esc(x.title || 'Rad ' + (i + 1))}</option>`).join('') +
+    S.presets.map(c => `<option value="c${esc(c.id)}" ${f.card === c.id ? 'selected' : ''}>💾 ${esc(c.name)}</option>`).join('');
+}
+function qeHide() { const Q = $('#qedit'); Q.classList.remove('show'); Q.onclick = null; Q.oninput = null; }
+function quickEdit(wi, fi, px, py) {
+  const w = S.wheels[wi]; let f = w.fields[fi]; if (!f) return;
+  S.active = wi; editHL = fi; render(); updateRail();
+  const Q = $('#qedit');
+  const draw = () => {
+    f = w.fields[fi];
+    Q.innerHTML = `<h5>✏ Feld ${fi + 1} · ${esc(w.title || 'Rad ' + (wi + 1))}</h5>
+      <textarea id="qeText" placeholder="Was soll passieren?">${esc(f.text)}</textarea>
+      <div class="qeRow">Wie oft? <select id="qeW">${oftOpts(f.weight)}</select> Danach weiter mit: <select id="qeN" style="flex:1;min-width:120px">${nextOptsQ(f, wi)}</select></div>
+      <div class="qeRow"><button class="b" data-qe="media">${f.media ? '🎬 Video/Foto ändern' : '🎬 Video / Foto'}</button>
+        <button class="b" data-qe="add" ${w.fields.length >= MAX_FIELDS ? 'disabled' : ''}>＋ Feld dazu</button>
+        <button class="b" data-qe="del">🗑 Löschen</button><button class="b pri" data-qe="ok" style="margin-left:auto">✔ Fertig</button></div>`;
+  };
+  draw();
+  Q.classList.add('show');
+  const W = Q.offsetWidth, H = Q.offsetHeight;
+  Q.style.left = clamp(px - W / 2, 10, innerWidth - W - 10) + 'px'; Q.style.top = clamp(py - H / 2, 10, innerHeight - H - 10) + 'px';
+  Q.oninput = e => {
+    if (e.target.id === 'qeText') { f.text = e.target.value; save(); return; }
+    if (e.target.id === 'qeW') { f.weight = clamp(+e.target.value || 0, 0, 100); save(); return; }
+    if (e.target.id === 'qeN') { const v = e.target.value; f.next = v[0] === 'w' ? +v.slice(1) : -1; f.card = v[0] === 'c' ? v.slice(1) : null; save(); }
+  };
+  Q.onclick = e => {
+    const b = e.target.closest('[data-qe]'); if (!b || b.disabled) return;
+    const a = b.dataset.qe;
+    if (a === 'ok') { qeHide(); editHL = null; render(); renderPanel(); return; }
+    if (a === 'media') { qeHide(); editHL = null; pickMedia({kind:'wheel', w:wi, f:fi}); return; }
+    if (a === 'add') { w.fields.splice(fi + 1, 0, newField('')); fi++; save(); editHL = fi; render(); draw(); $('#qeText').focus(); return; }
+    if (a === 'del') {
+      if (w.fields.length <= MIN_FIELDS) { toast('Mindestens ' + MIN_FIELDS + ' Felder'); return; }
+      if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Wirklich löschen?'; return; }
+      const mid = f.media && f.media.id; w.fields.splice(fi, 1); if (mid) delMedia(mid);
+      save(); qeHide(); editHL = null; render(); renderPanel(); toast('Feld gelöscht');
+    }
+  };
+}
+document.addEventListener('pointerdown', e => {
+  if ($('#qedit').classList.contains('show') && !e.target.closest('#qedit') && !e.target.closest('#cv')) { qeHide(); editHL = null; render(); }
+});
+
+applySimple();
+if (S.settings.home !== false || !S.settings.named) openHome();
 
 /* Start */
 initPanelEvents();
