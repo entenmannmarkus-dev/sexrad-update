@@ -325,7 +325,28 @@
   .vgc .vi span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .vgc .ck{position:absolute;top:6px;left:6px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.7);border:2px solid #ffe08a;color:#ffe08a;font:800 16px system-ui;display:flex;align-items:center;justify-content:center}
   .vgc .dur{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.75);color:#fff;font:600 12px system-ui;padding:2px 6px;border-radius:6px}
-  .vgc .take{padding:6px 10px;border-radius:8px;border:1px solid #c9a24e;background:#6a1016;color:#fff;font:700 12px system-ui}
+  .vgc .take{white-space:nowrap;padding:6px 10px;border-radius:8px;border:1px solid #c9a24e;background:#6a1016;color:#fff;font:700 12px system-ui}
+  .vgc .snip{position:absolute;left:6px;right:6px;bottom:38px;display:flex;gap:2px;pointer-events:none}
+  .vgc .snip s{flex:1;height:4px;border-radius:2px;background:rgba(0,0,0,.55);box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+  .vgc .snip s.on{background:#ffe08a}
+  .vgc .zoom{padding:4px 8px;border-radius:8px;border:1px solid #666;background:#232326;color:#fff;font-size:14px}
+  .vgc .ck{pointer-events:none}
+  #vgCatRow{gap:8px;padding:8px 14px;background:#18120c;border-bottom:1px solid #5a4520;flex-wrap:wrap}
+  #vgCatRow input{flex:1;min-width:160px;padding:10px;border-radius:10px;border:1px solid #555;background:#0d0d0f;color:#eee;font:15px system-ui;-webkit-user-select:text;user-select:text}
+  #vgPrev{position:absolute;inset:0;background:#000;display:none;flex-direction:column;z-index:3}
+  #vgPrev.show{display:flex}
+  #gpMedia{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+  #gpMedia video,#gpMedia img{max-width:100%;max-height:100%;object-fit:contain}
+  #gpBar{padding:8px 14px 12px;background:#121214;border-top:1px solid #5a4520;color:#eee;font:14px system-ui}
+  #gpName{display:block;margin-bottom:6px;color:#ffe08a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #gpCtl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  #gpCtl input{flex:1;min-width:200px;accent-color:#c9a24e;height:30px}
+  #vgPrev button{padding:10px 14px;border-radius:10px;border:1px solid #555;background:#232326;color:#eee;font:600 15px system-ui}
+  #vgPrev button.pri{background:#6a1016;border-color:#c9a24e}
+  #vgPrev button.on{background:#2e5a1c;border-color:#9fe39f}
+  #gpSnips{display:flex;gap:4px;flex-wrap:wrap;width:100%}
+  #gpSnips button{padding:6px 8px;font-size:12px}
+  .gpRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   #vgEmpty{grid-column:1/-1;color:#aaa;text-align:center;padding:12vh 0;font:16px system-ui}
   #jpick{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:55;display:none;align-items:center;justify-content:center}
   #jpick.show{display:flex}
@@ -526,10 +547,19 @@
 <div id="vgal"><div id="vgHead"><span class="t">🗂 Video-Galerie</span>
   <button class="b" id="vgDir">📁 Ordner wählen</button><button class="b" id="vgFiles">🎬 Videos / Fotos wählen</button>
   <select id="vgCat" style="display:none;padding:9px;border-radius:10px;background:#0d0d0f;color:#eee;border:1px solid #555;font:15px system-ui"></select>
+  <button class="b" id="vgCatNewBtn" style="display:none" title="Neue Kategorie anlegen">＋ Kategorie</button>
   <button class="b pri" id="vgLibBtn" style="display:none">🏷 In Kategorie speichern</button>
+  <button class="b" id="vgAll" style="display:none">☑ Alle</button>
   <button class="b pri" id="vgSpread" style="display:none">Auf Felder verteilen</button><button class="b" id="vgClose">Schließen</button></div>
+  <div id="vgCatRow" style="display:none"><input id="vgCatName" placeholder="Neue Kategorie, z. B. Blowjob"><input id="vgCatSub" placeholder="Unterkategorie (optional)"><button class="b pri" id="vgCatOk">✔ Anlegen</button></div>
   <div class="hint" id="vgInfo" style="padding:4px 14px;color:#b9a27a"></div>
-  <div id="vgGrid"></div></div>
+  <div id="vgGrid"></div>
+  <div id="vgPrev"><div id="gpMedia"></div>
+    <div id="gpBar"><b id="gpName"></b>
+      <div id="gpCtl"><button id="gpBack">⏪ 10</button><button id="gpBack1">◀ 1</button><button id="gpPlay">❚❚</button><button id="gpFwd1">1 ▶</button><button id="gpFwd">10 ⏩</button>
+        <input id="gpPos" type="range" min="0" max="1" step="0.1" value="0"><b id="gpTime">0:00 / 0:00</b>
+        <div id="gpSnips"></div></div>
+      <div class="gpRow"><button id="gpPrevI">◀ Voriges</button><button id="gpSel" class="pri">☐ Auswählen</button><button id="gpNextI">Nächstes ▶</button><button id="gpClose">✕ Zurück zur Übersicht</button></div></div></div></div>
 <input id="vgIn" type="file" accept="video/*,image/*" multiple hidden>
 <input id="vgInDir" type="file" webkitdirectory multiple hidden>
 <div id="jpick"><div id="jpickBox"><div class="jt">★ Joker – Abfolge wählen</div><div id="jpickList"></div><button class="mbtn" id="jpickX" style="width:100%">Abbrechen</button></div></div>
@@ -1671,10 +1701,10 @@ function renderPanel() {
     <div class="hint">Videos in der Bibliothek haben eine Kategorie. Ein Feld mit „Video aus Kategorie“ spielt dann zufällig eines davon. Videos fügst du über die 🗂 Video-Galerie hinzu.</div>
     <button class="b" data-act="vgLib" style="margin:4px 0">🗂 Galerie öffnen und Videos einsortieren</button>
     ${vcats().map(c => { const all = S.vlib.filter(x => x.cat.split('/')[0] === c.name);
-      return `<div class="genw"><b>${esc(c.name)}</b> · ${all.length} Videos<br>${c.subs.map(sb => { const n = S.vlib.filter(x => x.cat === c.name + '/' + sb).length;
-        return `<span style="display:inline-block;margin:2px 8px 2px 0">${esc(sb)} <b style="color:${n ? '#9fe39f' : '#888'}">${n}</b></span>`; }).join('')}
+      return `<div class="genw"><b>${esc(c.name)}</b> · ${all.length} Videos <button class="x" data-act="vcatDel" data-c="${esc(c.name)}" title="Kategorie löschen">✕</button><br>${c.subs.map(sb => { const n = S.vlib.filter(x => x.cat === c.name + '/' + sb).length;
+        return `<span style="display:inline-block;margin:2px 8px 2px 0">${esc(sb)} <b style="color:${n ? '#9fe39f' : '#888'}">${n}</b> <button class="x" data-act="vcatDel" data-c="${esc(c.name)}" data-s="${esc(sb)}" title="Unterkategorie löschen" style="padding:0 6px">✕</button></span>`; }).join('')}
         ${all.length ? `<details style="margin-top:4px"><summary>Videos ansehen</summary>${all.map(x => `<div class="hint" style="color:#ddd">${esc(x.cat.split('/')[1] || '–')} · ${esc(x.media.name || '')} <button class="x" data-act="vlibDel" data-id="${esc(x.media.id)}">✕</button></div>`).join('')}</details>` : ''}</div>`; }).join('')}
-    <div style="display:flex;gap:6px;margin-top:6px"><input id="vcatNew" placeholder="Neu: Kategorie / Unterkategorie" style="flex:1"><button class="b" data-act="vcatAdd">＋</button></div>
+    <div style="display:flex;gap:6px;margin-top:6px"><input id="vcatNew" placeholder="Eigene Kategorie anlegen, z. B. Blowjob / Kniend" style="flex:1"><button class="b" data-act="vcatAdd">＋ Anlegen</button></div>
   </details>
 
   <details ${op('flows')} data-sec="flows"><summary>🔗 Abläufe (${(S.flows || []).length})</summary>
@@ -1921,6 +1951,13 @@ function initPanelEvents() {
         const L = vcats(); let e = L.find(x => x.name.toLowerCase() === c.toLowerCase()); if (!e) { e = {name:c, subs:[]}; L.push(e); }
         if (sb && !e.subs.some(x => x.toLowerCase() === sb.toLowerCase())) e.subs.push(sb);
         S.vcats = L; save(); renderPanel(); break; }
+      case 'vcatDel': {
+        const c = b.dataset.c, sb = b.dataset.s, key = sb ? c + '/' + sb : c;
+        const hit = S.vlib.filter(x => sb ? x.cat === key : x.cat.split('/')[0] === c);
+        if (hit.length && !b.dataset.armed) { b.dataset.armed = 1; b.textContent = `Mit ${hit.length} Videos löschen?`; setTimeout(() => { delete b.dataset.armed; b.textContent = '✕'; }, 3500); break; }
+        S.vlib = S.vlib.filter(x => !hit.includes(x)); hit.forEach(x => delMedia(x.media.id));
+        const L = vcats(); if (sb) { const e = L.find(x => x.name === c); if (e) e.subs = e.subs.filter(x => x !== sb); } else S.vcats = L.filter(x => x.name !== c);
+        save(); renderPanel(); toast(`„${key.replace('/', ' › ')}“ gelöscht`); break; }
       case 'vlibDel': { const id = b.dataset.id; S.vlib = S.vlib.filter(x => x.media.id !== id); delMedia(id); save(); renderPanel(); break; }
       case 'fbEdit': fbOpen(+b.dataset.i); break;
       case 'genRun': genRun(); break;
@@ -2144,7 +2181,7 @@ function vgOpen(target) {   // target = Feld aus dem Import-Dialog (dann: antipp
   if (!target) closePanel();
   $('#vgal').classList.add('show'); vgRender();
 }
-function vgClose() { $('#vgal').classList.remove('show'); $('#vgGrid').querySelectorAll('video').forEach(v => v.pause()); }
+function vgClose() { if (GP.v || GP.i >= 0) gpClose(); $('#vgal').classList.remove('show'); $('#vgGrid').querySelectorAll('video').forEach(v => v.pause()); }
 function vgAdd(files) {
   const seen = new Set(GAL.items.map(x => x.name + '|' + x.file.size));
   [...files].filter(f => galType(f) && !seen.has(f.name + '|' + f.size)).forEach(f => GAL.items.push({file:f, name:f.webkitRelativePath || f.name, type:galType(f), url:URL.createObjectURL(f)}));
@@ -2153,70 +2190,167 @@ function vgAdd(files) {
 }
 const mmss = s => { s = Math.round(s || 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 let vgObs = null;
+const SNIP_N = 10, SNIP_MS = 1100;   // Mini-Vorschau: 10 kurze Ausschnitte nacheinander, in Schleife
+const vgTargetWheel = () => GAL.target && GAL.target.kind === 'wheel' ? GAL.target : null;
+const vgWheelName = () => { const w = S.wheels[vgTargetWheel() ? GAL.target.w : S.active]; return w.title || 'Rad ' + (S.wheels.indexOf(w) + 1); };
 function vgRender() {
   const g = $('#vgGrid'), tgt = GAL.target;
-  $('#vgSpread').style.display = !tgt && GAL.sel.size ? '' : 'none';
-  vgCatUi();
-  $('#vgSpread').textContent = `${GAL.sel.size} auf Felder von „${S.wheels[S.active].title || 'Rad ' + (S.active + 1)}“ verteilen`;
+  vgBar();
   $('#vgInfo').textContent = GAL.items.length
-    ? `${GAL.items.length} Dateien · Antippen = Vorschau abspielen · ${tgt ? '„Nehmen“ übernimmt das Video für das Feld' : 'Häkchen wählen, dann auf die Felder verteilen'}`
+    ? `${GAL.items.length} Dateien · Antippen = auswählen (mehrere möglich) · 🔍 = groß ansehen und spulen`
     : '';
   g.innerHTML = GAL.items.length ? GAL.items.map((it, i) => `<div class="vgc ${GAL.sel.has(i) ? 'sel' : ''}" data-i="${i}">
-      ${it.type === 'video' ? `<video data-src="${it.url}" muted playsinline preload="none"></video><b class="dur" data-d="${i}"></b>` : `<img src="${it.url}" loading="lazy" alt="">`}
-      ${tgt ? '' : `<b class="ck" data-ck="${i}">${GAL.sel.has(i) ? '✓' : ''}</b>`}
-      <div class="vi"><span>${esc(it.name)}</span>${(it.file.size / 1048576).toFixed(0)} MB${tgt ? `<button class="take" data-take="${i}">✔ Nehmen</button>` : ''}</div></div>`).join('')
-    : `<div id="vgEmpty">Wähle einen Ordner oder mehrere Videos und Fotos.<br>Hier siehst du dann alle mit Vorschau und suchst aus.</div>`;
-  // Vorschaubilder erst laden, wenn sie sichtbar werden
+      ${it.type === 'video' ? `<video data-src="${it.url}" muted playsinline preload="none"></video><b class="dur" data-d="${i}"></b><i class="snip">${'<s></s>'.repeat(SNIP_N)}</i>` : `<img src="${it.url}" loading="lazy" alt="">`}
+      <b class="ck">${GAL.sel.has(i) ? '✓' : ''}</b>
+      <div class="vi"><span>${esc(it.name)}</span>${(it.file.size / 1048576).toFixed(0)} MB<button class="zoom" data-zoom="${i}" title="Groß ansehen und spulen">🔍</button>${tgt ? `<button class="take" data-take="${i}">✔ Nur dieses</button>` : ''}</div></div>`).join('')
+    : `<div id="vgEmpty">Wähle einen Ordner oder mehrere Videos und Fotos.<br>Hier laufen sie dann als kleine Vorschau, und du suchst aus.</div>`;
+  // Vorschau nur für sichtbare Karten: laden, abspielen; unsichtbare anhalten
   if (vgObs) vgObs.disconnect();
-  vgObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; const v = e.target; vgObs.unobserve(v); vgThumb(v); }), {root:g, rootMargin:'200px'}) : null;
-  g.querySelectorAll('video[data-src]').forEach(v => vgObs ? vgObs.observe(v) : vgThumb(v));
+  vgObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => {
+    const v = e.target; v._vis = e.isIntersecting;
+    if (e.isIntersecting) { if (!v.src) vgThumb(v); else if (v._ok && !GP.v) v.play().catch(() => {}); } else v.pause();
+  }), {root:g, rootMargin:'100px'}) : null;
+  g.querySelectorAll('video[data-src]').forEach(v => vgObs ? vgObs.observe(v) : (v._vis = true, vgThumb(v)));
 }
 function vgThumb(v) {
-  v.preload = 'metadata'; v.src = v.dataset.src;
-  v.addEventListener('loadedmetadata', () => { try { v.currentTime = Math.min(2, (v.duration || 0) * 0.15); } catch (e) { }
-    const d = v.parentNode.querySelector('.dur'); if (d) d.textContent = mmss(v.duration); }, {once:true});
+  v.preload = 'metadata'; v.src = v.dataset.src; v.muted = true; v.loop = true;
+  v.addEventListener('loadedmetadata', () => {
+    v._ok = true; v._k = 0;
+    const d = v.parentNode.querySelector('.dur'); if (d) d.textContent = mmss(v.duration);
+    try { v.currentTime = vgSnipAt(v, 0); } catch (e) { }
+    if (v._vis && !GP.v) v.play().catch(() => {});
+  }, {once:true});
+}
+const vgSnipAt = (v, k) => (v.duration || 0) * (k + 0.5) / SNIP_N;
+// Ein Takt für alle sichtbaren Vorschauen: zum nächsten Ausschnitt springen
+setInterval(() => {
+  if (!$('#vgal').classList.contains('show') || GP.v) return;
+  $('#vgGrid').querySelectorAll('video').forEach(v => {
+    if (!v._ok || !v._vis || !isFinite(v.duration) || v.duration < 2) return;
+    v._k = ((v._k || 0) + 1) % SNIP_N;
+    try { v.currentTime = vgSnipAt(v, v._k); } catch (e) { }
+    if (v.paused) v.play().catch(() => {});
+    const bars = v.parentNode.querySelectorAll('.snip s'); bars.forEach((b, j) => b.classList.toggle('on', j === v._k));
+  });
+}, SNIP_MS);
+function vgBar() {
+  const n = GAL.sel.size, tw = vgTargetWheel();
+  $('#vgSpread').style.display = n && (!GAL.target || tw) ? '' : 'none';
+  $('#vgSpread').textContent = tw ? `${n} ab Feld ${GAL.target.f + 1} einfügen` : `${n} auf Felder von „${vgWheelName()}“ verteilen`;
+  $('#vgAll').style.display = GAL.items.length ? '' : 'none';
+  $('#vgAll').textContent = n === GAL.items.length && n ? '☐ Keins' : '☑ Alle';
+  vgCatUi();
+}
+function vgToggle(i) {
+  GAL.sel.has(i) ? GAL.sel.delete(i) : GAL.sel.add(i);
+  const card = $('#vgGrid').querySelector(`.vgc[data-i="${i}"]`);
+  if (card) { card.classList.toggle('sel', GAL.sel.has(i)); card.querySelector('.ck').textContent = GAL.sel.has(i) ? '✓' : ''; }
+  vgBar(); if (GP.i === i) gpUi();
 }
 $('#vgGrid').addEventListener('click', e => {
-  const take = e.target.closest('[data-take]'), ck = e.target.closest('[data-ck]'), card = e.target.closest('.vgc');
+  const take = e.target.closest('[data-take]'), zoom = e.target.closest('[data-zoom]'), card = e.target.closest('.vgc');
   if (take) { const it = GAL.items[+take.dataset.take]; vgClose();
     mimpShow(URL.createObjectURL(it.file), it.type, it.file.name, it.file.type || '', 0, 0, true); MI.file = it.file;
     $('#mInfo').textContent = `${it.file.name} · ${(it.file.size / 1048576).toFixed(1)} MB · noch nicht gespeichert`; return; }
-  if (!card) return;
-  const i = +card.dataset.i;
-  if (ck || (!GAL.target && GAL.items[i].type === 'image')) { GAL.sel.has(i) ? GAL.sel.delete(i) : GAL.sel.add(i);
-    card.classList.toggle('sel', GAL.sel.has(i)); const c = card.querySelector('.ck'); if (c) c.textContent = GAL.sel.has(i) ? '✓' : '';
-    vgCatUi(); $('#vgSpread').style.display = GAL.sel.size ? '' : 'none'; $('#vgSpread').textContent = `${GAL.sel.size} auf Felder von „${S.wheels[S.active].title || 'Rad ' + (S.active + 1)}“ verteilen`; return; }
-  const v = card.querySelector('video'); if (!v) return;
-  if (!v.src) vgThumb(v);
-  $('#vgGrid').querySelectorAll('video').forEach(x => { if (x !== v) x.pause(); });
-  v.paused ? v.play().catch(() => {}) : v.pause();
+  if (zoom) { gpOpen(+zoom.dataset.zoom); return; }
+  if (card) vgToggle(+card.dataset.i);
 });
+$('#vgAll').onclick = () => { if (GAL.sel.size === GAL.items.length) GAL.sel.clear(); else GAL.items.forEach((x, i) => GAL.sel.add(i)); vgRender(); };
+
+/* ---------- Große Vorschau mit Spulen ---------- */
+const GP = {i:-1, v:null};
+function gpOpen(i) {
+  const it = GAL.items[i]; GP.i = i;
+  $('#vgGrid').querySelectorAll('video').forEach(v => v.pause());
+  const box = $('#gpMedia');
+  box.innerHTML = it.type === 'video' ? `<video src="${it.url}" playsinline autoplay></video>` : `<img src="${it.url}" alt="">`;
+  GP.v = box.querySelector('video');
+  $('#gpCtl').style.display = GP.v ? '' : 'none';
+  $('#gpName').textContent = it.name;
+  if (GP.v) {
+    GP.v.addEventListener('loadedmetadata', () => { $('#gpPos').max = GP.v.duration || 1; gpChips(); gpUi(); });
+    GP.v.addEventListener('timeupdate', gpUi); GP.v.addEventListener('play', gpUi); GP.v.addEventListener('pause', gpUi);
+  }
+  $('#vgPrev').classList.add('show'); gpUi();
+}
+function gpChips() {
+  const v = GP.v; if (!v || !isFinite(v.duration)) return;
+  $('#gpSnips').innerHTML = Array.from({length:SNIP_N}, (_, k) => `<button data-gk="${k}">${mmss(vgSnipAt(v, k))}</button>`).join('');
+}
+function gpUi() {
+  const v = GP.v, sel = GAL.sel.has(GP.i);
+  $('#gpSel').textContent = sel ? '✓ Ausgewählt' : '☐ Auswählen'; $('#gpSel').classList.toggle('on', sel);
+  if (!v) return;
+  $('#gpPlay').textContent = v.paused ? '▶' : '❚❚';
+  if (!GP.drag) $('#gpPos').value = v.currentTime;
+  $('#gpTime').textContent = mmss(v.currentTime) + ' / ' + mmss(v.duration);
+}
+function gpClose() {
+  if (GP.v) GP.v.pause(); $('#gpMedia').innerHTML = ''; GP.v = null; GP.i = -1; $('#vgPrev').classList.remove('show');
+  $('#vgGrid').querySelectorAll('video').forEach(v => { if (v._ok && v._vis) v.play().catch(() => {}); });
+}
+const gpSeek = d => { if (GP.v) GP.v.currentTime = clamp(GP.v.currentTime + d, 0, GP.v.duration || 0); };
+$('#gpPlay').onclick = () => GP.v && (GP.v.paused ? GP.v.play().catch(() => {}) : GP.v.pause());
+$('#gpBack').onclick = () => gpSeek(-10); $('#gpFwd').onclick = () => gpSeek(10);
+$('#gpBack1').onclick = () => gpSeek(-1); $('#gpFwd1').onclick = () => gpSeek(1);
+$('#gpPos').addEventListener('input', e => { GP.drag = true; if (GP.v) GP.v.currentTime = +e.target.value; $('#gpTime').textContent = mmss(+e.target.value) + ' / ' + mmss(GP.v && GP.v.duration); });
+$('#gpPos').addEventListener('change', () => { GP.drag = false; });
+$('#gpSnips').addEventListener('click', e => { const b = e.target.closest('[data-gk]'); if (b && GP.v) { GP.v.currentTime = vgSnipAt(GP.v, +b.dataset.gk); GP.v.play().catch(() => {}); } });
+$('#gpSel').onclick = () => vgToggle(GP.i);
+$('#gpPrevI').onclick = () => { const i = GP.i; gpClose(); gpOpen((i - 1 + GAL.items.length) % GAL.items.length); };
+$('#gpNextI').onclick = () => { const i = GP.i; gpClose(); gpOpen((i + 1) % GAL.items.length); };
+$('#gpClose').onclick = gpClose;
+
+/* ---------- Ausgewählte auf Felder verteilen bzw. ab einem Feld einfügen ---------- */
 $('#vgSpread').onclick = async () => {
-  const w = S.wheels[S.active], idx = [...GAL.sel].sort((a, b) => a - b);
-  let fi = 0, n = 0;
+  const tw = vgTargetWheel(), wi = tw ? tw.w : S.active, w = S.wheels[wi], idx = [...GAL.sel].sort((a, b) => a - b);
+  let fi = tw ? tw.f : 0, n = 0, first = !!tw;
   toast('Speichere …', 2000);
   for (const i of idx) {
-    while (fi < w.fields.length && w.fields[fi].media) fi++;               // nur Felder ohne Video/Foto
+    if (!first) while (fi < w.fields.length && w.fields[fi].media) fi++;   // sonst nur Felder ohne Video/Foto
+    first = false;
     if (fi >= w.fields.length) { if (w.fields.length >= MAX_FIELDS) break; w.fields.push(newField()); }
     const it = GAL.items[i], id = 'm' + uid();
     try { await DB.put(id, it.file); } catch (e) { toast('Fehler beim Speichern: ' + e.message); break; }
-    const f = w.fields[fi];
+    const f = w.fields[fi], old = f.media && f.media.id;
     f.media = {id, type:it.type, name:it.file.name, mime:it.file.type || '', start:0, end:0};
+    if (old) delMedia(old);
     if (!f.text) f.text = it.file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').slice(0, 40);
     fi++; n++;
   }
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
-  GAL.sel.clear(); save(); render(); renderPanel(); vgClose();
-  toast(`${n} Videos/Fotos auf die Felder verteilt${n < idx.length ? ' (Rad voll)' : ''} · Start/Stopp je Feld über „Vorschau“`, 5000);
+  GAL.sel.clear(); save(); render(); vgClose();
+  if (tw) closeMediaDlg(false);
+  renderPanel();
+  toast(`${n} Videos/Fotos eingefügt${n < idx.length ? ' (Rad voll)' : ''} · Start/Stopp je Feld über „Vorschau“`, 5000);
 };
+
+/* ---------- Kategorie wählen oder direkt neu anlegen ---------- */
 function vgCatUi() {
-  const on = !GAL.target && GAL.sel.size > 0, sel = $('#vgCat');
-  sel.style.display = $('#vgLibBtn').style.display = on ? '' : 'none';
-  if (on && !sel.options.length) sel.innerHTML = vcatOpts('', true);
+  const on = !GAL.target && GAL.sel.size > 0, sel = $('#vgCat'), keep = sel.value;
+  sel.style.display = $('#vgLibBtn').style.display = $('#vgCatNewBtn').style.display = on ? '' : 'none';
+  if (!on) $('#vgCatRow').style.display = 'none';
+  if (on) { sel.innerHTML = vcatOpts('', true); if (keep) sel.value = keep; }
   $('#vgLibBtn').textContent = `🏷 ${GAL.sel.size} in Kategorie speichern`;
 }
+$('#vgCatNewBtn').onclick = () => { const r = $('#vgCatRow'); r.style.display = r.style.display === 'none' ? 'flex' : 'none'; if (r.style.display === 'flex') $('#vgCatName').focus(); };
+$('#vgCatOk').onclick = () => {
+  const name = $('#vgCatName').value.trim(), sub = $('#vgCatSub').value.trim();
+  if (!name) { toast('Bitte einen Namen für die Kategorie eingeben'); return; }
+  const v = vcatAdd(name, sub);
+  $('#vgCatName').value = $('#vgCatSub').value = ''; $('#vgCatRow').style.display = 'none';
+  vgCatUi(); $('#vgCat').value = v; toast(`Kategorie „${v.replace('/', ' › ')}“ angelegt`);
+};
+// legt Kategorie (und optional Unterkategorie) an und gibt den Wert für die Auswahl zurück
+function vcatAdd(c, sb) {
+  const L = vcats(); let e = L.find(x => x.name.toLowerCase() === c.toLowerCase()); if (!e) { e = {name:c, subs:[]}; L.push(e); }
+  if (sb && !e.subs.some(x => x.toLowerCase() === sb.toLowerCase())) e.subs.push(sb);
+  S.vcats = L; save();
+  const s2 = sb ? e.subs.find(x => x.toLowerCase() === sb.toLowerCase()) : '';
+  return s2 ? e.name + '/' + s2 : e.name;
+}
 $('#vgLibBtn').onclick = async () => {
-  const cat = $('#vgCat').value; if (!cat) { toast('Bitte Kategorie wählen'); return; }
+  const cat = $('#vgCat').value; if (!cat) { toast('Bitte Kategorie wählen oder mit ＋ neu anlegen'); return; }
   let n = 0; toast('Speichere …', 2000);
   for (const i of [...GAL.sel]) {
     const it = GAL.items[i], id = 'm' + uid();
@@ -3272,7 +3406,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110202;
+const APP_BUILD = 2026110203;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
