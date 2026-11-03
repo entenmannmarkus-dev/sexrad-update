@@ -600,6 +600,29 @@
   .tyA{padding:24px 16px;border-radius:18px;border:2px solid rgba(255,255,255,.15);color:#fff;font:600 22px/1.2 var(--disp);min-height:96px}
   .tyA.l1{background:linear-gradient(150deg,#f29ab4,#7a2a44)}.tyA.l2{background:linear-gradient(150deg,#b3263f,#3d0408)}
   .tyA.l3{background:linear-gradient(150deg,#ff2a2a,#2a0002)}.tyA.l4{background:linear-gradient(150deg,#1a1a1c,#000);border-color:#5a0008;color:#ff3344}
+  /* Ergebnis aufgeräumt: nur das Ergebnis, darunter „erfüllt?“ */
+  #result.nomedia{background:radial-gradient(ellipse at 50% 45%,var(--bgA),#000 80%)}
+  #rDone{display:none;margin-top:3.5vh;pointer-events:auto;opacity:0;animation:wIn .6s ease-out 1.2s forwards;text-transform:none;letter-spacing:0;text-shadow:none;font-family:system-ui}
+  #result.show #rDone.on{display:block}
+  #result.show #rText>#rDone{animation:wIn .6s ease-out 1.2s forwards}
+  html.night #result.show #rText>#rDone{opacity:1}
+  .rdQ{font:600 min(3vh,18px) system-ui;color:var(--acc2);margin-bottom:10px}
+  .rdB{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .rdB button{min-width:150px;padding:16px 18px;border-radius:16px;border:2px solid rgba(255,255,255,.2);font:800 min(3vh,19px) system-ui;color:#fff;cursor:pointer}
+  .rdB .ok{background:linear-gradient(150deg,#1f8a4c,#0b3a1f);border-color:#4fd18a}
+  .rdB .half{background:linear-gradient(150deg,#a87a1c,#3d2a06);border-color:#e9c15a}
+  .rdB .no{background:linear-gradient(150deg,#8a1a1a,#2a0505);border-color:#ff6a6a}
+  .rdB button.on{outline:3px solid #fff}
+  .rdS{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+  .rdS #rFeel{display:flex;gap:8px;width:auto}
+  .rdS button,.rdS #rFeel button{padding:9px 13px;border-radius:12px;border:1px solid #4a4a4e;background:rgba(20,16,18,.85);color:#ddd;font:600 14px system-ui;height:auto;flex:none}
+  .rdS button.on{border-color:var(--acc);box-shadow:0 0 12px var(--glow)}
+  #result.hasvid #rDone{margin-top:1.5vh}
+  #bBack{position:fixed;left:12px;top:12px;z-index:61;width:50px;height:50px;border-radius:50%;border:1px solid var(--acc);background:rgba(0,0,0,.7);color:#fff;font:700 26px/1 system-ui;padding:0;box-shadow:0 0 14px var(--glow)}
+  #bSafe{top:72px}
+  #bWho{font-size:14px;line-height:1.15}
+  #bWho small{display:block;font-size:11px;opacity:.75;font-weight:500}
+  body.simple #bWho{display:block}
   #portrait{display:none}
   @media (orientation:portrait){
     #portrait{display:block;position:fixed;top:8px;left:50%;transform:translateX(-50%);font-size:13px;color:#a8988a;z-index:5;pointer-events:none}
@@ -614,6 +637,7 @@
 <div id="rail">
   <button id="stufeChip" title="Stufe wechseln"></button>
   <div id="wlabel"></div>
+  <button id="bWho" class="mbtn" title="Wer dreht? Antippen = wechseln">👤 Er dreht</button>
   <button id="bSpin" class="spin">DREHEN</button>
   <button id="bMenu" class="mbtn">☰ MENÜ</button>
   <button id="bTimer" class="mbtn">⏱ TIMER</button>
@@ -641,6 +665,7 @@
 <div id="guideBar"></div>
 <div id="kissFx">💋</div>
 <div id="nightV"></div>
+<button id="bBack" title="Zurück ins Hauptmenü">←</button>
 <div id="tense"></div>
 <button id="bSafe" title="Safeword: sofort alles anhalten">STOPP</button>
 <div id="safe" class="ov"></div>
@@ -655,14 +680,16 @@
 <div id="result">
   <div id="rMedia"></div>
   <div id="rVeil"><i></i><i></i></div>
-  <div id="rText"><div id="rPre"></div><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div><div id="rHold"></div></div>
+  <div id="rText"><div id="rPre"></div><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div><div id="rHold"></div>
+    <div id="rDone"><div class="rdQ" id="rdQ">Wie wurde es erfüllt?</div>
+      <div class="rdB"><button data-done="2" class="ok">✔ Erfüllt</button><button data-done="1" class="half">½ Teilweise</button><button data-done="0" class="no">✘ Nicht erfüllt</button></div>
+      <div class="rdS"><div id="rFeel"><button data-feel="1" title="Mehr davon">🔥 mehr davon</button><button data-feel="0" title="Passt">👌 passt</button><button data-feel="-1" title="Weniger davon">🧊 weniger</button></div>
+        <button id="rGift">🎁 Gutschein</button></div></div></div>
   <div id="rVctl"><button id="rvBack" title="10 s zurück">⏪ 10</button><button id="rvPlay">❚❚</button><button id="rvFwd" title="10 s vor">10 ⏩</button>
     <input id="rvPos" type="range" min="0" max="1" step="0.1" value="0"><b id="rvTime">0:00 / 0:00</b></div>
   <div id="rBtns">
     <button id="rNext" class="spin" style="font-size:14px">WEITER</button>
-    <button id="rKiss" class="mbtn">💋 Erledigt</button>
-    <div id="rFeel"><button data-feel="1" title="Mehr davon">🔥</button><button data-feel="0" title="Passt">👌</button><button data-feel="-1" title="Weniger davon">🧊</button></div>
-    <button id="rGift" class="mbtn">🎁 Gutschein</button>
+    <button id="rKiss" class="mbtn" style="display:none">💋 Erledigt</button>
     <button id="rClose" class="mbtn">✕ Schließen</button>
     <button id="rStop" class="mbtn" style="display:none;color:#ff8a8a">■ Abfolge stoppen</button>
   </div>
@@ -3935,7 +3962,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110305;
+const APP_BUILD = 2026110306;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4451,7 +4478,7 @@ function setStufe(L, quiet) {
   if ($('#menu').classList.contains('show')) renderMenu();
 }
 // Stufe in der Leiste antippen = eine Stufe höher (nach der höchsten wieder Soft)
-$('#stufeChip').onclick = () => { if (busy) return; if (typeof typOn === 'function' && typOn() && !G.on) { const T = TYP(); T.turn = other(T.turn); save(); applyStufe(); typToast(); return; } const cap = stufeCap(), L = baseStufe(); setStufe(L >= cap ? 1 : L + 1); };
+$('#stufeChip').onclick = () => { if (busy) return; if (typeof typOn === 'function' && typOn() && !G.on) { const T = TYP(); T.turn = other(T.turn); save(); applyStufe(); whoUi(); typToast(); return; } const cap = stufeCap(), L = baseStufe(); setStufe(L >= cap ? 1 : L + 1); };
 
 /* ---------- Stimmungs-Hintergrund: Soft Herzen, Middle Glut, Hard rote Funken + Rauch, Heavy Duty Funkenregen + Herzschlag ---------- */
 const AMB_CFG = [null,
@@ -4600,8 +4627,7 @@ function resultDecor(w, f, i) {
   el.style.animationDelay = (S.settings.reveal ? 0.9 + 0.16 * k : 0.4).toFixed(2) + 's';
   RES.line = line;
   document.querySelectorAll('#rFeel button').forEach(b => b.classList.remove('on'));
-  const real = w && w.fields && w.fields[i];
-  $('#rFeel').style.display = real ? '' : 'none';
+  document.querySelectorAll('#rDone [data-done]').forEach(b => b.classList.remove('on'));
 }
 const RES = {line:''};
 function resultButtons(w, f, i, target, done) {
@@ -4609,6 +4635,26 @@ function resultButtons(w, f, i, target, done) {
   $('#rFeel').onclick = e => { const b = e.target.closest('[data-feel]'); if (!b) return;
     feel(w, i, +b.dataset.feel); document.querySelectorAll('#rFeel button').forEach(x => x.classList.toggle('on', x === b)); };
   $('#rGift').onclick = () => giftOpen(f.text || resultLine(w, f, i));
+  const real = w && w.fields && w.fields[i], n = NM(), who = TYP().turn;
+  $('#rDone').classList.toggle('on', !!real && !target);
+  $('#rdQ').textContent = `Wie wurde es für ${who === 'a' ? n.A : n.B} erfüllt?`;
+  $('#rDone').onclick = e => { const b = e.target.closest('[data-done]'); if (!b) return;
+    if ($('#rDone').dataset.lock) return; $('#rDone').dataset.lock = 1;
+    b.classList.add('on'); doneMark(w, f, i, +b.dataset.done); setTimeout(() => { delete $('#rDone').dataset.lock; done(null); }, 900); };
+}
+// Erfüllt? ✔ = Herz + lernt dazu · ½ / ✘ = die nächsten Runden gehen eher in Richtung dessen, für den es nicht erfüllt wurde
+function doneMark(w, f, i, v) {
+  const st = S.x.stats; st.full = st.full || 0; st.part = st.part || 0; st.no = st.no || 0;
+  if (v === 2) { st.full++; kissFx(); st.kisses++; xtDone(f); heartReward(); typLearn(f, 0.3); }
+  else { v === 1 ? st.part++ : st.no++; typFavor(v === 1 ? 1 : 2, f); }
+  save();
+}
+function typFavor(nRounds, f) {
+  const T = TYP(), who = T.turn, n = NM(), nm = who === 'a' ? n.A : n.B;
+  if (typOn()) { T.favor = who; T.favorN = nRounds; T.favorSkip = true;
+    toast(`Nicht ganz erfüllt – die nächsten ${nRounds === 1 ? 'Runde geht' : nRounds + ' Runden gehen'} wieder eher in Richtung ${nm}`, 4000); }
+  else { if (f) { f.weight = clamp(Math.round(f.weight || 1) + 1, 1, 100); } toast('Nicht ganz erfüllt – kommt öfter wieder dran', 3000); }
+  save(); whoUi();
 }
 async function resultVoice(w, f, i) {
   if (f.voice && f.voice.media) {
@@ -5258,7 +5304,7 @@ function lvlOf(f) {
 const typKey = f => f.qid || String(f.text || '').replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 60);
 function typFactor(f) {
   if (!typOn() || !String(f.text || '').trim()) return 1;
-  const T = TYP(), s = T.turn, o = other(s), L = lvlOf(f);
+  const T = TYP(), s = T.favorN > 0 && T.favor ? T.favor : T.turn, o = other(s), L = lvlOf(f);
   if (f.qid && quizHasData() && isTabu(f.qid)) return 0;
   if (!textOk(f.text || '')) return 0;
   if (L > Math.min(typLvl(s), typLvl(o)) + 1) return 0;   // nie mehr als eine Stufe über dem sanfteren der beiden Typen
@@ -5278,7 +5324,31 @@ function typLearn(f, v) {
   T.hist.unshift({w:s, k:key, txt:String(f.text || '').replace(/\n/g, ' ').slice(0, 80), v, L, at:Date.now()}); T.hist = T.hist.slice(0, 300);
   save();
 }
-function typAfterSpin() { if (!typOn()) return; const T = TYP(); if (T.auto) { T.turn = other(T.turn); save(); } stufeChipUi(); typToast(); }
+function typAfterSpin() {
+  const T = TYP();
+  if (T.favorSkip) T.favorSkip = false; else if (T.favorN > 0) { T.favorN--; if (!T.favorN) T.favor = null; }
+  if (T.auto && typOn()) T.turn = other(T.turn);
+  save(); whoUi(); if (typOn()) { stufeChipUi(); typToast(); }
+}
+function whoUi() {
+  const T = TYP(), n = NM(), nm = k => k === 'a' ? n.A : n.B;
+  $('#bWho').innerHTML = `👤 ${esc(nm(T.turn))} dreht${T.favorN > 0 && T.favor ? `<small>Bonus für ${esc(nm(T.favor))} (${T.favorN})</small>` : typOn() ? `<small>${esc(typInfo(T.turn).n)}</small>` : '<small>antippen = wechseln</small>'}`;
+}
+$('#bWho').onclick = () => { if (busy) return; const T = TYP(); T.turn = other(T.turn); save(); whoUi(); if (typOn()) { applyStufe(); typToast(); } else toast(`👤 Jetzt dreht ${T.turn === 'a' ? NM().A : NM().B}`, 1800); };
+/* ---------- Zurück-Pfeil: von überall ins Hauptmenü ---------- */
+function goMenu() {
+  if ($('#result').classList.contains('show')) $('#rClose').click();
+  if ($('#timerView').classList.contains('show')) $('#tClose').click();
+  $('#quiz').classList.remove('show');
+  if ($('#vgal').classList.contains('show')) vgClose();
+  if ($('#mimp').classList.contains('show')) closeMediaDlg(false);
+  $('#upd').classList.remove('show');
+  edgeStop(); TT = null; qeHide();
+  document.querySelectorAll('.ov.show').forEach(o => o.classList.remove('show'));
+  openMenu();
+}
+$('#bBack').onclick = goMenu;
+whoUi();
 function typToast() { if (!typOn()) return; const n = NM(), w = TYP().turn; toast(`🎯 Jetzt dreht ${w === 'a' ? n.A : n.B} – ${typInfo(w).n}`, 2500); }
 
 /* ---------- Typ-Test und Typ-Seite ---------- */
@@ -5336,7 +5406,7 @@ $('#typ').addEventListener('click', e => {
     case 'on': T.on = !T.on; if (T.on && G.on) gEnd(false); save(); applyStufe(); typRender();
       if (T.on) { if (!T.a.done || !T.b.done) { TT = {who:T.a.done ? 'b' : 'a', k:0, ans:[]}; typRender(); } else typToast(); } break;
     case 'auto': T.auto = !T.auto; save(); typRender(); break;
-    case 'turn': T.turn = other(T.turn); save(); typRender(); stufeChipUi(); applyStufe(); break;
+    case 'turn': T.turn = other(T.turn); save(); typRender(); stufeChipUi(); applyStufe(); whoUi(); break;
     case 'reset': if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Wirklich löschen?'; return; } T.learn = {a:{}, b:{}}; T.hist = []; save(); typRender(); break;
   }
 });
