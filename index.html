@@ -496,6 +496,85 @@
   #rText{font-family:var(--disp)}
   @media (max-width:900px){.stufeSel{grid-template-columns:repeat(2,1fr)}}
   @media (prefers-reduced-motion:reduce){.spin,.wspin{animation:none!important}}
+  /* ---------- Stufe 3: Enthüllung, Kopfkino, Kussmund, Nachtmodus, Heute Nacht, Vorlagen, Sperre, Wisch-Karten ---------- */
+  #nightV{position:fixed;inset:0;pointer-events:none;z-index:97;display:none;background:radial-gradient(ellipse at 50% 45%,rgba(40,0,6,.28),rgba(0,0,0,.62));mix-blend-mode:multiply}
+  html.night #nightV{display:block}
+  html.night #result.show::after{display:none}
+  html.night #result.show #rText>*{animation:none}
+  #rVeil{position:absolute;inset:0;pointer-events:none;z-index:2;display:none;overflow:hidden}
+  #result.reveal #rVeil{display:block}
+  #result.reveal.hasvid #rVeil{display:none}
+  #rVeil i{position:absolute;top:-2%;bottom:-2%;width:52%;
+    background:repeating-linear-gradient(90deg,var(--silk1) 0,var(--silk2) 6%,var(--silk1) 13%),linear-gradient(var(--silk2),var(--silk1));
+    background-blend-mode:overlay;box-shadow:0 0 60px rgba(0,0,0,.8)}
+  #rVeil i:first-child{left:0;animation:veilL 1.25s cubic-bezier(.6,.05,.3,1) .15s forwards}
+  #rVeil i:last-child{right:0;animation:veilR 1.25s cubic-bezier(.6,.05,.3,1) .15s forwards}
+  @keyframes veilL{to{transform:translateX(-105%) skewX(-8deg);opacity:.2}}
+  @keyframes veilR{to{transform:translateX(105%) skewX(8deg);opacity:.2}}
+  #result.reveal::after{display:none}
+  #rText{z-index:3}
+  #rBtns{z-index:4}
+  #result.reveal #rText>*{animation:none}
+  #rTxt .wd{display:inline-block;opacity:0;filter:blur(8px);transform:translateY(.25em);animation:wIn .6s ease-out forwards}
+  @keyframes wIn{to{opacity:1;filter:none;transform:none}}
+  #rLine{margin-top:2.2vh;font:italic 600 min(5.4vh,3.6vw)/1.2 var(--disp);text-transform:none;color:var(--acc2);opacity:0;max-width:80%;text-align:center}
+  #result.show #rText>#rLine{animation:wIn .8s ease-out 1.4s forwards}
+  :root[data-stufe="4"] #rLine{font-style:normal;text-transform:uppercase;letter-spacing:.06em;color:#fff}
+  #result.hasvid #rLine{font-size:min(3.6vh,2.6vw)}
+  #rFeel{display:flex;gap:6px;width:100%}
+  #rFeel button{flex:1;height:44px;border-radius:12px;border:1px solid #4a4a4e;background:rgba(20,16,18,.85);font-size:20px;padding:0}
+  #rFeel button.on{border-color:var(--acc);box-shadow:0 0 12px var(--glow)}
+  #rKiss,#rGift{font-size:14px}
+  #kissFx{position:fixed;left:50%;top:48%;z-index:120;font-size:30vh;line-height:1;pointer-events:none;transform:translate(-50%,-50%) scale(.2);opacity:0}
+  #kissFx.go{animation:kiss 1.1s ease-out forwards}
+  @keyframes kiss{0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-12deg)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(4deg)}60%{transform:translate(-50%,-50%) scale(1) rotate(0)}100%{opacity:0;transform:translate(-50%,-62%) scale(1.05)}}
+  .pill{padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.45);color:#fff;font:600 14px system-ui}
+  .pill.on{border-color:var(--acc);background:var(--silk1)}
+  .ovcard{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px 16px;background:rgba(0,0,0,.45);margin:12px 0}
+  .ovcard h4{margin:0 0 6px;font:600 22px var(--disp);color:#fff}
+  .ovcard p{margin:6px 0;color:rgba(255,255,255,.78);line-height:1.45;font-size:15px}
+  .libGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .libc{position:relative;text-align:left;padding:14px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(0,0,0,.4));color:#fff;min-height:118px}
+  .libc .li{font-size:30px}.libc b{display:block;font:600 21px/1.1 var(--disp);margin:6px 0 3px}.libc small{color:rgba(255,255,255,.65);font-size:12.5px;line-height:1.35;display:block}
+  .libc .lv{position:absolute;top:10px;right:10px}
+  .lvb.l1{background:#f29ab4;color:#3a0a18}.lvb.l2{background:#b3263f;color:#fff}.lvb.l3{background:#ff2a2a;color:#fff}.lvb.l4{background:#000;color:#ff2a3a;border:1px solid #ff2a3a}
+  #lock,#camo{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column}
+  #lock.show,#camo.show{display:flex}
+  #lock{background:radial-gradient(ellipse at 50% 30%,#2a0a12,#000 70%);color:#fff}
+  #lock .lt{font:600 34px var(--disp);margin-bottom:6px}
+  #lock .ldots{display:flex;gap:14px;margin:14px 0 18px}#lock .ldots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--acc)}#lock .ldots i.on{background:var(--acc)}
+  #lock .lpad{display:grid;grid-template-columns:repeat(3,76px);gap:12px}
+  #lock .lpad button{height:76px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font:600 28px system-ui}
+  #camo{background:#f4f4f2;color:#222;font:16px system-ui;justify-content:flex-start;align-items:stretch;overflow:auto}
+  #camo .ch{padding:18px 22px;border-bottom:1px solid #ddd;font:700 22px system-ui;color:#333;background:#fff;user-select:none;-webkit-user-select:none}
+  #camo .cl{padding:14px 22px;border-bottom:1px solid #e6e6e6;color:#444;background:#fff}
+  #camo .cl small{display:block;color:#999;font-size:13px}
+  #guideBar{position:fixed;left:14px;bottom:14px;z-index:33;display:none;max-width:calc(100vw - var(--rail) - 40px);padding:10px 14px;border-radius:14px;
+    border:1px solid var(--acc);background:rgba(0,0,0,.72);box-shadow:0 0 22px var(--glow);color:#fff;align-items:center;gap:12px}
+  #guideBar.show{display:flex}
+  #guideBar .gp{font:700 11px system-ui;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2)}
+  #guideBar b{display:block;font:600 22px/1.1 var(--disp)}
+  #guideBar .gdots{display:flex;gap:4px;margin-top:5px}#guideBar .gdots span{width:18px;height:4px;border-radius:2px;background:rgba(255,255,255,.2)}#guideBar .gdots span.on{background:var(--acc)}
+  #guideBar button{padding:10px 14px;border-radius:10px;border:1px solid var(--acc);background:var(--sp2);color:#fff;font:700 14px system-ui}
+  #guideBar button.alt{background:rgba(0,0,0,.4);border-color:#555}
+  #guideBar button.ready{animation:gReady 1.4s infinite}
+  @keyframes gReady{50%{box-shadow:0 0 22px var(--glow)}}
+  .swWrap{display:flex;flex-direction:column;align-items:center;padding:10px 0 20px}
+  .swCard{position:relative;width:min(560px,92vw);min-height:250px;border-radius:22px;padding:26px 24px;touch-action:none;user-select:none;-webkit-user-select:none;
+    background:linear-gradient(160deg,#2a0d16,#0b0507);border:1px solid #6a2a3a;box-shadow:0 20px 50px rgba(0,0,0,.7);text-align:center;transition:transform .25s,opacity .25s;
+    display:flex;flex-direction:column;justify-content:center}
+  .swCard .sc{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#c9a97a;margin-bottom:12px}
+  .swCard .sq{font:600 30px/1.2 var(--disp);color:#fff}
+  .swCard .sh{position:absolute;padding:6px 10px;border-radius:8px;border:2px solid;font:800 14px system-ui;opacity:0;pointer-events:none}
+  .swCard .sh.r{right:14px;top:14px;color:#5fd38a;transform:rotate(10deg)}.swCard .sh.l{left:14px;top:14px;color:#e0a050;transform:rotate(-10deg)}
+  .swCard .sh.u{left:50%;top:10px;transform:translateX(-50%);color:#ff4d6a}.swCard .sh.d{left:50%;bottom:10px;transform:translateX(-50%);color:#bbb}
+  .swBtns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+  .swBtns button{padding:12px 14px;border-radius:12px;border:1px solid #5a3a2a;background:#1a0d10;color:#fff;font:600 15px system-ui}
+  .swBtns button:disabled{opacity:.35}
+  .swHelp{margin-top:12px;font-size:13px;color:#a8988a;text-align:center;max-width:560px}
+  body.bigbtn #rail .mbtn,body.bigbtn #rBtns .mbtn{min-height:62px;font-size:17px}
+  body.bigbtn .spin{transform:scale(1.08)}
+  body.bigbtn .qeRow .b,body.bigbtn .mb,body.bigbtn .pill{font-size:18px;padding:14px 16px}
   #portrait{display:none}
   @media (orientation:portrait){
     #portrait{display:block;position:fixed;top:8px;left:50%;transform:translateX(-50%);font-size:13px;color:#a8988a;z-index:5;pointer-events:none}
@@ -533,14 +612,27 @@
 <div id="home" class="ov"></div>
 <div id="menu" class="ov"></div>
 <div id="qedit"></div>
+<div id="lib" class="ov"></div>
+<div id="guideBar"></div>
+<div id="kissFx">💋</div>
+<div id="nightV"></div>
+<div id="lock"></div>
+<div id="camo"><div class="ch">Notizen</div><div class="cl">Einkaufen<small>Milch, Brot, Kaffee, Tomaten</small></div>
+  <div class="cl">Termine<small>Zahnarzt Do 9:30 · Werkstatt anrufen</small></div><div class="cl">Ideen fürs Wochenende<small>Spaziergang, Freunde einladen</small></div>
+  <div class="cl">Rezepte<small>Lasagne, Gemüsecurry</small></div></div>
+<input id="fileVoice" type="file" accept="audio/*" hidden>
 
 <div id="result">
   <div id="rMedia"></div>
-  <div id="rText"><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div></div>
+  <div id="rVeil"><i></i><i></i></div>
+  <div id="rText"><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div></div>
   <div id="rVctl"><button id="rvBack" title="10 s zurück">⏪ 10</button><button id="rvPlay">❚❚</button><button id="rvFwd" title="10 s vor">10 ⏩</button>
     <input id="rvPos" type="range" min="0" max="1" step="0.1" value="0"><b id="rvTime">0:00 / 0:00</b></div>
   <div id="rBtns">
     <button id="rNext" class="spin" style="font-size:14px">WEITER</button>
+    <button id="rKiss" class="mbtn">💋 Erledigt</button>
+    <div id="rFeel"><button data-feel="1" title="Mehr davon">🔥</button><button data-feel="0" title="Passt">👌</button><button data-feel="-1" title="Weniger davon">🧊</button></div>
+    <button id="rGift" class="mbtn">🎁 Gutschein</button>
     <button id="rClose" class="mbtn">✕ Schließen</button>
     <button id="rStop" class="mbtn" style="display:none;color:#ff8a8a">■ Abfolge stoppen</button>
   </div>
@@ -655,12 +747,13 @@ function newWheel(i) {
 function defaultState() {
   return {
     active:0,
-    settings:{stufe:0, stufeColors:true, amb:true, simple:true, home:true, named:false, sound:true, spinSec:6, speakMain:false, autoNext:5, resultSec:3, mode:'rad', slotHist:[]},
+    settings:{stufe:0, stufeColors:true, amb:true, simple:true, home:true, named:false, night:false, reveal:true, lines:true, toyBeat:true, big:false, sound:true, spinSec:6, speakMain:false, autoNext:5, resultSec:3, mode:'rad', slotHist:[]},
     toy:{enabled:false, url:'ws://127.0.0.1:12345', master:100},
     quiz:{names:{a:'Er', b:'Sie'}, ans:{}, learn:{}, stufe:{}, stufeSel:0, lvlOv:{}, thr:2.5, map:{}, timer:true, custom:{}, session:null, fb:null, sessions:[]},   // Vorlieben-Fragebogen   // Sexspielzeug über Intiface Central
     joker:{num:'', text:'JOKER', weight:1, next:-1, card:null, media:null, seqs:[]},   // seqs = gespeicherte Abfolgen   // eigenständiges Joker-Feld
     vcats:null, vlib:[], gal:[], seqs:[], seqCats:[{name:'Sequenzen', subs:[]}], flags:{},   // Video-Kategorien, Video-Bibliothek, Merker über Sessions (z. B. eingefroren)
     gen:{a:{wish:'', tabu:''}, b:{wish:'', tabu:''}, quiz:true, out:null, info:null},   // Ablauf-Generator
+    x:{setup:false, vouchers:[], teaser:null, stats:{kisses:0, hot:0, cold:0}, pin:'', lockMin:5, qmode:'cards'},   // Gutscheine, Teaser, Zähler, PIN
     presets:[],      // Speicherkarten: {id, name, kind:'single'|'combo', data}
     snapshot:null,   // Räder vor dem Laden einer Karte (für ↩ VORHER)
     wheels:Array.from({length:MAX_WHEELS}, (_, i) => newWheel(i)),
@@ -716,6 +809,10 @@ function normalize(o) {
         : Object.assign({mid:String(p.mid), type:'video', mime:String(p.mime || ''), name:String(p.name || ''), start:+p.start || 0, end:+p.end || 0}, tr); })})).filter(q => q.parts.some(p => p.type !== 'text'));
   s.seqCats = Array.isArray(o.seqCats) ? o.seqCats.filter(c => c && c.name).map(c => ({name:String(c.name), subs:(Array.isArray(c.subs) ? c.subs : []).map(String)})) : [{name:'Sequenzen', subs:[]}];
   s.flags = o.flags && typeof o.flags === 'object' ? o.flags : {};
+  s.x = Object.assign(d.x, o.x && typeof o.x === 'object' ? o.x : {});
+  s.x.stats = Object.assign({kisses:0, hot:0, cold:0}, s.x.stats || {});
+  s.x.vouchers = Array.isArray(s.x.vouchers) ? s.x.vouchers.filter(v => v && v.text) : [];
+  if (!s.x.teaser || !s.x.teaser.text) s.x.teaser = null;
   const gp = x => ({wish:String((x && x.wish) || ''), tabu:String((x && x.tabu) || '')});
   s.gen = {a:gp(o.gen && o.gen.a), b:gp(o.gen && o.gen.b), quiz:!(o.gen && o.gen.quiz === false),
     out:o.gen && Array.isArray(o.gen.out) ? o.gen.out.map((w, i) => normWheel(w, i)) : null, info:o.gen && o.gen.info || null};
@@ -1217,12 +1314,14 @@ async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   const w = S.wheels[idx], vis = visibleIdx();
   const useFocus = jockey || isSlot() || vis.length > 1 || !vis.includes(idx);
   if (useFocus) { focus = {idx, p:0, jockey}; await tween(450, (t, now) => { focus.p = t; render(now); }); }
+  const beatOff = spinBeat();
   const res = await spinAnim(w, render, (secs || S.settings.spinSec) * (jockey ? 1.3 : 1));
-  stopSound();
+  beatOff(); stopSound();
   await flashWin(w, res, render);
   w.history = [resultLine(w, w.fields[res], res), ...(w.history || [])].slice(0, 5);
   if (depth === 0) LASTRUN.length = 0;
   fieldFlags(w.fields[res]);
+  gAfterSpin(idx);
   LASTRUN.push(String(w.fields[res].text || resultLine(w, w.fields[res], res)).replace(/\n/g, ' '));
   quizLog(w.fields[res]);
   save();
@@ -1428,6 +1527,7 @@ function showResult(w, i, depth, fieldOverride) {
     $('#rTxt').textContent = f.text || (f.num === '' ? 'Feld ' + (i + 1) : '');
     $('#rTxt').style.fontSize = f._fs || '';
     $('#rUnit').textContent = w.unit || '';
+    resultDecor(w, f, i);
     const nx = $('#rNext');
     const card = f.card ? S.presets.find(c => c.id === f.card) : null;
     const target = depth >= MAX_CHAIN - 1 ? null
@@ -1508,15 +1608,16 @@ function showResult(w, i, depth, fieldOverride) {
       } else if (url) { const im = new Image(); im.src = url; im.style.transform = cropCss(f.media.crop); box.appendChild(im); }
     }
     toyPlay(f.toy);
-    if (S.settings.speakMain) speak(resultLine(w, f, i));
+    resultVoice(w, f, i);
     function done(next) {
-      clearInterval(autoT); clearTimeout(autoT);
+      clearInterval(autoT); clearTimeout(autoT); resultCleanup();
       $('#result').classList.remove('show', 'hasvid'); if (box._sqp) { box._sqp.stop(); box._sqp = null; } box.querySelectorAll('video').forEach(x => x.pause()); box.innerHTML = '';
       nx.onclick = $('#rClose').onclick = null;
       stopSpeech();
       resolve(next);
     }
     nx.onclick = () => done(target);
+    resultButtons(w, f, i, target, done);
     $('#rStop').style.display = SEQ.run ? 'block' : 'none';
     $('#rStop').onclick = () => { SEQ.abort = true; toyStop(); done(null); };
     // ohne Video/Folge: kurz groß aufleuchten, dann zurück zum Rad
@@ -1842,6 +1943,11 @@ function renderPanel() {
     <label class="chk"><input type="checkbox" data-sp="simple" ${S.settings.simple !== false ? 'checked' : ''}> Einfache Ansicht (nur DREHEN, Joker, ☰ MENÜ und 🏠 in der Leiste)</label>
     <label class="chk"><input type="checkbox" data-sp="stufeColors" ${S.settings.stufeColors !== false ? 'checked' : ''}> Radfarben passend zur Stufe (aus = eigene Farbe je Rad)</label>
     <label class="chk"><input type="checkbox" data-sp="amb" ${S.settings.amb !== false ? 'checked' : ''}> Stimmungs-Hintergrund (Herzen, Glut, Funken je Stufe)</label>
+    <label class="chk"><input type="checkbox" data-sp="reveal" ${S.settings.reveal !== false ? 'checked' : ''}> Ergebnis enthüllen (Seidentuch, Wort für Wort)</label>
+    <label class="chk"><input type="checkbox" data-sp="lines" ${S.settings.lines !== false ? 'checked' : ''}> Sprüche zum Ergebnis (je Stufe derber, Tabus bleiben draußen)</label>
+    <label class="chk"><input type="checkbox" data-sp="night" ${S.settings.night ? 'checked' : ''}> Nachtmodus (gedimmt, rötlich, kein Aufblitzen)</label>
+    <label class="chk"><input type="checkbox" data-sp="toyBeat" ${S.settings.toyBeat !== false ? 'checked' : ''}> Spielzeug pulsiert schon beim Drehen im Herzschlag</label>
+    <label class="chk"><input type="checkbox" data-sp="big" ${S.settings.big ? 'checked' : ''}> Große Knöpfe</label>
     <label class="chk"><input type="checkbox" data-sp="home" ${S.settings.home !== false ? 'checked' : ''}> Startbildschirm beim Öffnen zeigen</label>
     <label class="chk"><input type="checkbox" data-sp="sound" ${S.settings.sound ? 'checked' : ''}> Tick- und Stopp-Ton</label>
     <label class="chk"><input type="checkbox" data-sp="speakMain" ${S.settings.speakMain ? 'checked' : ''}> Ergebnisse der Räder auch vorlesen</label>
@@ -1936,7 +2042,7 @@ function initPanelEvents() {
       S.settings[k] = el.type === 'checkbox' ? el.checked : +el.value;
       if (k === 'spinSec') $('#spinSecL').textContent = el.value + ' s';
       if (k === 'simple') applySimple();
-      if (k === 'stufeColors' || k === 'amb') applyStufe();
+      if (['stufeColors', 'amb', 'night', 'big'].includes(k)) applyStufe();
       save(); return;
     }
   });
@@ -3216,11 +3322,12 @@ const rateBtns = (attrs, v, withNone) => (withNone ? `<button ${attrs} data-v="0
 function renderQuiz() {
   quizHead();
   const N = QS().names, B = $('#qBody');
+  if ((quizTab === 'a' || quizTab === 'b') && (S.x.qmode || 'cards') === 'cards') { B.innerHTML = quizCardsHtml(quizTab); swBind(quizTab); return; }
   if (quizTab === 'a' || quizTab === 'b') {
     const who = quizTab, total = allQuizItems().length;
     const done = allQuizItems().filter(it => (QS().ans[it.id] || {})[who]).length;
     B.innerHTML = `<div class="qmap">Name: <input type="text" data-qname="${who}" value="${esc(N[who])}" class="qname">
-        <span class="qprog">${done} / ${total} beantwortet</span></div>
+        <span class="qprog">${done} / ${total} beantwortet</span><button class="qbtn alt" style="margin:0 0 0 auto" data-qmode="cards">🃏 Als Karten wischen</button></div>
       <div class="qmap"><b>Wie intensiv magst du es?</b></div>
       <div class="qstufe">${[1, 2, 3, 4].map(L => `<button data-qstufe="${L}" class="${(QS().stufe || {})[who] === L ? 'on' : ''}">${STUFEN[L]}</button>`).join('')}
         <button data-qstufe="0" class="${!(QS().stufe || {})[who] ? 'on' : ''}">Automatisch</button>
@@ -3375,7 +3482,7 @@ function themeWheels(t) {
   return t.wheels.map((tw, k) => ({title:tw.title, fields:tw.fields.map((x, j) => Object.assign({text:thText(x),
     next:typeof x === 'object' && x.to != null ? x.to : (typeof x === 'object' && x.end) || k >= t.wheels.length - 1 ? -1 : k + 1,
     weight:typeof x === 'object' && x.w ? x.w : 1},
-    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
+    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
     toy:tw.stufe ? {lvl:STUFE_TOY[Math.min(4, j + 1)], sec:30, pat:j >= 2 ? 'steigernd' : 'welle', dev:''} : undefined}))}));
 }
 // alle möglichen Abläufe eines Themas (für Liste und Test)
@@ -3786,7 +3893,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110301;
+const APP_BUILD = 2026110302;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -3844,7 +3951,7 @@ $('#updReset').onclick = e => { const b = e.currentTarget; if (!updNative()) ret
 setTimeout(() => { if (navigator.onLine !== false) updCheck(true); }, 4000);
 
 seedFlows();
-window.SexRad = window.FickRad = {drawWheel, newWheel, vlibPick, pickWeighted, themeWheels, GAL, vgOpen, genBuild, genParse, fbOpen, THEMES, themePaths, loadTheme, flowPaths, flowSave, applyWheelSet, LASTRUN, get state() { return S; }};
+window.SexRad = window.FickRad = {drawWheel, newWheel, vlibPick, pickWeighted, themeWheels, GAL, vgOpen, genBuild, genParse, fbOpen, THEMES, themePaths, loadTheme, flowPaths, flowSave, applyWheelSet, LASTRUN, get state() { return S; }, setStufe:(...a) => setStufe(...a), openQuiz:(...a) => openQuiz(...a), openLib:(...a) => openLib(...a), get G() { return G; }};
 
 /* =====================================================================
    Abo über Google Play
@@ -4004,52 +4111,89 @@ function openSetup(sec) {
 // Im einfachen Modus ist das Zahnrad versteckt: Panel über ☰ öffnen und mit ✕ im Panel schließen
 function closeSetup() { closePanel(); render(); }
 
-/* ---------- Startbildschirm ---------- */
-let wizOn = false;
-function openHome() { closePanel(); $('#menu').classList.remove('show'); renderHome(); $('#home').classList.add('show'); }
+/* ---------- Startbildschirm mit Ersteinrichtung (Namen → Stufe → passende Räder) ---------- */
+let wizOn = false, wizStep = 0;
+function openHome() { closePanel(); $('#menu').classList.remove('show'); $('#lib').classList.remove('show'); renderHome(); $('#home').classList.add('show'); }
 function closeHome() { $('#home').classList.remove('show'); }
 function renderHome() {
   const H = $('#home'), n = NM();
   if (!S.settings.named || wizOn) {
-    H.innerHTML = `<div class="ovin"><h1 class="hTitle">Sex<em>Rad</em></h1><p class="hMotto">Wenn es sich um das eine dreht</p>
-      <div class="hLab">Wer spielt heute?</div>
-      <div class="wizIn"><input id="wzA" value="${esc(n.A)}" placeholder="Name 1"><input id="wzB" value="${esc(n.B)}" placeholder="Name 2"></div>
-      <div class="hRow"><button class="hbtn alt" data-wzp="Er|Sie">Er & Sie</button><button class="hbtn alt" data-wzp="Sie|Sie">Sie & Sie</button><button class="hbtn alt" data-wzp="Er|Er">Er & Er</button></div>
-      <div class="hRow"><button class="hbtn" data-h="wzok">Weiter ▶</button></div>
+    const steps = [
+      `<div class="hLab">Schritt 1 von 3 · Wer spielt heute?</div>
+        <div class="wizIn"><input id="wzA" value="${esc(n.A)}" placeholder="Name 1"><input id="wzB" value="${esc(n.B)}" placeholder="Name 2"></div>
+        <div class="hRow"><button class="hbtn alt" data-wzp="Er|Sie">Er & Sie</button><button class="hbtn alt" data-wzp="Sie|Sie">Sie & Sie</button><button class="hbtn alt" data-wzp="Er|Er">Er & Er</button></div>
+        <div class="hRow"><button class="hbtn" data-wz="1">Weiter ▶</button></div>`,
+      `<div class="hLab">Schritt 2 von 3 · Wie heiß soll es werden?</div>
+        <p class="tip" style="margin-top:0">Farben, Sprüche und Animationen werden mit jeder Stufe dominanter. Ihr könnt jederzeit wechseln.</p>
+        ${stufeButtons()}<div class="hRow"><button class="hbtn" data-wz="2">Weiter ▶</button><button class="hbtn alt" data-wz="0">◀ Zurück</button></div>`,
+      `<div class="hLab">Schritt 3 von 3 · Fertig, ${esc(n.A)} & ${esc(n.B)}</div>
+        <p class="tip" style="margin-top:0">Sollen wir euch passende Räder für <b>${STUFEN[baseStufe()]}</b> einrichten (Wo? → Vorspiel → Stellung → Abschluss)?
+          Eure bisherigen Räder lassen sich mit ↩ VORHER zurückholen.</p>
+        <div class="hRow"><button class="hbtn" data-wz="fill">✔ Passende Räder einrichten</button><button class="hbtn alt" data-wz="keep">Meine Räder behalten</button><button class="hbtn alt" data-wz="1">◀ Zurück</button></div>`];
+    H.innerHTML = `<div class="ovin"><h1 class="hTitle">Sex<em>Rad</em></h1><p class="hMotto">Wenn es sich um das eine dreht</p>${steps[wizStep] || steps[0]}
       <div class="tip"><b>So geht's:</b> Rad mit dem Finger anschubsen = drehen · lange auf ein Feld drücken = Feld bearbeiten ·
-        ☰ MENÜ = Spielarten, Fragebogen und Einrichten.</div></div>`;
+        ☰ MENÜ = Spielarten, Fragebogen und Einrichten · lange auf ☰ drücken = Tarnbildschirm.</div></div>`;
     return;
   }
+  const open = S.x.vouchers.filter(v => !v.done), T = S.x.teaser, hm = d => new Date(d).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
+  const teaserCard = T ? `<div class="ovcard"><h4>🌒 Heute Abend wartet etwas …</h4>
+      <p>Es hat mit <b>„${esc(T.wheel)}“</b> zu tun. ${Date.now() >= T.rev ? 'Es ist so weit.' : 'Enthüllung um ' + hm(T.rev) + ' Uhr.'}</p>
+      <div class="hRow"><button class="hbtn" data-h="tReveal">${Date.now() >= T.rev ? '🔓 Jetzt enthüllen' : '🔓 Doch schon jetzt enthüllen'}</button>
+      <button class="hbtn alt" data-h="tShare">📤 Hinweis an ${esc(n.B)} schicken</button><button class="hbtn alt" data-h="tDel">✕ Verwerfen</button></div></div>` : '';
+  const vCard = open.length ? `<div class="ovcard"><h4>🎁 Offene Gutscheine (${open.length})</h4>${open.slice(0, 8).map(v =>
+      `<p>für <b>${esc(v.to === 'a' ? n.A : n.B)}</b>: ${esc(v.text)} <button class="pill" data-h="vDone" data-v="${esc(v.id)}">✔ eingelöst</button></p>`).join('')}</div>` : '';
   H.innerHTML = `<button class="ovx" data-h="close" title="Zum Rad">✕</button><div class="ovin">
     <h1 class="hTitle">Sex<em>Rad</em></h1><p class="hMotto">Wenn es sich um das eine dreht · ${esc(n.A)} & ${esc(n.B)}</p>
     <div class="hLab">Was habt ihr heute vor?</div>
     <div class="hGrid">
-      <button class="tile main" data-h="quick"><span class="ti">⚡</span><b>Schnell & spontan</b><small>Sofort drehen mit euren Rädern.</small></button>
-      <button class="tile" data-h="quiz"><span class="ti">💞</span><b>Uns kennenlernen</b><small>Vorlieben-Fragebogen: jeder bewertet für sich, Tabus bleiben draußen.</small></button>
-      <button class="tile" data-h="themen"><span class="ti">🎯</span><b>Fertige Themen</b><small>Vorlagen-Räder laden und los.</small></button>
+      <button class="tile main" data-h="night"><span class="ti">🌙</span><b>Heute Nacht</b><small>Geführter Abend in 6 Phasen – von Ankommen bis Höhepunkt. Wird mit jeder Phase heißer.</small></button>
+      <button class="tile" data-h="quick"><span class="ti">⚡</span><b>Schnell & spontan</b><small>Sofort drehen mit euren Rädern.</small></button>
+      <button class="tile" data-h="quiz"><span class="ti">💞</span><b>Uns kennenlernen</b><small>Jeder wischt für sich durch die Vorlieben – Tabus bleiben geheim.</small></button>
+      <button class="tile" data-h="lib"><span class="ti">📚</span><b>Vorlagen</b><small>Fertige Spiele: Wahrheit oder Pflicht, Blowjob, Spermerei, Fesseln …</small></button>
+      <button class="tile" data-h="extrem" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}><span class="ti">⛓</span><b>Extrem-Training</b><small>Nur Heavy Duty: Bondage, Anal, Kehle, Spermaspiele – wird mit jedem Mal härter.</small></button>
       <button class="tile" data-h="setup"><span class="ti">⚙</span><b>Eigenes Spiel</b><small>Felder, Videos und Räder selbst einrichten.</small></button>
     </div>
     <div class="hLab">Stufe für heute</div>${stufeButtons()}
-    <div class="hRow" style="margin-top:22px"><button class="hbtn" data-h="close">Direkt zum Rad ▸</button>
-      <button class="hbtn alt" data-h="names">👥 Namen ändern</button>
-      <button class="hbtn alt" data-h="nohome">${S.settings.home !== false ? 'Beim Öffnen nicht mehr zeigen' : 'Beim Öffnen wieder zeigen'}</button></div>
+    <div class="hRow">
+      <button class="pill ${S.settings.night ? 'on' : ''}" data-h="nightm">🌙 Nachtmodus ${S.settings.night ? 'an' : 'aus'}</button>
+      <button class="pill" data-h="teaser">🌒 Vorfreude-Teaser</button>
+      <button class="pill" data-h="wop">🎲 Wahrheit oder Pflicht</button>
+      <button class="pill" data-h="names">👥 Namen & Stufe neu</button>
+      <button class="pill" data-h="nohome">${S.settings.home !== false ? 'Beim Öffnen nicht mehr zeigen' : 'Beim Öffnen wieder zeigen'}</button></div>
+    ${teaserCard}${vCard}
+    <div class="hRow" style="margin-top:20px"><button class="hbtn" data-h="close">Direkt zum Rad ▸</button>
+      <span style="color:rgba(255,255,255,.55);font-size:14px">💋 ${S.x.stats.kisses} erledigt · 🔥 ${S.x.stats.hot} · 🧊 ${S.x.stats.cold}</span></div>
     <div class="tip">Tipp: Rad anschubsen = drehen · lange auf ein Feld drücken = bearbeiten · 🏠 in der Leiste bringt euch hierher zurück.</div></div>`;
 }
 $('#home').addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
   const d = b.dataset;
   if (d.wzp) { const [a, c] = d.wzp.split('|'); $('#wzA').value = a; $('#wzB').value = c; return; }
+  if (d.wz != null) {
+    if ($('#wzA')) { S.quiz.names = S.quiz.names || {}; S.quiz.names.a = $('#wzA').value.trim() || 'Er'; S.quiz.names.b = $('#wzB').value.trim() || 'Sie'; save(); }
+    if (d.wz === 'fill' || d.wz === 'keep') {
+      S.settings.named = true; S.x.setup = true; wizOn = false; wizStep = 0; save();
+      if (d.wz === 'fill') applyWheelSet('Start ' + STUFEN[baseStufe()], starterWheels(baseStufe()), true, 'Start');
+      renderHome(); return;
+    }
+    wizStep = +d.wz; renderHome(); return;
+  }
   switch (d.h) {
-    case 'wzok':
-      S.quiz.names = S.quiz.names || {};
-      S.quiz.names.a = $('#wzA').value.trim() || 'Er'; S.quiz.names.b = $('#wzB').value.trim() || 'Sie';
-      S.settings.named = true; wizOn = false; save(); renderHome(); break;
     case 'close': closeHome(); break;
     case 'quick': closeHome(); setTimeout(() => isSlot() ? slotSpin() : doSpin(S.active), 250); break;
+    case 'night': closeHome(); gStart(); break;
+    case 'extrem': if (stufeCap() >= 4) closeHome(); xtStart(); break;
     case 'quiz': closeHome(); openQuiz('a'); break;
-    case 'themen': openSetup('themen'); break;
+    case 'lib': openLib(); break;
     case 'setup': openSetup('fields'); break;
-    case 'names': wizOn = true; renderHome(); break;
+    case 'wop': { const i = THEMES.findIndex(t => t.wop); closeHome(); loadTheme(i); setTimeout(() => doSpin(0), 400); break; }
+    case 'nightm': S.settings.night = !S.settings.night; save(); applyStufe(); renderHome(); break;
+    case 'teaser': teaserNew(); renderHome(); break;
+    case 'tReveal': teaserReveal(); break;
+    case 'tShare': teaserShare(); break;
+    case 'tDel': S.x.teaser = null; save(); renderHome(); break;
+    case 'vDone': { const v = S.x.vouchers.find(x => x.id === d.v); if (v) { v.done = Date.now(); save(); kissFx(); renderHome(); } break; }
+    case 'names': wizOn = true; wizStep = 0; renderHome(); break;
     case 'nohome': S.settings.home = S.settings.home === false; save(); renderHome();
       toast(S.settings.home ? 'Startbildschirm kommt beim Öffnen' : 'Startbildschirm nur noch über 🏠', 2500); break;
   }
@@ -4058,23 +4202,33 @@ $('#home').addEventListener('click', e => {
 /* ---------- Menü ☰ ---------- */
 function openMenu() { closePanel(); renderMenu(); $('#menu').classList.add('show'); }
 function renderMenu() {
-  const nw = $('#bUpd').classList.contains('new');
+  const nw = $('#bUpd').classList.contains('new'), open = S.x.vouchers.filter(v => !v.done).length;
   $('#menu').innerHTML = `<button class="ovx" data-m="close">✕</button><div class="ovin">
     <h2 class="hTitle" style="font-size:46px">Menü</h2><p class="hMotto">Spielart wählen und einrichten</p>
     <div class="hLab">Stufe</div>${stufeButtons()}
     <div class="hLab">Spielen</div><div class="mGrid">
+      <button class="mb" data-m="night">🌙 Heute Nacht<small>Geführter Abend in 6 Phasen</small></button>
       <button class="mb" data-m="mode">${isSlot() ? '🎡 Glücksrad' : '🎰 Slotmaschine'}<small>${isSlot() ? 'Ein Rad nach dem anderen drehen' : 'Alle Räder auf einmal ziehen'}</small></button>
+      <button class="mb" data-m="lib">📚 Vorlagen<small>Fertige und eigene Spiele</small></button>
+      <button class="mb" data-m="wop">🎲 Wahrheit oder Pflicht<small>Fragen und Aufgaben passend zur Stufe</small></button>
+      <button class="mb" data-m="extrem">⛓ Extrem-Training<small>Nur Heavy Duty · Bondage, Anal, Kehle, Sperma</small></button>
       <button class="mb" data-m="timer">⏱ Timer-Rad<small>Alle paar Sekunden eine neue Ansage</small></button>
       <button class="mb" data-m="flow">🔗 Spielablauf<small>Mehrere Räder nacheinander</small></button>
       <button class="mb" data-m="quiz">💞 Fragebogen<small>Vorlieben, Stufen, Rückblick</small></button>
-      <button class="mb" data-m="themen">🎯 Fertige Themen<small>Vorlagen-Räder laden</small></button>
-      <button class="mb" data-m="home">🏠 Startbildschirm<small>Was habt ihr heute vor?</small></button></div>
+      <button class="mb" data-m="teaser">🌒 Vorfreude-Teaser<small>Morgens drehen, abends enthüllen</small></button>
+      <button class="mb" data-m="home">🏠 Startbildschirm<small>${open ? open + ' offene Gutscheine' : 'Was habt ihr heute vor?'}</small></button></div>
     <div class="hLab">Einrichten</div><div class="mGrid">
       <button class="mb" data-m="setup">⚙ Felder & Räder<small>Texte, Videos, wie oft, danach weiter mit</small></button>
+      <button class="mb" data-m="gal">🗂 Galerie & Ordner<small>Videos, Sequenzen, Zufall aus Ordnern</small></button>
       <button class="mb" data-m="cards">💾 Gespeicherte Spiele<small>Speichern, laden, teilen</small></button>
-      <button class="mb" data-m="opts">🔧 Optionen<small>Ton, Drehdauer, Export</small></button>
+      <button class="mb" data-m="opts">🔧 Optionen<small>Ton, Drehdauer, Enthüllung, Sprüche, Export</small></button>
       <button class="mb ${nw ? 'new' : ''}" data-m="upd">⟳ Update<small>${nw ? 'Neue Version verfügbar!' : 'Neue Version suchen'}</small></button>
-      <button class="mb" data-m="pro">🛠 Profi-Ansicht<small>Alle Knöpfe wie früher in der Leiste</small></button></div></div>`;
+      <button class="mb" data-m="pro">🛠 Profi-Ansicht<small>Alle Knöpfe wie früher in der Leiste</small></button></div>
+    <div class="hLab">Ansicht & Diskretion</div><div class="mGrid">
+      <button class="mb" data-m="nightm">🌙 Nachtmodus: ${S.settings.night ? 'an' : 'aus'}<small>Gedimmt, rötlich, kein Aufblitzen</small></button>
+      <button class="mb" data-m="big">🔠 Große Knöpfe: ${S.settings.big ? 'an' : 'aus'}<small>Leichter zu treffen</small></button>
+      <button class="mb" data-m="pin">🔒 PIN-Sperre: ${S.x.pin ? 'an' : 'aus'}<small>${S.x.pin ? 'Antippen = ausschalten' : 'Beim Öffnen PIN abfragen'}</small></button>
+      <button class="mb" data-m="camo">🕶 Tarnbildschirm<small>Sofort neutrale Ansicht · auch: lange auf ☰ drücken</small></button></div></div>`;
 }
 $('#menu').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
@@ -4082,21 +4236,33 @@ $('#menu').addEventListener('click', e => {
   const close = () => $('#menu').classList.remove('show');
   switch (m) {
     case 'close': close(); break;
+    case 'night': close(); gStart(); break;
     case 'mode': close(); setMode(isSlot() ? 'rad' : 'slot'); break;
+    case 'lib': close(); openLib(); break;
+    case 'wop': { close(); loadTheme(THEMES.findIndex(t => t.wop)); setTimeout(() => doSpin(0), 400); break; }
     case 'timer': close(); openTimer(); break;
+    case 'extrem': close(); xtStart(); break;
     case 'flow': close(); openFlowPick(); break;
     case 'quiz': close(); openQuiz('a'); break;
-    case 'themen': openSetup('themen'); break;
+    case 'teaser': close(); teaserNew(); openHome(); break;
     case 'home': openHome(); break;
     case 'setup': openSetup('fields'); break;
+    case 'gal': close(); vgOpen(null); break;
     case 'cards': openSetup('cards'); break;
     case 'opts': openSetup('opts'); break;
     case 'upd': close(); updOpen(); break;
+    case 'nightm': S.settings.night = !S.settings.night; save(); applyStufe(); renderMenu(); break;
+    case 'big': S.settings.big = !S.settings.big; save(); applyStufe(); renderMenu(); break;
+    case 'pin': if (S.x.pin) { S.x.pin = ''; save(); toast('PIN-Sperre aus'); renderMenu(); } else { close(); lockSetup(); } break;
+    case 'camo': close(); camoOn(); break;
     case 'pro': S.settings.simple = false; save(); applySimple(); close();
       toast('Profi-Ansicht: alle Knöpfe in der Leiste. Zurück unter ⚙ → Optionen → Einfache Ansicht.', 5000); break;
   }
 });
-$('#bMenu').onclick = openMenu;
+$('#bMenu').onclick = () => { if (!$('#bMenu')._lp) openMenu(); };
+// lange auf ☰ drücken = sofort Tarnbildschirm
+$('#bMenu').addEventListener('pointerdown', () => { const b = $('#bMenu'); b._lp = false; b._t = setTimeout(() => { b._lp = true; camoOn(); }, 700); });
+['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => $('#bMenu').addEventListener(ev, () => clearTimeout($('#bMenu')._t)));
 // Einrichten offen: Zahnrad zum Schließen auch im einfachen Modus zeigen
 new MutationObserver(() => document.body.classList.toggle('setupOpen', $('#panel').classList.contains('open'))).observe($('#panel'), {attributes:true, attributeFilter:['class']});
 $('#bHome').onclick = openHome;
@@ -4157,7 +4323,8 @@ function quickEdit(wi, fi, px, py) {
       <textarea id="qeText" placeholder="Was soll passieren?">${esc(f.text)}</textarea>
       <div class="qeRow">Wie oft? <select id="qeW">${oftOpts(f.weight)}</select> Danach weiter mit: <select id="qeN" style="flex:1;min-width:120px">${nextOptsQ(f, wi)}</select></div>
       <div class="qeRow"><button class="b" data-qe="media">${f.media ? '🎬 Video/Foto ändern' : '🎬 Video / Foto'}</button>
-        <button class="b" data-qe="add" ${w.fields.length >= MAX_FIELDS ? 'disabled' : ''}>＋ Feld dazu</button>
+        <button class="b" data-qe="voice">🎙 ${f.voice ? 'Neu aufnehmen' : 'Eigene Stimme'}</button>${f.voice ? '<button class="b" data-qe="vplay">▶ 🎙</button><button class="b" data-qe="vdel">🗑 🎙</button>' : ''}</div>
+      <div class="qeRow"><button class="b" data-qe="add" ${w.fields.length >= MAX_FIELDS ? 'disabled' : ''}>＋ Feld dazu</button>
         <button class="b" data-qe="del">🗑 Löschen</button><button class="b pri" data-qe="ok" style="margin-left:auto">✔ Fertig</button></div>`;
   };
   draw();
@@ -4174,6 +4341,9 @@ function quickEdit(wi, fi, px, py) {
     const a = b.dataset.qe;
     if (a === 'ok') { qeHide(); editHL = null; render(); renderPanel(); return; }
     if (a === 'media') { qeHide(); editHL = null; pickMedia({kind:'wheel', w:wi, f:fi}); return; }
+    if (a === 'voice') { if (!voiceStop()) voiceRecord(f, draw); return; }
+    if (a === 'vplay') { mediaURL(f.voice.media.id).then(u => { if (u) new Audio(u).play().catch(() => {}); }); return; }
+    if (a === 'vdel') { voiceDel(f); draw(); return; }
     if (a === 'add') { w.fields.splice(fi + 1, 0, newField('')); fi++; save(); editHL = fi; render(); draw(); $('#qeText').focus(); return; }
     if (a === 'del') {
       if (w.fields.length <= MIN_FIELDS) { toast('Mindestens ' + MIN_FIELDS + ' Felder'); return; }
@@ -4193,32 +4363,35 @@ document.addEventListener('pointerdown', e => {
 const quizHasData = () => Object.values(QS().ans || {}).some(x => x && x.a && x.b);
 // Gemeinsame Obergrenze: ist der Fragebogen ausgefüllt, gilt die vorsichtigere Stufe der beiden
 const stufeCap = () => quizHasData() ? stufeMax() : 4;
-function curStufe() { return clamp(+S.settings.stufe || (quizHasData() ? stufeSession() : 2), 1, stufeCap()); }
+const G = {on:false, k:0, spins:0, look:0, heat:0};   // geführter Abend „Heute Nacht“
+function baseStufe() { return clamp(+S.settings.stufe || (quizHasData() ? stufeSession() : 2), 1, stufeCap()); }
+function curStufe() { return G.on && G.look ? G.look : baseStufe(); }
 const LOOK = () => LOOKS[curStufe()] || LOOKS[2];
 function wheelPal(w) { return S.settings.stufeColors !== false ? LOOK().pal : (PALETTES[w.palette] || PALETTES.klassik); }
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function applyStufe() {
-  document.documentElement.dataset.stufe = curStufe();
+  const R = document.documentElement; R.dataset.stufe = curStufe(); R.classList.toggle('night', !!S.settings.night);
+  document.body.classList.toggle('guided', G.on); document.body.classList.toggle('bigbtn', !!S.settings.big);
   layerCache.clear(); $('#wbtns').dataset.key = '';
   stufeChipUi(); render();
   if ($('#timerView').classList.contains('show')) renderTimer();
 }
 function stufeChipUi() {
   const L = curStufe();
-  $('#stufeChip').innerHTML = `Stufe<b>${STUFEN[L]}</b><i>${[1, 2, 3, 4].map(k => `<span class="${k <= L ? 'on' : ''}"></span>`).join('')}</i>`;
+  $('#stufeChip').innerHTML = `${G.on ? 'Heute Nacht' : 'Stufe'}<b>${STUFEN[L]}</b><i>${[1, 2, 3, 4].map(k => `<span class="${k <= L ? 'on' : ''}"></span>`).join('')}</i>`;
 }
 function setStufe(L, quiet) {
   const cap = stufeCap();
   if (L > cap) { toast(`Gemeinsam geht höchstens ${STUFEN[cap]} – so habt ihr es im Fragebogen festgelegt. Höher nur, wenn beide ihre Stufe anheben.`, 5000); L = cap; }
   S.settings.stufe = L; if (quizHasData()) QS().stufeSel = L;
-  save(); applyStufe();
+  save(); applyStufe(); if (G.on) gLoad(true);
   if (!quiet) toast(`Stufe ${STUFEN[L]}`, 1500);
   if ($('#home').classList.contains('show')) renderHome();
   if ($('#menu').classList.contains('show')) renderMenu();
 }
 // Stufe in der Leiste antippen = eine Stufe höher (nach der höchsten wieder Soft)
-$('#stufeChip').onclick = () => { if (busy) return; const cap = stufeCap(), L = curStufe(); setStufe(L >= cap ? 1 : L + 1); };
+$('#stufeChip').onclick = () => { if (busy) return; const cap = stufeCap(), L = baseStufe(); setStufe(L >= cap ? 1 : L + 1); };
 
 /* ---------- Stimmungs-Hintergrund: Soft Herzen, Middle Glut, Hard rote Funken + Rauch, Heavy Duty Funkenregen + Herzschlag ---------- */
 const AMB_CFG = [null,
@@ -4291,10 +4464,527 @@ function ambLoop(now) {
 }
 
 function stufeButtons() {
-  const cap = stufeCap(), L = curStufe(), D = ['', 'zärtlich, romantisch, viel Haut', 'verspielt, neckend, ein bisschen frech', 'fordernd, wild, er bestimmt', 'dominant, derb, ohne Gnade'];
+  const cap = stufeCap(), L = baseStufe(), D = ['', 'zärtlich, romantisch, viel Haut', 'verspielt, neckend, ein bisschen frech', 'fordernd, wild, er bestimmt', 'dominant, derb, ohne Gnade'];
   return `<div class="stufeSel">${[1, 2, 3, 4].map(k => `<button class="stb l${k} ${k === L ? 'on' : ''}" data-hs="${k}" ${k > cap ? 'disabled' : ''}>${STUFEN[k]}<small>${D[k]}${k > cap ? ' · über eurer Grenze' : ''}</small></button>`).join('')}</div>`;
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-hs]'); if (b && !b.disabled) setStufe(+b.dataset.hs); });
+
+
+/* =====================================================================
+   Stufe 3: Enthüllung, Kopfkino je Stufe, Kussmund, 🔥👌🧊, Gutscheine,
+   eigene Stimme, Spielzeug im Takt, Nachtmodus, Heute Nacht, Vorfreude,
+   Wahrheit oder Pflicht, PIN & Tarnung, Wisch-Fragebogen, Vorlagen
+   ===================================================================== */
+
+function qeShow(at) {
+  const Q = $('#qedit'); Q.classList.add('show');
+  const w = Q.offsetWidth, h = Q.offsetHeight;
+  const left = at ? clamp(at.x - w / 2, 10, innerWidth - w - 10) : (innerWidth - w) / 2, top = at ? clamp(at.y - h / 2, 10, innerHeight - h - 10) : (innerHeight - h) / 2;
+  Q.style.left = left + 'px'; Q.style.top = top + 'px';
+}
+/* ---------- Kopfkino-Sätze je Stufe (derber, je härter) ----------
+   Sätze, die eine bestimmte Handlung nennen, erscheinen nur, wenn das Ergebnis genau dazu passt
+   und keiner von beiden diese Handlung im Fragebogen als Tabu markiert hat. */
+const LINES = [null,
+  ['Ganz langsam … genieß jede Sekunde.', 'Schau {B} dabei tief in die Augen.', 'Nimm dir Zeit. Heute gibt es keine Eile.', 'Zärtlich – und mit ganz viel Haut.',
+   'Flüster {B} ins Ohr, was du an ihr liebst.', 'Jede Berührung ein kleines Versprechen.', 'Atme mit ihr im selben Takt.'],
+  ['Zeig {B}, wie sehr du das willst.', 'Langsam anfangen – dann immer ein bisschen mehr.', 'Sag laut, was dich gerade geil macht.', 'Kein Wort – nur Hände und Mund.',
+   'Necken erlaubt. Erlösung erst später.', 'Mach sie richtig neugierig auf mehr.', '{A} gibt das Tempo vor.'],
+  ['Keine Ausreden. Jetzt.', '{A} bestimmt – {B} gehorcht.', 'Fester. Tiefer. Kein Zurück.', 'Heute wird nicht gefragt, heute wird genommen.',
+   'Mach sie so richtig nass.', 'Sie soll laut werden.', 'Erst wenn sie bettelt, gibt es mehr.', 'Halt sie fest – sie darf nicht weg.', 'Sie soll spüren, wer hier bestimmt.'],
+  ['Keine Gnade. Nur Lust.', 'Du gehörst heute nur mir.', 'Jetzt wird hart gefickt.', 'Sei mein dreckiges Fickstück.', 'Betteln hilft nicht – nur Gehorchen.',
+   'Schwanz raus. Jetzt wird nicht mehr geredet.', 'Safeword bereit? Dann los.', 'Heute bist du nur zum Benutzen da.', 'Sag laut, wem du gehörst.',
+   'Kein Mitleid – nur harter Schwanz.', 'Erst wenn ich sage, darfst du kommen.'],
+];
+const ACT_LINES = [
+  {rx:/mund|maul|blas|blowjob|oral|lutsch|gurgel|schluck|deepthroat/i, tabu:['vor.oral_sie', 'fin.mund'],
+   3:['Ganz tief in den Mund.', 'Lippen um den Schwanz – und nicht loslassen.', 'Sie soll ihn richtig schmecken.'],
+   4:['Wichs ihr ins Maul.', 'Maul auf – alles schlucken.', 'Schwanz tief ins Maul, bis sie würgt.', 'Fick ihr Maul – sie hält still.']},
+  {rx:/gesicht/i, tabu:['fin.gesicht'], 3:['Mitten ins Gesicht.', 'Sie hält still – du zielst.'], 4:['Spritz ihr alles in die Fresse.', 'Gesicht hinhalten – und schön dankbar sein.']},
+  {rx:/sperma|spritz|cum|abspritz/i, tabu:['fin.mund'], 3:['Jeder Tropfen zählt.'], 4:['Jeder Tropfen wird geschluckt.', 'Zeig ihm alles im Mund – dann runter damit.']},
+  {rx:/arsch|anal|\bpo\b|plug|dehner/i, tabu:['fin.arsch', 'toy.plug', 'toy.anal_gross'], 3:['Heute ist der Po dran.', 'Langsam rein – dann fester.'],
+   4:['Fick sie richtig in den Arsch.', 'Arsch hoch – jetzt wird er gefickt.', 'Langsam rein … und dann hart in den Arsch.']},
+  {rx:/muschi|fotze|reiter|doggy|missionar|löffel|stehend|tisch|schoß|beine|stellung|fick/i, tabu:['fin.muschi'], 3:['Nimm sie richtig hart.', 'Tief rein – und halt sie fest.'],
+   4:['Schwanz rein, Fotze auf.', 'Fick ihre Fotze, bis sie bettelt.', 'Nimm sie hart – sie will deinen Schwanz.']},
+  {rx:/fessel|binde|gefesselt|handschell|knebel|halsband|tape|bondage|festbind/i, tabu:['art.fessel', 'art.fessel_fest'], 3:['Hände fest – sie gehört dir.'],
+   4:['Gefesselt und wehrlos – genau so.', 'Sie kann sich nicht wehren. Nutz das aus.']},
+  {rx:/klaps|spank|schlag|hintern/i, tabu:['art.klaps', 'art.spank'], 3:['Ein Klaps für jede Frechheit.'], 4:['Der Arsch wird heute rot.', 'Zähl laut mit – und bedank dich.']},
+  {rx:/leck|zunge/i, tabu:['vor.oral_er'], 3:['Leck sie, bis sie zittert.'], 4:['Leck sie, bis sie um Gnade bettelt.']},
+];
+const isTabu = id => quizHasData() && quizScore(id).state === 'tabu';
+const fill = s => { const n = NM(); return s.replace(/\{A\}/g, n.A).replace(/\{B\}/g, n.B); };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function kopfkino(f, w, L) {
+  const txt = [f.text, w && w.title].filter(Boolean).join(' ');
+  if (L >= 3) {
+    const acts = ACT_LINES.filter(a => a.rx.test(txt) && !(a.tabu || []).some(isTabu) && a[L]);
+    if (acts.length && Math.random() < 0.75) return fill(pick(pick(acts)[L]));
+  }
+  return fill(pick(LINES[L]));
+}
+
+/* ---------- Ergebnis: Enthüllung, Kopfkino, Kussmund, 🔥👌🧊, Gutschein, eigene Stimme ---------- */
+function resultDecor(w, f, i) {
+  const R = $('#result'), txt = $('#rTxt'), L = curStufe();
+  R.classList.toggle('reveal', !!S.settings.reveal);
+  let k = 0;
+  if (S.settings.reveal) {
+    const t = txt.textContent;
+    txt.innerHTML = t.split('\n').map(line => line.split(/\s+/).filter(Boolean)
+      .map(wd => `<span class="wd" style="animation-delay:${(0.7 + 0.16 * k++).toFixed(2)}s">${esc(wd)}</span>`).join(' ')).join('<br>\n');
+  }
+  const line = S.settings.lines ? kopfkino(f, w, L) : '';
+  const el = $('#rLine'); el.textContent = line; el.style.display = line ? '' : 'none';
+  el.style.animationDelay = (S.settings.reveal ? 0.9 + 0.16 * k : 0.4).toFixed(2) + 's';
+  RES.line = line;
+  document.querySelectorAll('#rFeel button').forEach(b => b.classList.remove('on'));
+  const real = w && w.fields && w.fields[i];
+  $('#rFeel').style.display = real ? '' : 'none';
+}
+const RES = {line:''};
+function resultButtons(w, f, i, target, done) {
+  $('#rKiss').onclick = () => { kissFx(); S.x.stats.kisses++; xtDone(f); save(); setTimeout(() => done(target), 700); };
+  $('#rFeel').onclick = e => { const b = e.target.closest('[data-feel]'); if (!b) return;
+    feel(w, i, +b.dataset.feel); document.querySelectorAll('#rFeel button').forEach(x => x.classList.toggle('on', x === b)); };
+  $('#rGift').onclick = () => giftOpen(f.text || resultLine(w, f, i));
+}
+async function resultVoice(w, f, i) {
+  if (f.voice && f.voice.media) {
+    const url = await mediaURL(f.voice.media.id);
+    if (url) { const a = new Audio(url); RES.audio = a; a.play().catch(() => {}); return; }
+  }
+  if (S.settings.speakMain) speak(resultLine(w, f, i) + (RES.line && S.settings.lines ? '. ' + RES.line : ''));
+}
+function resultCleanup() { $('#result').classList.remove('reveal'); if (RES.audio) { RES.audio.pause(); RES.audio = null; } }
+function smack() {
+  const a = ac(); if (!a || !S.settings.sound) return;
+  const len = 0.12, buf = a.createBuffer(1, Math.floor(a.sampleRate * len), a.sampleRate), d = buf.getChannelData(0);
+  for (let k = 0; k < d.length; k++) d[k] = (Math.random() * 2 - 1) * Math.pow(1 - k / d.length, 3);
+  const src = a.createBufferSource(), bp = a.createBiquadFilter(), g = a.createGain();
+  bp.type = 'bandpass'; bp.frequency.value = 1500; bp.Q.value = 1.2; g.gain.value = 0.9;
+  src.buffer = buf; src.connect(bp).connect(g).connect(a.destination); src.start();
+}
+function kissFx() { const k = $('#kissFx'); k.classList.remove('go'); void k.offsetWidth; k.classList.add('go'); smack(); }
+function feel(w, i, v) {
+  const f = w && w.fields && w.fields[i];
+  if (f) {
+    if (v > 0) f.weight = clamp(Math.round(f.weight || 1) + 1, 1, 100);
+    else if (v < 0) f.weight = Math.max(1, Math.round(f.weight || 1) - 1);
+    if (f.qid && v) ['a', 'b'].forEach(k => { const e = eff(f.qid, k); if (e) (QS().learn[f.qid] = QS().learn[f.qid] || {})[k] = clamp(e + 0.4 * v, 1.5, 5); });
+  }
+  if (v > 0) S.x.stats.hot++; else if (v < 0) S.x.stats.cold++;
+  if (G.on) G.heat = clamp(G.heat + v, -2, 2);
+  if (v < 0) xtDown(w && w.fields && w.fields[i]);
+  save();
+  toast(v > 0 ? '🔥 Kommt öfter dran' + (G.on ? ' – und die nächste Phase wird heißer' : '') : v < 0 ? '🧊 Kommt seltener dran' + (G.on ? ' – nächste Phase etwas ruhiger' : '') : '👌 Bleibt genau so', 2400);
+}
+
+/* ---------- Gutscheine verschenken ---------- */
+function giftOpen(text) {
+  const n = NM(), Q = $('#qedit');
+  Q.innerHTML = `<h5>🎁 Als Gutschein verschenken</h5>
+    <textarea id="gfText">${esc(String(text).replace(/\n/g, ' '))}</textarea>
+    <div class="qeRow">Für: <button class="b" data-gto="a">${esc(n.A)}</button><button class="b pri" data-gto="b">${esc(n.B)}</button></div>
+    <div class="qeRow"><button class="b pri" id="gfGo">🎁 Erstellen & teilen</button><button class="b" id="gfX">Abbrechen</button></div>`;
+  let to = 'b';
+  qeShow(null);
+  Q.onclick = async e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.gto) { to = b.dataset.gto; Q.querySelectorAll('[data-gto]').forEach(x => x.classList.toggle('pri', x === b)); return; }
+    if (b.id === 'gfX') { qeHide(); return; }
+    if (b.id === 'gfGo') {
+      const v = {id:'g' + uid(), text:$('#gfText').value.trim() || text, to, from:to === 'a' ? 'b' : 'a', created:Date.now(), done:false, lvl:curStufe()};
+      S.x.vouchers.unshift(v); S.x.vouchers = S.x.vouchers.slice(0, 60); save(); qeHide();
+      const blob = await giftImage(v), name = 'SexRad-Gutschein.png';
+      if (NATIVE) await nativeFile(blob, name, 'share');
+      else if (navigator.canShare && navigator.canShare({files:[new File([blob], name, {type:'image/png'})]})) {
+        try { await navigator.share({files:[new File([blob], name, {type:'image/png'})], title:'Gutschein'}); } catch (e) {}
+      } else download(blob, name);
+      toast('🎁 Gutschein gespeichert – offen unter 🏠 Start', 3500);
+    }
+  };
+}
+function giftImage(v) {
+  const W = 1400, H = 820, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d'), L = LOOKS[v.lvl] || LOOKS[2], n = NM(), who = k => k === 'a' ? n.A : n.B;
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, L.pal.a); g.addColorStop(1, '#050505'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.strokeStyle = L.trim[0]; x.lineWidth = 6; x.strokeRect(36, 36, W - 72, H - 72); x.lineWidth = 2; x.strokeRect(54, 54, W - 108, H - 108);
+  x.fillStyle = L.trim[0]; x.textAlign = 'center';
+  x.font = '600 34px Georgia,serif'; x.fillText('S E X R A D', W / 2, 130);
+  x.font = 'italic 600 96px "Cormorant Garamond",Georgia,serif'; x.fillStyle = '#fff'; x.fillText('Gutschein', W / 2, 250);
+  x.font = '500 34px Georgia,serif'; x.fillStyle = L.plate[1]; x.fillText(`für ${who(v.to)} · von ${who(v.from)}`, W / 2, 310);
+  x.fillStyle = '#fff'; let fs = 64; const words = v.text.split(/\s+/), lines = [];
+  const wrap = () => { lines.length = 0; let ln = ''; x.font = `700 ${fs}px Georgia,serif`;
+    for (const w of words) { const t = ln ? ln + ' ' + w : w; if (x.measureText(t).width > W - 260 && ln) { lines.push(ln); ln = w; } else ln = t; } if (ln) lines.push(ln); };
+  wrap(); while (lines.length > 3 && fs > 30) { fs -= 6; wrap(); }
+  lines.forEach((l, k) => x.fillText(l, W / 2, 450 + k * fs * 1.15 - (lines.length - 1) * fs * 0.55));
+  x.font = 'italic 32px Georgia,serif'; x.fillStyle = L.trim[0]; x.fillText('einlösbar, wann du willst · „Wenn es sich um das eine dreht“', W / 2, H - 110);
+  x.font = '120px serif'; x.fillText('💋', W - 170, 190);
+  return new Promise(r => c.toBlob(r, 'image/png'));
+}
+
+/* ---------- Eigene Stimme je Feld (Aufnahme oder Audiodatei) ---------- */
+const VREC = {rec:null, chunks:[], stream:null, timer:0, f:null};
+async function voiceRecord(f, after) {
+  VREC.f = f; VREC.after = after;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) { $('#fileVoice').click(); return; }
+  try { VREC.stream = await navigator.mediaDevices.getUserMedia({audio:true}); } catch (e) { toast('Mikrofon nicht erlaubt – wähle eine Sprachaufnahme als Datei'); $('#fileVoice').click(); return; }
+  VREC.chunks = []; const rec = VREC.rec = new MediaRecorder(VREC.stream);
+  rec.ondataavailable = e => { if (e.data.size) VREC.chunks.push(e.data); };
+  rec.onstop = async () => { VREC.stream.getTracks().forEach(t => t.stop()); clearTimeout(VREC.timer);
+    const blob = new Blob(VREC.chunks, {type:rec.mimeType || 'audio/webm'}); await voiceSave(blob, 'Aufnahme'); };
+  rec.start(); VREC.timer = setTimeout(() => rec.state === 'recording' && rec.stop(), 20000);
+  toast('🎙 Aufnahme läuft (max. 20 s) – nochmal auf 🎙 tippen zum Stoppen', 4000);
+}
+function voiceStop() { if (VREC.rec && VREC.rec.state === 'recording') { VREC.rec.stop(); return true; } return false; }
+async function voiceSave(blob, name) {
+  const f = VREC.f; if (!f || !blob || !blob.size) return;
+  const id = 'v' + uid(); await DB.put(id, blob);
+  const old = f.voice && f.voice.media && f.voice.media.id;
+  f.voice = {media:{id, type:'audio', name, mime:blob.type || 'audio/webm'}}; if (old) delMedia(old);
+  save(); toast('🎙 Stimme gespeichert – sie ertönt, wenn das Feld kommt'); if (VREC.after) VREC.after();
+}
+$('#fileVoice').addEventListener('change', e => { const file = e.target.files[0]; e.target.value = ''; if (file) voiceSave(file, file.name); });
+function voiceDel(f) { const id = f.voice && f.voice.media && f.voice.media.id; delete f.voice; if (id) delMedia(id); save(); }
+
+/* ---------- Spielzeug im Takt: Herzschlag schon beim Drehen ---------- */
+function spinBeat() {
+  if (!S.settings.toyBeat || !S.toy.enabled || !TOY.devices.size) return () => {};
+  const L = curStufe(), base = [0, 0.15, 0.22, 0.3, 0.4][L], t0 = performance.now();
+  const iv = setInterval(() => {
+    const t = (performance.now() - t0) / 1000, per = Math.max(0.45, 1 - t * 0.06), ph = (t % per) / per;
+    const pulse = ph < 0.12 ? 1 : ph < 0.22 ? 0.3 : ph < 0.32 ? 0.75 : 0.15;
+    toyLevel(base * pulse + base * 0.3);
+  }, 120);
+  return () => { clearInterval(iv); toyLevel(0); };
+}
+
+
+/* ---------- Start-Räder für die Ersteinrichtung ---------- */
+function starterWheels(L) {
+  const set = [['ort', 'Wo?'], ['vor', 'Vorspiel'], ['pos', 'Stellung'], ['fin', 'Abschluss']];
+  return set.map(([cid, title], k) => {
+    const c = QUIZ.find(q => q.id === cid);
+    let its = quizItems(c).filter(it => itemLvl(it.id) <= L && !isTabu(it.id));
+    its = its.sort((x, y) => itemLvl(y.id) - itemLvl(x.id)).slice(0, 12);
+    return {title, fields:its.map(it => ({text:it.l, qid:it.id, weight:itemLvl(it.id) === L ? 2 : 1, next:k < set.length - 1 ? k + 1 : -1,
+      toy:c.toy ? {lvl:STUFE_TOY[L], sec:30, pat:L >= 3 ? 'steigernd' : 'welle', dev:''} : undefined}))};
+  });
+}
+
+
+/* ---------- Vorlagen-Bibliothek ---------- */
+function openLib() { $('#home').classList.remove('show'); renderLib(); $('#lib').classList.add('show'); }
+function renderLib() {
+  const cap = stufeCap();
+  const th = THEMES.map((t, i) => { const lv = t.wop ? curStufe() : (t.stufe || 2), lock = quizHasData() && lv > cap;
+    return `<button class="libc" data-lt="${i}" ${lock ? 'style="opacity:.45"' : ''}><span class="lv"><span class="lvb l${lv}">${STUFEN[lv]}</span></span>
+      <span class="li">${t.icon}</span><b>${esc(t.name)}</b><small>${t.wheels.length} Räder · ${themePaths(t).length} mögliche Abläufe${lock ? ' · über eurer Grenze' : ''}</small></button>`; }).join('');
+  const fl = (S.flows || []).map((f, i) => `<button class="libc" data-lf="${i}"><span class="li">🔗</span><b>${esc(f.name)}</b><small>${f.wheels.map(w => esc(w.title)).join(' → ')}</small></button>`).join('');
+  const cards = S.presets.map(c => `<button class="libc" data-lc="${esc(c.id)}"><span class="li">${c.kind === 'combo' ? '🎰' : '🎡'}</span><b>${esc(c.name)}</b><small>${c.kind === 'combo' ? c.data.slots.length + ' Räder' : 'Ein Rad'}</small></button>`).join('');
+  $('#lib').innerHTML = `<button class="ovx" data-l="close">✕</button><div class="ovin"><h2 class="hTitle" style="font-size:46px">Vorlagen</h2>
+    <p class="hMotto">Antippen = laden und sofort drehen. ↩ VORHER holt eure Räder zurück.</p>
+    <div class="hLab">Fertige Spiele</div><div class="libGrid">${th}</div>
+    ${fl ? `<div class="hLab">Eure Ablauf-Spiele</div><div class="libGrid">${fl}</div>` : ''}
+    ${cards ? `<div class="hLab">Eure gespeicherten Spiele</div><div class="libGrid">${cards}</div>` : ''}</div>`;
+}
+$('#lib').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return; const d = b.dataset;
+  const go = fn => { $('#lib').classList.remove('show'); fn(); };
+  if (d.l === 'close') { $('#lib').classList.remove('show'); return; }
+  if (d.lt != null && THEMES[+d.lt].extrem) { $('#lib').classList.remove('show'); xtStart(); return; }
+  if (d.lt != null) { const t = THEMES[+d.lt], lv = t.wop ? curStufe() : (t.stufe || 2);
+    if (quizHasData() && lv > stufeCap()) { toast(`„${t.name}“ ist ${STUFEN[lv]} – das liegt über eurer gemeinsamen Grenze aus dem Fragebogen.`, 5000); return; }
+    go(() => { loadTheme(+d.lt); setTimeout(() => isSlot() ? slotSpin() : doSpin(0), 450); }); return; }
+  if (d.lf != null) { const f = S.flows[+d.lf]; if (f) go(() => { applyWheelSet(f.name, f.wheels.map(w => strip(w)), true, 'Ablauf'); setTimeout(() => doSpin(0), 450); }); return; }
+  if (d.lc) go(() => runCard(d.lc, 0));
+});
+
+/* ---------- Wahrheit oder Pflicht (Inhalt je Stufe, Tabus fliegen raus) ---------- */
+const WOP = {
+  w:[null,
+    ['Was war unser schönster Kuss?', 'Wo berührst du mich am liebsten?', 'Was findest du an mir am erotischsten?', 'Welches Outfit soll ich öfter tragen?',
+     'Wann hast du zuletzt an Sex mit mir gedacht?', 'Was dachtest du, als du mich zum ersten Mal nackt gesehen hast?', 'Welche Stelle soll ich öfter küssen?', 'Was macht dich sofort an?'],
+    ['Was ist deine heimliche Fantasie mit mir?', 'Wo würdest du gern mal Sex haben?', 'Was hast du dich bisher nicht getraut zu fragen?', 'Welche Stellung magst du am liebsten – und warum?',
+     'Was war unser geilster Moment?', 'Hast du beim Selbermachen schon an mich gedacht?', 'Welches Spielzeug würdest du gern ausprobieren?', 'Was soll ich im Bett öfter sagen?'],
+    ['Wie hart darf ich heute sein?', 'Was ist das Versauteste, das du je gedacht hast?', 'Welchen Befehl würdest du gern von mir hören?', 'Wo soll ich heute kommen?',
+     'Was würdest du tun, wenn ich dich festbinde?', 'Woran denkst du, wenn du es dir selbst machst?', 'Welches Tabu würdest du für mich vielleicht brechen?', 'Wie laut darfst du heute werden?'],
+    ['Was soll ich heute Nacht mit dir anstellen?', 'Wie nennst du mich, wenn ich dich richtig ficke?', 'Wie dreckig darf ich heute mit dir reden?', 'Was ist deine härteste Fantasie?',
+     'Wohin willst du mein Sperma – ehrlich?', 'Was ist heute dein Safeword?', 'Welcher Teil von dir gehört heute komplett mir?', 'Was müsste ich tun, damit du bettelst?']],
+  p:[null,
+    ['Küss mich 30 Sekunden lang ohne Hände.', 'Massier mir 2 Minuten den Nacken.', 'Zieh mir ein Kleidungsstück aus – nur mit den Zähnen.', 'Flüster mir etwas Unanständiges ins Ohr.',
+     'Küss mich an einer Stelle deiner Wahl.', 'Tanz 30 Sekunden nur für mich.', 'Streichel mich 1 Minute mit verbundenen Augen.', 'Ich darf dich 1 Minute überall küssen.'],
+    ['Langsamer Striptease bis auf die Unterwäsche.', 'Leck mir vom Hals bis zum Ohr.', 'Setz dich auf meinen Schoß und beweg dich 1 Minute.', 'Zeig mir, wie du dich am liebsten berührst.',
+     'Verwöhn mich 2 Minuten nur mit dem Mund.', 'Zieh dich ganz aus – ich bleibe angezogen.', 'Verbinde mir die Augen und überrasch mich.', 'Beschreib laut, was du gleich mit mir machst.'],
+    ['Auf die Knie – 2 Minuten blasen ohne Hände.', 'Leck mich, bis ich Stopp sage.', 'Hände festbinden lassen – 5 Minuten.', '10 Klapse auf den Po, laut mitzählen.',
+     'Nimm meinen Schwanz so tief es geht – 30 Sekunden.', 'Fick mich 3 Minuten in der Stellung meiner Wahl.', 'Kommen verboten – 5 Minuten necken.', 'Sag mir 5 versaute Sachen, die du willst.'],
+    ['Maul auf – ich wichse dir ins Maul.', 'Arsch hoch – jetzt wird in den Arsch gefickt.', 'Festgebunden, Augen verbunden – ich darf alles (Safeword gilt).', 'Bettel um meinen Schwanz – erst dann gibt es ihn.',
+     '20 harte Klapse – du zählst und bedankst dich.', 'Deepthroat, bis ich Stopp sage.', '10 Minuten bist du mein Fickstück – kein Wort ohne Erlaubnis.', 'Ich spritze dir ins Gesicht – du bleibst still knien.']],
+};
+// Tabu-Schutz für feste Texte: Satz fliegt raus, wenn er eine Handlung nennt, die jemand als Tabu markiert hat
+const TABU_RX = [
+  [['fin.arsch', 'toy.plug', 'toy.anal_gross'], /arsch|anal/i], [['fin.gesicht'], /gesicht/i], [['fin.mund'], /ins maul|wichse dir|sperma/i],
+  [['vor.deep'], /deepthroat|so tief/i], [['art.klaps', 'art.spank'], /klaps/i], [['art.fessel', 'art.fessel_fest'], /festbind|festgebunden/i],
+  [['vor.oral_sie'], /blasen|schwanz so tief|ins maul/i], [['vor.oral_er'], /leck mich/i], [['art.unterw'], /fickstück|bettel/i], [['art.augen'], /augen verb/i],
+];
+const textOk = s => !TABU_RX.some(([ids, rx]) => rx.test(s) && ids.some(isTabu));
+function wopWheels(L) {
+  const take = arr => { const out = arr[L].filter(textOk); if (L > 1) out.push(...arr[L - 1].filter(textOk).slice(0, 4)); return out.map(t => ({t, end:true})); };
+  return [{title:'Wahrheit oder Pflicht', fields:[{t:'Wahrheit', to:1}, {t:'Pflicht', to:2}]},
+    {title:'Wahrheit · ' + STUFEN[L], fields:take(WOP.w)}, {title:'Pflicht · ' + STUFEN[L], fields:take(WOP.p)}];
+}
+THEMES.unshift({name:'Wahrheit oder Pflicht', icon:'🎲', rad:true, wop:true, get wheels() { return wopWheels(curStufe()); }});
+[['Blowjob', 3], ['Abspritzen-Ablauf', 4], ['Spermerei', 4], ['Spielzeug & Fesseln', 4]].forEach(([n, l]) => { const t = THEMES.find(x => x.name === n); if (t) t.stufe = l; });
+
+/* ---------- Extrem-Modus mit Training (nur Heavy Duty, Tabus fliegen raus) ----------
+   Vier Disziplinen mit je 6 Trainingsstufen. 3× „💋 Erledigt“ auf einer Stufe = nächstes Mal eine Stufe härter,
+   🧊 = eine Stufe zurück. Spermaspiele haben keine Stufen, dort kommen alle Varianten. */
+const XT = {
+  bondage:{name:'Bondage', icon:'⛓', tabu:['art.fessel', 'art.fessel_fest'], lv:[null,
+    ['Hände mit einem Tuch hinter dem Rücken – 10 Minuten', 'Augenbinde – sie darf nur noch fühlen', 'Hände über dem Kopf festhalten – sie darf sich nicht bewegen'],
+    ['Handschellen – Hände über dem Kopf', 'Arme ans Bett gefesselt', 'Hände auf dem Rücken gefesselt – und auf die Knie'],
+    ['Hand- und Fußfesseln – gespreizt ans Bett', 'Spreizstange zwischen den Knöcheln', 'Halsband mit Kette – er führt sie'],
+    ['Hände an die Knöchel gefesselt – Arsch hoch', 'Gefesselt + Augenbinde – sie weiß nicht, was kommt', 'Ballknebel und Augenbinde (Stoppzeichen ohne Worte ausmachen!)'],
+    ['Gefesselt und benutzt – Fotze, Arsch und Maul', 'Arme komplett mit Bondage-Tape verschnürt', 'Bondagegestell – 15 Minuten ausgeliefert'],
+    ['Komplett wehrlos verschnürt – 20 Minuten nach seinem Willen', 'Gefesselt, geknebelt, Plug im Arsch – und hart gefickt', 'Ans Bettgestell gefesselt und so lange benutzt, bis er kommt']]},
+  anal:{name:'Anal-Training', icon:'🍑', tabu:['fin.arsch', 'toy.plug', 'toy.anal_gross'], lv:[null,
+    ['Arsch lecken und vorbereiten – 3 Minuten', 'Ein Finger mit viel Gleitgel – ganz langsam', 'Arsch massieren und spreizen'],
+    ['Kleiner Plug – 10 Minuten drin lassen', 'Zwei Finger – langsam dehnen', 'Plug rein, dann Fotze lecken'],
+    ['Mittlerer Plug – beim Blasen drin lassen', 'Schwanz an den Arsch – nur die Spitze rein', 'Plug tragen und so ficken'],
+    ['Großer Plug – 20 Minuten tragen', 'Arschfick langsam – ganz rein, sie gibt das Tempo vor', 'Löffelchen anal – tief und langsam'],
+    ['Analdehner – Stück für Stück weiter', 'Hart in den Arsch ficken – 5 Minuten', 'Doggy anal – er hält die Hüften fest'],
+    ['Arsch zum Benutzen – hart und tief, bis er kommt', 'Abwechselnd Fotze und Arsch – ohne Pause', 'In den Arsch spritzen – und drin lassen']]},
+  kehle:{name:'Kehlen-Training', icon:'👄', tabu:['vor.oral_sie', 'vor.deep'], lv:[null,
+    ['Nur die Spitze – Zunge kreisen lassen', 'Eier lecken und lutschen', 'Schwanz ablecken von unten bis oben'],
+    ['Halber Schwanz – 1 Minute im Rhythmus', 'Ohne Hände blasen – 2 Minuten', 'Blasen und dabei in die Augen schauen'],
+    ['So tief es geht – 10 Sekunden halten', 'Kniend blasen, Hände auf dem Rücken', 'Langsam tiefer – bei jedem Mal ein Stück'],
+    ['Deepthroat – 5× bis zum Anschlag', 'Kopf hängt über die Bettkante – er schiebt tief rein', 'Würgen erlaubt – aufhören nicht'],
+    ['Kopf festhalten – er fickt ihr Maul', 'Deepthroat 20 Sekunden halten', 'Maulfick im Liegen – Kopf über der Bettkante'],
+    ['Maulfick ohne Pause, bis er abspritzt', 'Bis zum Anschlag und drin lassen – sie wartet auf sein Zeichen', 'Gesichtsfick – sie hält still, er bestimmt alles']]},
+  sperma:{name:'Spermaspiele', icon:'💦', all:[
+    ['Wichs ihr ins Maul', ['fin.mund']], ['Ins Maul spritzen – Mund auf zeigen – schlucken', ['fin.mund']], ['Gurgeln – dann schlucken', ['fin.mund']],
+    ['Im Mund behalten und weiterblasen', ['fin.mund']], ['Snowball – Kuss mit Sperma im Mund', ['fin.mund']], ['Ins Glas spucken und austrinken', ['fin.mund']],
+    ['Mitten ins Gesicht spritzen', ['fin.gesicht']], ['Ins Gesicht – verreiben – so bleiben', ['fin.gesicht']], ['Vom Gesicht ablecken und schlucken', ['fin.gesicht', 'fin.mund']],
+    ['Auf die Titten spritzen', ['fin.brueste']], ['Auf die Zunge – zeigen – schlucken', ['fin.mund']], ['In die Fotze spritzen – rauslaufen lassen', ['fin.muschi']],
+    ['In den Arsch spritzen – drin lassen', ['fin.arsch']], ['Auf den Arsch spritzen und verreiben', ['fin.po']], ['Vom Löffel essen', ['fin.mund']],
+    ['Einfrieren für die nächste Session', []]]},
+};
+const xtLv = k => clamp(+((S.x.train || {})[k] || {}).lv || 1, 1, 6);
+const xtOk = k => !(XT[k].tabu || []).some(isTabu);
+function xtWheels() {
+  const keys = ['bondage', 'anal', 'kehle'].filter(xtOk);
+  const hint = `Trainingsstufe ${keys.map(k => XT[k].name.split('-')[0] + ' ' + xtLv(k)).join(' · ')}`;
+  const sp = XT.sperma.all.filter(([t, ids]) => !ids.some(isTabu) && textOk(t)).map(([t]) => ({t, end:true, set:/einfrieren/i.test(t) ? 'frozen' : undefined}));
+  const W = [{title:'Extrem · Disziplin', fields:[]}];
+  keys.forEach(k => {
+    const L = xtLv(k), cur = XT[k].lv[L].filter(textOk), prev = L > 1 ? XT[k].lv[L - 1].filter(textOk).slice(0, 1) : [];
+    W[0].fields.push({t:XT[k].icon + ' ' + XT[k].name, to:W.length});
+    W.push({title:`${XT[k].name} · Stufe ${L}/6`, fields:[...cur.map(t => ({t, w:2, train:k, to:sp.length ? 99 : undefined})), ...prev.map(t => ({t, train:k, to:sp.length ? 99 : undefined}))]});
+  });
+  if (sp.length) {
+    W[0].fields.push({t:'💦 Spermaspiele', to:W.length});
+    const si = W.length; W.push({title:'Spermaspiele', fields:sp});
+    W.forEach(w => w.fields.forEach(f => { if (f.to === 99) f.to = si; }));
+  } else W.forEach(w => w.fields.forEach(f => { if (f.to === 99) { delete f.to; f.end = true; } }));
+  return {W, hint};
+}
+THEMES.push({name:'Extrem-Training', icon:'⛓', rad:true, extrem:true, stufe:4,
+  get wheels() { return xtWheels().W; }, get hint() { return 'Safeword gilt immer · Stoppzeichen ohne Worte ausmachen · ' + xtWheels().hint; }});
+function xtStart() {
+  const cap = stufeCap();
+  if (cap < 4) { toast('Extrem gibt es nur, wenn beide im Fragebogen Heavy Duty erlauben.', 5000); return false; }
+  if (baseStufe() < 4) setStufe(4, true);
+  const t = THEMES.findIndex(x => x.extrem);
+  if (!xtWheels().W[0].fields.length) { toast('Alles davon steht bei euch auf Tabu – Extrem bleibt aus.', 5000); return false; }
+  loadTheme(t); setTimeout(() => doSpin(0), 450); return true;
+}
+// Training: 3× geschafft = Stufe hoch, 🧊 = Stufe runter
+function xtDone(f) {
+  if (!f || !f.train || !XT[f.train]) return;
+  const T = S.x.train = S.x.train || {}, k = f.train, e = T[k] = T[k] || {lv:1, n:0};
+  e.n = (e.n || 0) + 1;
+  if (e.n >= 3 && (e.lv || 1) < 6) { e.lv = (e.lv || 1) + 1; e.n = 0; toast(`${XT[k].icon} ${XT[k].name}: geschafft! Nächstes Mal Stufe ${e.lv}/6`, 4500); }
+  else if ((e.lv || 1) < 6) toast(`${XT[k].icon} ${XT[k].name}: ${e.n}/3 bis Stufe ${(e.lv || 1) + 1}`, 2500);
+  save();
+}
+function xtDown(f) {
+  if (!f || !f.train || !XT[f.train]) return;
+  const T = S.x.train = S.x.train || {}, e = T[f.train] = T[f.train] || {lv:1, n:0};
+  if ((e.lv || 1) > 1) { e.lv--; e.n = 0; toast(`${XT[f.train].name}: zurück auf Stufe ${e.lv}/6`, 3000); }
+  save();
+}
+
+/* ---------- Geführter Abend „Heute Nacht“ ---------- */
+const PHASES = [
+  {name:'Ankommen', icon:'🕯', d:'Wo soll es heute passieren?', cats:['ort'], lv:[1, 2], n:1},
+  {name:'Necken', icon:'💋', d:'Langsam anheizen', ids:['vor.kuss', 'vor.massage', 'vor.strip', 'vor.brust', 'vor.dusche', 'vor.eis', 'vor.fuss', 'vor.dirty', 'art.augen'], lv:[1, 2], n:2},
+  {name:'Vorspiel', icon:'👅', d:'Mit Mund, Händen und Spielzeug', ids:['vor.oral_sie', 'vor.oral_er', 'vor.hand', 'vor.deep', 'vor.edging', 'vor.dirty'], cats:['toy'], lv:[2, 3], n:2},
+  {name:'Steigern', icon:'🔥', d:'Stellungen und Spielart', cats:['pos', 'art'], lv:[2, 4], n:3},
+  {name:'Höhepunkt', icon:'💦', d:'Wie soll es enden?', cats:['fin'], lv:[2, 4], n:1},
+  {name:'Ausklang', icon:'🤍', d:'Runterkommen und genießen', fixed:['Kuscheln und nachspüren', 'Zusammen duschen', 'Sag, was heute am geilsten war', 'Massage zum Runterkommen', 'Etwas trinken und lachen'], lv:[1, 1], n:1},
+];
+function phaseLook(ph) {
+  const max = baseStufe(), h = G.heat > 0 ? 1 : G.heat < 0 ? -1 : 0;
+  return clamp(ph.lv[1] + (ph.fixed ? 0 : h), 1, max) || 1;
+}
+function phaseFields(ph, L) {
+  if (ph.fixed) return ph.fixed.map(t => ({text:t, weight:1}));
+  const pool = allQuizItems().filter(it => (ph.cats || []).includes(it.cat.id) || (ph.ids || []).includes(it.id));
+  const qd = quizHasData();
+  const mk = (it, wgt) => ({text:it.l, qid:it.id, weight:wgt, toy:it.cat.toy ? {lvl:STUFE_TOY[L], sec:30, pat:L >= 3 ? 'steigernd' : 'welle', dev:''} : undefined});
+  let out = pool.filter(it => itemLvl(it.id) <= L && !isTabu(it.id)).map(it => {
+    if (qd) { const r = quizScore(it.id); if (r.state === 'in') return mk(it, r.weight + (itemLvl(it.id) === L ? 1 : 0)); return null; }
+    return mk(it, itemLvl(it.id) === L ? 2 : 1);
+  }).filter(Boolean);
+  if (out.length < 3) out = pool.filter(it => itemLvl(it.id) <= L && !isTabu(it.id)).map(it => mk(it, itemLvl(it.id) === L ? 2 : 1));
+  return out.sort((a, b) => b.weight - a.weight).slice(0, 14);
+}
+function gStart() {
+  if (busy) return;
+  G.on = true; G.k = 0; G.heat = 0;
+  if (!S.snapshot) S.snapshot = {active:S.active, wheels:strip(S.wheels)};
+  if (isSlot()) { S.settings.mode = 'rad'; $('#wbtns').dataset.key = ''; }
+  if (quizHasData() && !QS().session) { QS().session = {start:Date.now(), log:[]}; QS().fb = null; }
+  gLoad(); toast('🌙 Heute Nacht – Phase 1: Ankommen. Dreht das Rad!', 3500);
+}
+function gLoad(keepSpins) {
+  const ph = PHASES[G.k]; G.look = phaseLook(ph);
+  S.wheels[0] = normWheel({title:ph.name, unit:'', palette:S.wheels[0].palette, enabled:true, history:[], rot:0, fields:phaseFields(ph, G.look)}, 0);
+  S.wheels.forEach((w, i) => w.enabled = i === 0); S.active = 0;
+  if (!keepSpins) G.spins = 0;
+  save(); applyStufe(); updateRail(); renderPanel(); gBar();
+}
+function gBar() {
+  const B = $('#guideBar'); if (!G.on) { B.classList.remove('show'); return; }
+  const ph = PHASES[G.k], last = G.k === PHASES.length - 1, ready = G.spins >= ph.n;
+  B.innerHTML = `<span style="font-size:30px">${ph.icon}</span><div><div class="gp">Heute Nacht · Phase ${G.k + 1} / ${PHASES.length} · ${STUFEN[G.look]}</div><b>${ph.name}</b>
+    <div class="gdots">${PHASES.map((p, k) => `<span class="${k <= G.k ? 'on' : ''}"></span>`).join('')}</div></div>
+    <button class="${ready ? 'ready' : ''}" data-g="next">${last ? '🏁 Abend beenden' : 'Nächste Phase ▶'}</button><button class="alt" data-g="stop">✕</button>`;
+  B.classList.add('show');
+}
+$('#guideBar').addEventListener('click', e => {
+  const b = e.target.closest('[data-g]'); if (!b || busy) return;
+  if (b.dataset.g === 'next') { if (G.k < PHASES.length - 1) { G.k++; gLoad(); toast(`${PHASES[G.k].icon} Phase ${G.k + 1}: ${PHASES[G.k].name} – ${PHASES[G.k].d}`, 3200); } else gEnd(true); }
+  else gEnd(false);
+});
+function gEnd(done) {
+  G.on = false; G.look = 0; $('#guideBar').classList.remove('show');
+  if (S.snapshot) undoCard();
+  applyStufe();
+  if (done) { kissFx(); toast('🤍 Was für eine Nacht.' + (QS().session ? ' Jetzt kurz zurückblicken – der Algorithmus lernt mit.' : ''), 4500); if (QS().session) setTimeout(sessionEnd, 1200); }
+}
+function gAfterSpin(idx) {
+  if (!G.on || idx !== 0) return;
+  G.spins++; gBar();
+  const ph = PHASES[G.k];
+  if (G.spins === ph.n) toast(G.k < PHASES.length - 1 ? `Bereit für „${PHASES[G.k + 1].name}“? Unten links auf „Nächste Phase“ tippen – oder weiterdrehen.` : 'Bereit für das Ende? Unten links auf „Abend beenden“ tippen.', 4200);
+}
+
+/* ---------- Vorfreude-Teaser: morgens drehen, abends enthüllen ---------- */
+function teaserNew() {
+  const vis = visibleIdx(), w = S.wheels[vis[Math.floor(Math.random() * vis.length)]], i = pickWeighted(w.fields), f = w.fields[i];
+  const now = new Date(), rev = new Date(); rev.setHours(20, 0, 0, 0);
+  if (rev - now < 30 * 60000) rev.setTime(now.getTime() + 2 * 3600000);
+  S.x.teaser = {text:String(f.text || resultLine(w, f, i)), wheel:w.title || 'Überraschung', at:Date.now(), rev:rev.getTime()};
+  save(); toast('🌒 Gedreht – das Ergebnis bleibt bis zur Enthüllung geheim', 3500);
+}
+function teaserReveal() {
+  const T = S.x.teaser; if (!T) return; S.x.teaser = null; save(); closeHome();
+  showResult({unit:'', title:T.wheel}, 0, 0, normField({text:T.text}));
+}
+function teaserShare() {
+  const T = S.x.teaser; if (!T) return; const n = NM();
+  sendText(`😈 ${n.B}, heute Abend wartet etwas auf dich.\nEs hat mit „${T.wheel}“ zu tun – Anfangsbuchstabe: ${T.text.trim()[0].toUpperCase()}.\nEnthüllung um ${new Date(T.rev).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})} Uhr. Mehr verrate ich nicht.\n\n– ${n.A} · SexRad`, 'SexRad-Teaser.txt');
+}
+
+/* ---------- PIN-Sperre und Tarnbildschirm ---------- */
+const pinHash = s => String([...String(s)].reduce((h, c) => (h * 33 + c.charCodeAt(0)) >>> 0, 5381));
+let PIN = {buf:'', mode:'unlock', first:''};
+function lockShow(mode) {
+  PIN = {buf:'', mode, first:''}; lockDraw(); $('#lock').classList.add('show');
+}
+function lockDraw(msg) {
+  const t = PIN.mode === 'unlock' ? 'PIN eingeben' : PIN.first ? 'PIN wiederholen' : 'Neue PIN (4 Ziffern)';
+  $('#lock').innerHTML = `<div class="lt">🔒 ${t}</div><div style="color:#d9a3b0;min-height:20px">${msg || ''}</div>
+    <div class="ldots">${[0, 1, 2, 3].map(k => `<i class="${k < PIN.buf.length ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="lpad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, '⌫'].map(k => k === '' ? '<span></span>' : `<button data-k="${k}">${k}</button>`).join('')}</div>
+    ${PIN.mode === 'set' ? '<button class="btn alt" data-k="x" style="margin-top:18px">Abbrechen</button>' : ''}`;
+}
+$('#lock').addEventListener('click', e => {
+  const b = e.target.closest('[data-k]'); if (!b) return; const k = b.dataset.k;
+  if (k === 'x') { $('#lock').classList.remove('show'); return; }
+  if (k === '⌫') { PIN.buf = PIN.buf.slice(0, -1); lockDraw(); return; }
+  PIN.buf += k; lockDraw(); if (PIN.buf.length < 4) return;
+  if (PIN.mode === 'unlock') {
+    if (pinHash(PIN.buf) === S.x.pin) { $('#lock').classList.remove('show'); } else { PIN.buf = ''; lockDraw('Falsche PIN'); }
+  } else if (!PIN.first) { PIN.first = PIN.buf; PIN.buf = ''; lockDraw(); }
+  else if (PIN.first === PIN.buf) { S.x.pin = pinHash(PIN.buf); save(); $('#lock').classList.remove('show'); toast('🔒 PIN-Sperre an – gilt beim Öffnen und nach ' + S.x.lockMin + ' Minuten im Hintergrund', 4500); }
+  else { PIN.first = ''; PIN.buf = ''; lockDraw('Stimmte nicht überein – nochmal'); }
+});
+function lockSetup() { lockShow('set'); }
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = Date.now(); if (S.x.pin) toyStop(); }
+  else if (S.x.pin && hiddenAt && Date.now() - hiddenAt > (S.x.lockMin || 5) * 60000) lockShow('unlock');
+});
+function camoOn() { toyStop(); stopSpeech(); $('#camo').classList.add('show'); }
+// Tarnung beenden: 2 Sekunden auf die Überschrift drücken
+(() => { let t = 0; const h = $('#camo .ch');
+  h.addEventListener('pointerdown', () => { t = setTimeout(() => { $('#camo').classList.remove('show'); if (S.x.pin) lockShow('unlock'); }, 2000); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => h.addEventListener(ev, () => clearTimeout(t))); })();
+
+/* ---------- Fragebogen als Wisch-Karten ---------- */
+const SWV = [[1, '⛔ Tabu'], [2, '👎 Eher nicht'], [3, '🤷 Vielleicht'], [4, '❤️ Gerne'], [5, '🔥 Unbedingt']];
+const SW = {skip:new Set(), last:[]};
+function quizCardsHtml(who) {
+  const N = QS().names, all = allQuizItems(), done = all.filter(it => (QS().ans[it.id] || {})[who]).length;
+  const it = all.find(x => !(QS().ans[x.id] || {})[who] && !SW.skip.has(who + x.id));
+  const head = `<div class="qmap">Name: <input type="text" data-qname="${who}" value="${esc(N[who])}" class="qname"><span class="qprog">${done} / ${all.length} beantwortet</span>
+    <button class="qbtn alt" style="margin:0 0 0 auto" data-qmode="list">☰ Als Liste</button></div>
+    <div class="qstufe"><b style="color:#e9d6a6">Wie intensiv magst du es?</b>${[1, 2, 3, 4].map(L => `<button data-qstufe="${L}" class="${(QS().stufe || {})[who] === L ? 'on' : ''}">${STUFEN[L]}</button>`).join('')}
+      <button data-qstufe="0" class="${!(QS().stufe || {})[who] ? 'on' : ''}">Automatisch</button></div>`;
+  if (!it) return head + `<div class="swWrap"><div class="swCard"><div class="sc">Fertig</div><div class="sq">Alles bewertet, ${esc(N[who])} ✔</div>
+      <div class="swHelp">Deine Antworten bleiben verdeckt.</div></div>
+      <div class="swBtns">${SW.skip.size ? '<button data-swreset="1">Übersprungene zeigen</button>' : ''}<button data-qgo="${who === 'a' ? 'b' : 'r'}" style="border-color:#c9a24e">${who === 'a' ? 'Weiter: ' + esc(N.b) + ' ▶' : 'Zur Auswertung ▶'}</button></div></div>`;
+  return head + `<div class="swWrap"><div class="swCard" id="swCard" data-swid="${esc(it.id)}">
+      <span class="sh r">GERNE</span><span class="sh l">EHER NICHT</span><span class="sh u">UNBEDINGT</span><span class="sh d">TABU</span>
+      <div class="sc">${esc(it.cat.name)} · ${lvlTag(it.id)}</div><div class="sq">${esc(it.q)}</div></div>
+    <div class="swBtns">${SWV.map(([v, l]) => `<button data-swv="${v}">${l}</button>`).join('')}</div>
+    <div class="swBtns"><button data-swback="1" ${SW.last.length ? '' : 'disabled'}>↩ Zurück</button><button data-swskip="1">Überspringen</button></div>
+    <div class="swHelp">Wischen: → gerne · ← eher nicht · ↑ unbedingt · ↓ tabu · Eine Tabu-Antwort schließt den Punkt immer aus.</div></div>`;
+}
+function swAnswer(who, id, v, dir) {
+  const c = $('#swCard');
+  const go = () => { (QS().ans[id] = QS().ans[id] || {})[who] = v; delete (QS().learn[id] || {})[who]; SW.last.push(id); save(); renderQuiz(); };
+  if (c && dir) { c.style.transform = {r:'translateX(130%) rotate(18deg)', l:'translateX(-130%) rotate(-18deg)', u:'translateY(-130%)', d:'translateY(130%)'}[dir]; c.style.opacity = '0'; setTimeout(go, 220); }
+  else go();
+}
+function swBind(who) {
+  const c = $('#swCard'); if (!c) return;
+  let p0 = null; const hs = k => c.querySelector('.sh.' + k);
+  c.addEventListener('pointerdown', e => { p0 = [e.clientX, e.clientY]; c.setPointerCapture(e.pointerId); c.style.transition = 'none'; });
+  c.addEventListener('pointermove', e => { if (!p0) return; const dx = e.clientX - p0[0], dy = e.clientY - p0[1];
+    c.style.transform = `translate(${dx}px,${dy}px) rotate(${dx / 18}deg)`;
+    hs('r').style.opacity = clamp(dx / 120, 0, 1); hs('l').style.opacity = clamp(-dx / 120, 0, 1); hs('u').style.opacity = clamp(-dy / 120, 0, 1); hs('d').style.opacity = clamp(dy / 120, 0, 1); });
+  const up = e => { if (!p0) return; const dx = e.clientX - p0[0], dy = e.clientY - p0[1]; p0 = null; c.style.transition = '';
+    const ax = Math.abs(dx), ay = Math.abs(dy);
+    if (Math.max(ax, ay) < 90) { c.style.transform = ''; c.querySelectorAll('.sh').forEach(x => x.style.opacity = 0); return; }
+    const dir = ax > ay ? (dx > 0 ? 'r' : 'l') : (dy < 0 ? 'u' : 'd');
+    swAnswer(who, c.dataset.swid, {r:4, l:2, u:5, d:1}[dir], dir); };
+  c.addEventListener('pointerup', up); c.addEventListener('pointercancel', () => { p0 = null; c.style.transform = ''; });
+}
+$('#quiz').addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return; const d = t.dataset, who = quizTab;
+  if (d.qmode) { S.x.qmode = d.qmode; save(); renderQuiz(); return; }
+  if (d.swv) { const c = $('#swCard'); if (c) swAnswer(who, c.dataset.swid, +d.swv, {4:'r', 2:'l', 5:'u', 1:'d'}[d.swv]); return; }
+  if (d.swskip) { const c = $('#swCard'); if (c) { SW.skip.add(who + c.dataset.swid); renderQuiz(); } return; }
+  if (d.swreset) { SW.skip.clear(); renderQuiz(); return; }
+  if (d.swback) { const id = SW.last.pop(); if (id && QS().ans[id]) { delete QS().ans[id][who]; save(); renderQuiz(); } }
+});
+
+
+// Start: Sperre zuerst, sonst Startbildschirm
+if (S.x.pin) lockShow('unlock');
 
 applySimple(); applyStufe(); requestAnimationFrame(ambLoop);
 if (S.settings.home !== false || !S.settings.named) openHome();
