@@ -584,6 +584,14 @@
   @keyframes tenseA{0%{opacity:0}55%{opacity:.15}70%{opacity:.5}76%{opacity:.25}82%{opacity:.7}88%{opacity:.35}94%{opacity:.85}100%{opacity:0}}
   #rPre{font:italic 600 min(4vh,2.6vw) var(--disp);color:var(--acc2);text-transform:none;letter-spacing:.02em;margin-bottom:1vh;opacity:.9}
   #result.hasvid #rPre{display:none}
+  /* Großes Ergebnisfenster, bleibt bis zum Antippen (Wahrheit oder Pflicht) */
+  #result.hold #rText{inset:5vh calc(var(--rail) + 3vw) 5vh 4vw;border:3px solid var(--acc);border-radius:28px;background:rgba(0,0,0,.6);
+    box-shadow:0 0 50px var(--glow),inset 0 0 60px rgba(0,0,0,.6);padding:4vh 4vw;cursor:pointer}
+  #result.hold #rTxt{font-size:min(11vh,6.4vw);line-height:1.15;max-width:100%}
+  #result.hold #rLine{font-size:min(4.6vh,3vw)}
+  #rHold{display:none}
+  #result.hold #rHold{display:block;margin-top:3vh;font:700 min(2.6vh,15px) system-ui;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2);opacity:.75;animation:holdP 1.6s ease-in-out infinite}
+  @keyframes holdP{50%{opacity:.3}}
   #portrait{display:none}
   @media (orientation:portrait){
     #portrait{display:block;position:fixed;top:8px;left:50%;transform:translateX(-50%);font-size:13px;color:#a8988a;z-index:5;pointer-events:none}
@@ -638,7 +646,7 @@
 <div id="result">
   <div id="rMedia"></div>
   <div id="rVeil"><i></i><i></i></div>
-  <div id="rText"><div id="rPre"></div><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div></div>
+  <div id="rText"><div id="rPre"></div><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div><div id="rHold"></div></div>
   <div id="rVctl"><button id="rvBack" title="10 s zurück">⏪ 10</button><button id="rvPlay">❚❚</button><button id="rvFwd" title="10 s vor">10 ⏩</button>
     <input id="rvPos" type="range" min="0" max="1" step="0.1" value="0"><b id="rvTime">0:00 / 0:00</b></div>
   <div id="rBtns">
@@ -1552,7 +1560,8 @@ function showResult(w, i, depth, fieldOverride) {
     nx.style.display = target ? 'block' : 'none';
     nx.innerHTML = label;
     // Folge automatisch starten (Countdown auf dem Button)
-    let left = +S.settings.autoNext || 0, autoT = 0;
+    const hold = !!w.hold;   // z. B. Wahrheit oder Pflicht: groß stehen lassen, bis angetippt wird
+    let left = hold ? 0 : +S.settings.autoNext || 0, autoT = 0;
     const startCountdown = () => {
       if (!(target && left > 0)) return;
       const upd = () => { nx.innerHTML = label + '<br><small>(' + left + ')</small>'; };
@@ -1627,7 +1636,7 @@ function showResult(w, i, depth, fieldOverride) {
     function done(next) {
       clearInterval(autoT); clearTimeout(autoT); resultCleanup();
       $('#result').classList.remove('show', 'hasvid'); if (box._sqp) { box._sqp.stop(); box._sqp = null; } box.querySelectorAll('video').forEach(x => x.pause()); box.innerHTML = '';
-      nx.onclick = $('#rClose').onclick = null;
+      nx.onclick = $('#rClose').onclick = null; $('#result').onclick = null; $('#result').classList.remove('hold');
       stopSpeech();
       resolve(next);
     }
@@ -1637,8 +1646,11 @@ function showResult(w, i, depth, fieldOverride) {
     $('#rStop').onclick = () => { SEQ.abort = true; toyStop(); done(null); };
     // ohne Video/Folge: kurz groß aufleuchten, dann zurück zum Rad
     const rs = +S.settings.resultSec || 0;
-    if (!target && !f.media && rs > 0) autoT = setTimeout(() => done(null), rs * 1000);
+    if (!hold && !target && !f.media && rs > 0) autoT = setTimeout(() => done(null), rs * 1000);
     $('#rClose').onclick = () => done(null);
+    $('#result').classList.toggle('hold', hold);
+    $('#rHold').textContent = hold ? (target ? 'Antippen = weiter' : 'Antippen = schließen') : '';
+    $('#result').onclick = hold ? e => { if (e.target.closest('button,input,#rVctl,#rBtns')) return; done(target); } : null;
   });
 }
 
@@ -3499,7 +3511,7 @@ const vcatOpts = (cur, req, noSeq) => `<option value="">${req ? 'Kategorie wähl
 // Feld eines Themas: Text oder {t, end:true} (= hier endet die Kette)
 const thText = x => typeof x === 'string' ? x : x.t;
 function themeWheels(t) {
-  return t.wheels.map((tw, k) => ({title:tw.title, fields:tw.fields.map((x, j) => Object.assign({text:thText(x),
+  return t.wheels.map((tw, k) => ({title:tw.title, ...(tw.hold ? {hold:true} : {}), fields:tw.fields.map((x, j) => Object.assign({text:thText(x),
     next:typeof x === 'object' && x.to != null ? x.to : (typeof x === 'object' && x.end) || k >= t.wheels.length - 1 ? -1 : k + 1,
     weight:typeof x === 'object' && x.w ? x.w : 1},
     typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
@@ -3913,7 +3925,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110303;
+const APP_BUILD = 2026110304;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4563,8 +4575,9 @@ function resultDecor(w, f, i) {
     txt.innerHTML = t.split('\n').map(line => line.split(/\s+/).filter(Boolean)
       .map(wd => `<span class="wd" style="animation-delay:${(0.7 + 0.16 * k++).toFixed(2)}s">${esc(wd)}</span>`).join(' ')).join('<br>\n');
   }
-  $('#rPre').textContent = S.settings.pre !== false && !(w && w.unit) ? pick(PRE[L]) : '';
-  const line = S.settings.lines ? kopfkino(f, w, L) : '';
+  const truth = w && /^Wahrheit ·/.test(w.title || '');
+  $('#rPre').textContent = truth ? 'Ehrlich antworten:' : S.settings.pre !== false && !(w && w.unit) ? pick(PRE[L]) : '';
+  const line = S.settings.lines && !truth ? kopfkino(f, w, L) : '';
   const el = $('#rLine'); el.textContent = line; el.style.display = line ? '' : 'none';
   el.style.animationDelay = (S.settings.reveal ? 0.9 + 0.16 * k : 0.4).toFixed(2) + 's';
   RES.line = line;
@@ -4761,8 +4774,8 @@ const TABU_RX = [
 const textOk = s => !TABU_RX.some(([ids, rx]) => rx.test(s) && ids.some(isTabu));
 function wopWheels(L) {
   const take = arr => { const out = arr[L].filter(textOk); if (L > 1) out.push(...arr[L - 1].filter(textOk).slice(0, 4)); return out.map(t => ({t, end:true})); };
-  return [{title:'Wahrheit oder Pflicht', fields:[{t:'Wahrheit', to:1}, {t:'Pflicht', to:2}]},
-    {title:'Wahrheit · ' + STUFEN[L], fields:take(WOP.w)}, {title:'Pflicht · ' + STUFEN[L], fields:take(WOP.p)}];
+  return [{title:'Wahrheit oder Pflicht', hold:true, fields:[{t:'Wahrheit', to:1}, {t:'Pflicht', to:2}]},
+    {title:'Wahrheit · ' + STUFEN[L], hold:true, fields:take(WOP.w)}, {title:'Pflicht · ' + STUFEN[L], hold:true, fields:take(WOP.p)}];
 }
 THEMES.unshift({name:'Wahrheit oder Pflicht', icon:'🎲', rad:true, wop:true, get wheels() { return wopWheels(curStufe()); }});
 [['Blowjob', 3], ['Abspritzen-Ablauf', 4], ['Spermerei', 4], ['Spielzeug & Fesseln', 4]].forEach(([n, l]) => { const t = THEMES.find(x => x.name === n); if (t) t.stufe = l; });
