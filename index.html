@@ -374,11 +374,16 @@
   .edCat{display:flex;gap:6px;align-items:center}
   .edPart{display:flex;gap:6px;align-items:center;padding:6px 8px;border:1px solid #333;border-radius:8px;margin-top:4px}
   .edPart.on{border-color:#c9a24e}
+  #edMedia.sq{position:relative;height:46vh;max-height:46vh}
+  .edTr{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0 4px 18px;color:#b9a27a;font-size:13px}
+  .edTr input{flex:1;min-width:140px}
   .edPart span{flex:1}
   #vgEd .b,#vgSaveRow .b,#vgCatRow .b,#vgSelBar .b{padding:9px 13px;border-radius:10px;border:1px solid #555;background:#232326;color:#eee;font:600 14px system-ui}
   #vgEd .b.pri,#vgSaveRow .b.pri,#vgCatRow .b.pri,#vgSelBar .b.pri{background:#6a1016;border-color:#c9a24e}
   #vgEd .b.on{background:#2e5a1c;border-color:#9fe39f}
   .vgc{transition:transform .15s}
+  .vgf{border-radius:12px;border:2px solid #5a4520;background:linear-gradient(160deg,#2a1d10,#120c08);padding:16px 14px;cursor:pointer;min-height:120px;display:flex;flex-direction:column;gap:4px}
+  .vgf span{font-size:40px;line-height:1}.vgf b{color:#ffe08a;font:700 18px system-ui}.vgf small{color:#b9a27a}
   .vgc.on{border-color:#e0464e;box-shadow:0 0 18px rgba(224,70,78,.7);transform:scale(1.04);z-index:1}
   .vgc .ck{pointer-events:auto;width:34px;height:34px}
   .vgc .vi small{color:#b9a27a;white-space:nowrap}
@@ -580,12 +585,12 @@
 <div id="fpick"><div id="fpickBox"><div class="jt">🔗 Ablauf starten</div><div id="fpickList"></div><button class="mbtn" id="fpickX" style="width:100%;margin-top:8px">Schließen</button></div></div>
 <div id="fbuild"><div id="fbBox"></div></div>
 <div id="vgal"><div id="vgHead"><span class="t">🗂 Galerie</span>
-  <div class="vgTabs"><button data-tab="vid" id="tabVid">🎬 Videos & Fotos</button><button data-tab="seq" id="tabSeq">✂ Sequenzen</button></div>
-  <button class="b" id="vgFiles">＋ Videos / Fotos</button><button class="b" id="vgDir">📁 Ordner</button><button class="b" id="vgClose">Schließen</button></div>
+  <div class="vgTabs"><button data-tab="vid" id="tabVid">🎬 Videos & Fotos</button><button data-tab="seq" id="tabSeq">✂ Sequenzen</button><button data-tab="dir" id="tabDir">📁 Ordner</button></div>
+  <button class="b" id="vgFiles">＋ Videos / Fotos</button><button class="b" id="vgDir">📂 Aus Dateien-App</button><button class="b" id="vgClose">Schließen</button></div>
   <div id="vgFilter"></div>
   <div id="vgSelBar"><b id="vgSelN"></b>
     <button class="b pri" id="vgSpread"></button><button class="b pri" id="vgJoin">🎞 Zu einer Sequenz zusammensetzen</button>
-    <select id="vgCat"></select><button class="b" id="vgCatNewBtn">＋ Kategorie</button><button class="b" id="vgLibBtn">🏷 In Kategorie</button>
+    <select id="vgCat"></select><button class="b" id="vgCatNewBtn">＋ Ordner</button><button class="b" id="vgLibBtn">📁 In Ordner legen</button><button class="b" id="vgOut">Aus diesem Ordner nehmen</button>
     <button class="b" id="vgAll">☑ Alle</button><button class="b" id="vgNone">✕ Auswahl aufheben</button></div>
   <div id="vgCatRow"><b id="vgCatTitle"></b><input id="vgCatName" placeholder="Kategorie, z. B. Blowjob"><input id="vgCatSub" placeholder="Unterkategorie (optional)"><button class="b pri" id="vgCatOk">✔ Anlegen</button><button class="b" id="vgCatX">✕</button></div>
   <div id="vgSaveRow"></div>
@@ -593,6 +598,7 @@
   <div id="vgBody"><div id="vgGrid"></div><div id="vgEd"></div></div></div>
 <input id="vgIn" type="file" accept="video/*,image/*" multiple hidden>
 <input id="vgInDir" type="file" webkitdirectory multiple hidden>
+<input id="vgInDoc" type="file" accept="video/*,image/*,.mp4,.mov,.webm,.mkv" multiple hidden>
 <div id="jpick"><div id="jpickBox"><div class="jt">★ Joker – Abfolge wählen</div><div id="jpickList"></div><button class="mbtn" id="jpickX" style="width:100%">Abbrechen</button></div></div>
 <button id="bToyStop" title="Alle Spielzeuge sofort aus">■ NOT-AUS</button>
 <div id="paywall"></div>
@@ -705,7 +711,9 @@ function normalize(o) {
   s.vlib = (Array.isArray(o.vlib) ? o.vlib : []).filter(x => x && x.media && x.media.id).map(x => ({cat:String(x.cat || ''), media:x.media}));
   s.gal = (Array.isArray(o.gal) ? o.gal : []).filter(x => x && x.media && x.media.id).map(x => ({gid:String(x.gid || 'g' + uid()), media:{id:x.media.id, type:x.media.type === 'image' ? 'image' : 'video', name:String(x.media.name || 'Medium'), mime:String(x.media.mime || '')}, size:+x.size || 0, added:+x.added || 0}));
   s.seqs = (Array.isArray(o.seqs) ? o.seqs : []).filter(q => q && Array.isArray(q.parts) && q.parts.length).map(q => ({id:String(q.id || 'q' + uid()), name:String(q.name || 'Sequenz'), cat:String(q.cat || 'Sequenzen'), added:+q.added || 0,
-    parts:q.parts.filter(p => p && p.mid).map(p => ({mid:String(p.mid), type:'video', mime:String(p.mime || ''), name:String(p.name || ''), start:+p.start || 0, end:+p.end || 0}))})).filter(q => q.parts.length);
+    parts:q.parts.filter(p => p && (p.mid || p.type === 'text')).map(p => { const tr = p.tr ? {tr:{dur:clamp(+p.tr.dur || 0, 0, 3), text:String(p.tr.text || '')}} : {};
+      return p.type === 'text' ? Object.assign({type:'text', text:String(p.text || ''), dur:clamp(+p.dur || 3, 0.5, 30)}, tr)
+        : Object.assign({mid:String(p.mid), type:'video', mime:String(p.mime || ''), name:String(p.name || ''), start:+p.start || 0, end:+p.end || 0}, tr); })})).filter(q => q.parts.some(p => p.type !== 'text'));
   s.seqCats = Array.isArray(o.seqCats) ? o.seqCats.filter(c => c && c.name).map(c => ({name:String(c.name), subs:(Array.isArray(c.subs) ? c.subs : []).map(String)})) : [{name:'Sequenzen', subs:[]}];
   s.flags = o.flags && typeof o.flags === 'object' ? o.flags : {};
   const gp = x => ({wish:String((x && x.wish) || ''), tabu:String((x && x.tabu) || '')});
@@ -1687,7 +1695,7 @@ function renderPanel() {
           ? `<span>${f.media.type === 'video' ? '🎬' : '🖼'} ${esc(f.media.name || 'Medium')}${f.media.type === 'video' && f.media.end > f.media.start ? ` (${(+f.media.start).toFixed(1)}–${(+f.media.end).toFixed(1)} s)` : ''}</span>
              <button class="medbtn" data-fa="trim" data-f="${i}">${f.media.type === 'video' ? '🎬 Vorschau · Start/Stopp' : '🖼 Ansehen / ändern'}</button><button data-fa="unmedia" data-f="${i}">🗑</button>`
           : `<button class="medbtn" data-fa="media" data-f="${i}">🎬 Video / Foto importieren</button>`}</div>
-        <label style="margin:4px 0 0;display:block;width:100%">${f.media ? 'Sonst' : 'Oder'} Video aus Kategorie<select data-f="${i}" data-fp="vcat" style="width:100%;display:block">${vcatOpts(f.vcat)}</select></label>
+        <label style="margin:4px 0 0;display:block;width:100%">${f.media ? 'Sonst' : 'Oder'} 🎲 zufällig aus Ordner<select data-f="${i}" data-fp="vcat" style="width:100%;display:block">${vcatOpts(f.vcat)}</select></label>
         ${toyRow(`data-f="${i}"`, f.toy)}
       </div></div>`).join('');
   const tw = S.timer.wheel;
@@ -1759,8 +1767,8 @@ function renderPanel() {
     <button class="b" data-act="testVoice">🔊 Stimme testen</button>
     <button class="b pri" data-act="openTimer">⏱ Timer öffnen</button></details>
 
-  <details ${op('vcat')} data-sec="vcat"><summary>🏷 Video-Kategorien (${S.vlib.length} Videos)</summary>
-    <div class="hint">Videos in der Bibliothek haben eine Kategorie. Ein Feld mit „Video aus Kategorie“ spielt dann zufällig eines davon. Videos fügst du über die 🗂 Video-Galerie hinzu.</div>
+  <details ${op('vcat')} data-sec="vcat"><summary>📁 Video-Ordner (${S.vlib.length} Videos)</summary>
+    <div class="hint">Videos liegen in Ordnern (mit Unterordnern). Ein Feld mit „zufällig aus Ordner“ spielt dann per Zufall eines davon. Videos fügst du über die 🗂 Video-Galerie hinzu.</div>
     <button class="b" data-act="vgLib" style="margin:4px 0">🗂 Galerie öffnen und Videos einsortieren</button>
     ${vcats().map(c => { const all = S.vlib.filter(x => x.cat.split('/')[0] === c.name);
       return `<div class="genw"><b>${esc(c.name)}</b> · ${all.length} Videos <button class="x" data-act="vcatDel" data-c="${esc(c.name)}" title="Kategorie löschen">✕</button><br>${c.subs.map(sb => { const n = S.vlib.filter(x => x.cat === c.name + '/' + sb).length;
@@ -2262,7 +2270,7 @@ function seqPlayer(box, parts, o = {}) {
     preload();
   }
   function preload() { const n = parts[P.i + 1]; if (n && n.type !== 'text') load(V[1 - P.a], n, false); }
-  function cur() { const p = parts[P.i]; if (p.type === 'text') return Math.min(partLen(p), (P.paused ? P.cardPause : performance.now()) - P.card0) / 1000;
+  function cur() { const p = parts[P.i]; if (p.type === 'text') return P.paused ? P.cardPause : Math.min(partLen(p), (performance.now() - P.card0) / 1000);
     return Math.max(0, V[P.a].currentTime - (+p.start || 0)); }
   function startTr() {
     const k = P.i, n = parts[k + 1], d = trDur(k), t = parts[k].tr || {};
@@ -2295,7 +2303,7 @@ function seqPlayer(box, parts, o = {}) {
   const api = {
     get total() { return tot; }, get time() { return offs[P.i] + cur(); }, get paused() { return P.paused || P.done; }, get done() { return P.done; },
     play() { if (P.done) { P.done = false; showPart(0, true); } P.paused = false; if (parts[P.i].type === 'text') P.card0 = performance.now() - P.cardPause * 1000; else V[P.a].play().catch(() => {}); },
-    pause() { P.paused = true; P.cardPause = cur(); V.forEach(v => v.pause()); },
+    pause() { if (!P.paused) P.cardPause = cur(); P.paused = true; V.forEach(v => v.pause()); },
     seek(g) {   // g = Sekunden auf der ganzen Sequenz
       g = clamp(g, 0, tot - 0.1); let k = 0; while (k < parts.length - 1 && g >= offs[k + 1]) k++;
       P.done = false; showPart(k, !P.paused);
@@ -2332,18 +2340,29 @@ function galSync() {
 }
 const galByKey = k => k[0] === 'g' ? S.gal.find(x => 'g:' + x.gid === k) : S.seqs.find(x => 's:' + x.id === k);
 function seqMedia(q) {
-  const p = q.parts[0];
+  const p = q.parts.find(x => x.type !== 'text') || q.parts[0];
   const m = {id:p.mid, type:'video', name:q.name, mime:p.mime || '', start:+p.start || 0, end:+p.end || 0, seq:q.id};
-  if (q.parts.length > 1) m.parts = q.parts.map(x => ({...x}));
+  if (q.parts.length > 1 || p !== q.parts[0]) m.parts = q.parts.map(x => ({...x, tr:x.tr ? {...x.tr} : undefined}));
   return m;
 }
 const keyMedia = k => { const it = galByKey(k); if (!it) return null; return k[0] === 'g' ? {...it.media, start:0, end:0} : seqMedia(it); };
-const seqLen = q => q.parts.reduce((a, p) => a + Math.max(0, (+p.end || 0) - (+p.start || 0)), 0);
+const seqLen = q => q.parts.reduce((a, p) => a + (p.type === 'text' ? +p.dur || 3 : Math.max(0, (+p.end || 0) - (+p.start || 0))), 0);
 function galList() {
+  if (GAL.tab === 'dir') {   // Videos direkt in diesem Ordner (Unterordner zählen über ihre Kachel)
+    if (!GAL.dir) return [];
+    const seen = new Set(), out = [];
+    S.vlib.filter(x => x.cat === GAL.dir || (!GAL.dir.includes('/') && x.cat.startsWith(GAL.dir + '/') && false)).forEach(x => {
+      if (seen.has(x.media.id)) return; seen.add(x.media.id);
+      let gi = S.gal.find(g => g.media.id === x.media.id);
+      if (!gi) { galSync(); gi = S.gal.find(g => g.media.id === x.media.id); }
+      if (gi) out.push({k:'g:' + gi.gid, it:gi, type:gi.media.type, mid:gi.media.id, name:gi.media.name, t0:+x.media.start || 0});
+    });
+    return out;
+  }
   if (GAL.tab === 'vid') return S.gal.slice().reverse().map(g => ({k:'g:' + g.gid, it:g, type:g.media.type, mid:g.media.id, name:g.media.name, t0:0}));
   const f = GAL.filt;
   return S.seqs.filter(q => !f || q.cat === f || q.cat.startsWith(f + '/')).slice().reverse()
-    .map(q => ({k:'s:' + q.id, it:q, type:'video', mid:q.parts[0].mid, name:q.name, t0:+q.parts[0].start || 0}));
+    .map(q => { const v = q.parts.find(x => x.type !== 'text'); return {k:'s:' + q.id, it:q, type:'video', mid:v.mid, name:q.name, t0:+v.start || 0}; });
 }
 function vgOpen(target) {   // target = Feld aus dem Import-Dialog
   GAL.target = target; GAL.sel = []; GAL.ed = null;
@@ -2395,8 +2414,9 @@ function galInsert(t, ms) {
 let vgObs = null;
 function vgRender() {
   const g = $('#vgGrid'), L = galList();
-  $('#tabVid').classList.toggle('on', GAL.tab === 'vid'); $('#tabSeq').classList.toggle('on', GAL.tab === 'seq');
-  $('#tabVid').textContent = `🎬 Videos & Fotos (${S.gal.length})`; $('#tabSeq').textContent = `✂ Sequenzen (${S.seqs.length})`;
+  $('#tabVid').classList.toggle('on', GAL.tab === 'vid'); $('#tabSeq').classList.toggle('on', GAL.tab === 'seq'); $('#tabDir').classList.toggle('on', GAL.tab === 'dir');
+  $('#tabVid').textContent = `🎬 Videos & Fotos (${S.gal.length})`; $('#tabSeq').textContent = `✂ Sequenzen (${S.seqs.length})`; $('#tabDir').textContent = `📁 Ordner (${vcats().length})`;
+  if (GAL.tab === 'dir') { dirRender(g, L); return; }
   $('#vgFilter').innerHTML = GAL.tab !== 'seq' ? '' : [['', 'Alle']].concat(seqCats().flatMap(c => [[c.name, c.name]].concat(c.subs.map(sb => [c.name + '/' + sb, '› ' + sb]))))
     .map(([v, l]) => `<button class="chip ${GAL.filt === v ? 'on' : ''}" data-filt="${esc(v)}">${esc(l)}</button>`).join('') + `<button class="chip" data-act="scNew">＋ Kategorie</button>`;
   $('#vgFilter').style.display = GAL.tab === 'seq' ? '' : 'none';
@@ -2414,6 +2434,53 @@ function vgRender() {
   g.querySelectorAll('[data-mid]').forEach(v => vgObs ? vgObs.observe(v) : vgThumb(v));
   vgBar();
 }
+/* ---------- Ordner-Ansicht: eigene Ordner und Unterordner, Zufall daraus ---------- */
+const dirCount = path => new Set(S.vlib.filter(x => x.cat === path || x.cat.startsWith(path + '/')).map(x => x.media.id)).size;
+function dirRender(g, L) {
+  const d = GAL.dir, top = d.split('/')[0], C = vcats(), c = C.find(x => x.name === top);
+  const tiles = !d ? C.map(x => ({path:x.name, name:x.name, sub:x.subs.length}))
+    : (!d.includes('/') && c ? c.subs.map(sb => ({path:top + '/' + sb, name:sb, sub:0})) : []);
+  $('#vgFilter').style.display = '';
+  $('#vgFilter').innerHTML = `<button class="chip ${!d ? 'on' : ''}" data-dir="">📁 Alle Ordner</button>` +
+    (d ? `<button class="chip ${!d.includes('/') ? 'on' : ''}" data-dir="${esc(top)}">› ${esc(top)}</button>` : '') +
+    (d.includes('/') ? `<button class="chip on" data-dir="${esc(d)}">› ${esc(d.split('/')[1])}</button>` : '') +
+    (d.includes('/') ? '' : `<button class="chip" data-act="dirNew">＋ ${d ? 'Unterordner' : 'Ordner'}</button>`) +
+    (d && dirCount(d) ? `<button class="chip" data-act="dirRnd">🎲 Zufall testen</button>` : '') +
+    (d ? `<button class="chip" data-act="dirDel">🗑 Ordner löschen</button>` : '');
+  $('#vgInfo').textContent = !d ? 'Eigene Ordner und Unterordner. Ein Feld mit „🎲 zufällig aus Ordner“ spielt per Zufall ein Video daraus. Videos legst du unter „🎬 Videos & Fotos“ mit dem Kreis auswählen → „📁 In Ordner legen“.'
+    : `${dirCount(d)} Videos in „${d.replace('/', ' › ')}“${tiles.length ? ' (mit Unterordnern)' : ''} · Antippen = bearbeiten · Kreis = auswählen`;
+  g.innerHTML = tiles.map(t => `<div class="vgf" data-dir="${esc(t.path)}"><span>📁</span><b>${esc(t.name)}</b><small>${dirCount(t.path)} Videos${t.sub ? ' · ' + t.sub + ' Unterordner' : ''}</small></div>`).join('') +
+    L.map(x => `<div class="vgc ${GAL.sel.includes(x.k) ? 'sel' : ''} ${GAL.ed === x.k ? 'on' : ''}" data-k="${x.k}">
+      ${x.type === 'video' ? `<video data-mid="${x.mid}" data-t0="${x.t0}" muted playsinline preload="none"></video>` : `<img data-mid="${x.mid}" alt="">`}<b class="dur"></b>
+      <b class="ck" data-ck="${x.k}">${GAL.sel.includes(x.k) ? GAL.sel.indexOf(x.k) + 1 : ''}</b><div class="vi"><span>${esc(x.name)}</span></div></div>`).join('') +
+    (!tiles.length && !L.length ? `<div id="vgEmpty">${d ? 'Dieser Ordner ist noch leer.<br>Unter „🎬 Videos & Fotos“ Videos mit dem Kreis auswählen und „📁 In Ordner legen“.' : 'Noch keine Ordner.<br>Mit „＋ Ordner“ oben anlegen.'}</div>` : '');
+  if (vgObs) vgObs.disconnect();
+  vgObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { vgObs.unobserve(e.target); vgThumb(e.target); } }), {root:g, rootMargin:'200px'}) : null;
+  g.querySelectorAll('[data-mid]').forEach(v => vgObs ? vgObs.observe(v) : vgThumb(v));
+  vgBar();
+}
+$('#vgGrid').addEventListener('click', e => { const f = e.target.closest('.vgf'); if (f) { GAL.dir = f.dataset.dir; GAL.sel = []; edClose(); vgRender(); } }, true);
+$('#vgFilter').addEventListener('click', e => {
+  if (GAL.tab !== 'dir') return;
+  const b = e.target.closest('button'); if (!b) return; e.stopImmediatePropagation();
+  const a = b.dataset.act;
+  if (a === 'dirNew') { catRow('vid'); return; }
+  if (a === 'dirRnd') { const m = vlibPick(GAL.dir), gi = m && S.gal.find(x => x.media.id === m.id); if (gi) edOpen('g:' + gi.gid); return; }
+  if (a === 'dirDel') {
+    const n = dirCount(GAL.dir);
+    if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = n ? `Wirklich? ${n} Videos bleiben in der Galerie` : 'Wirklich löschen?'; return; }
+    const d = GAL.dir, [c, sb] = d.split('/');
+    S.vlib = S.vlib.filter(x => !(x.cat === d || x.cat.startsWith(d + '/')));
+    const L = vcats(); if (sb) { const e2 = L.find(x => x.name === c); if (e2) e2.subs = e2.subs.filter(x => x !== sb); } else S.vcats = L.filter(x => x.name !== c);
+    GAL.dir = sb ? c : ''; save(); vgRender(); toast('Ordner gelöscht – die Videos bleiben in der Galerie'); return;
+  }
+  if (b.dataset.dir != null) { GAL.dir = b.dataset.dir; GAL.sel = []; edClose(); vgRender(); }
+}, true);
+$('#vgOut').onclick = () => {
+  const ids = new Set(GAL.sel.map(k => { const g = galByKey(k); return g && g.media.id; }));
+  S.vlib = S.vlib.filter(x => !(x.cat === GAL.dir && ids.has(x.media.id)));
+  GAL.sel = []; save(); vgRender(); toast('Aus dem Ordner genommen – bleibt in der Galerie');
+};
 // Vorschaubild: nur ein stehendes Bild, kein Abspielen
 async function vgThumb(el) {
   const u = await mediaURL(el.dataset.mid); if (!u) return;
@@ -2430,6 +2497,7 @@ function vgBar() {
   $('#vgSelN').textContent = `${n} ausgewählt`;
   $('#vgSpread').textContent = tw ? `In Feld ${tw.f + 1}${n > 1 ? ' und folgende' : ''} einfügen` : GAL.target ? 'Übernehmen' : `Auf Felder von „${S.wheels[S.active].title || 'Rad ' + (S.active + 1)}“ verteilen`;
   $('#vgJoin').style.display = GAL.tab === 'seq' && n >= 2 ? '' : 'none';
+  $('#vgOut').style.display = GAL.tab === 'dir' && GAL.dir ? '' : 'none';
   const sel = $('#vgCat'), keep = sel.value; sel.innerHTML = vcatOpts('', true, true); if (keep) sel.value = keep;
 }
 $('#vgGrid').addEventListener('click', e => {
@@ -2442,7 +2510,7 @@ function vgToggle(k) {
   $('#vgGrid').querySelectorAll('.vgc').forEach(c => { const j = GAL.sel.indexOf(c.dataset.k); c.classList.toggle('sel', j >= 0); c.querySelector('.ck').textContent = j >= 0 ? j + 1 : ''; });
   vgBar(); if (GAL.ed === k) edSelUi();
 }
-$('#vgHead').addEventListener('click', e => { const t = e.target.closest('[data-tab]'); if (!t) return; GAL.tab = t.dataset.tab; GAL.sel = []; edClose(); vgRender(); });
+$('#vgHead').addEventListener('click', e => { const t = e.target.closest('[data-tab]'); if (!t) return; GAL.tab = t.dataset.tab; GAL.sel = []; GAL.dir = ''; edClose(); vgRender(); });
 $('#vgFilter').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.act === 'scNew') { catRow('seq'); return; }
@@ -2462,13 +2530,14 @@ $('#vgLibBtn').onclick = () => {
   const ms = GAL.sel.map(keyMedia).filter(Boolean);
   if (cat.startsWith('seq:')) {   // ausgewählte Sequenzen in eine Sequenz-Kategorie verschieben
     const c = cat.slice(4); GAL.sel.forEach(k => { if (k[0] === 's') galByKey(k).cat = c; });
-  } else ms.forEach(m => S.vlib.push({cat, media:m}));
+  } else ms.forEach(m => { if (!S.vlib.some(x => x.cat === cat && x.media.id === m.id && !m.parts)) S.vlib.push({cat, media:m}); });
   GAL.sel = []; save(); vgRender(); renderPanel();
   toast(`${ms.length} in „${cat.replace('seq:', '✂ ').replace('/', ' › ')}“`, 3000);
 };
 $('#vgJoin').onclick = () => {
   const qs = GAL.sel.map(galByKey).filter(q => q && q.parts); if (qs.length < 2) return;
-  edClose(); seqSaveDlg(qs.map(q => q.name).join(' + ').slice(0, 60), qs[0].cat, name => ({parts:qs.flatMap(q => q.parts.map(p => ({...p})))}), 'zusammengesetzt');
+  edClose(); seqSaveDlg(qs.map(q => q.name).join(' + ').slice(0, 60), qs[0].cat, name => { const parts = qs.flatMap(q => q.parts.map(p => ({...p})));
+    parts.forEach((p, i) => { if (i < parts.length - 1 && !p.tr) p.tr = {dur:1, text:''}; }); return {parts}; }, 'zusammengesetzt');
 };
 
 /* ---------- Kategorien (Video- und Sequenz-Kategorien) ---------- */
@@ -2483,13 +2552,14 @@ function vcatAdd(c, sb) { const L = vcats(); const v = catAdd(L, c, sb); S.vcats
 let catRowFor = 'vid', catRowCb = null;
 function catRow(kind, cb) {
   catRowFor = kind; catRowCb = cb || null; const r = $('#vgCatRow');
-  $('#vgCatTitle').textContent = kind === 'seq' ? 'Neue Sequenz-Kategorie' : 'Neue Video-Kategorie';
+  $('#vgCatTitle').textContent = kind === 'seq' ? 'Neue Sequenz-Kategorie' : GAL.dir && !GAL.dir.includes('/') ? `Neuer Unterordner in „${GAL.dir}“ (oben leer lassen = neuer Hauptordner)` : 'Neuer Ordner';
   r.style.display = 'flex'; $('#vgCatName').focus();
 }
 $('#vgCatNewBtn').onclick = () => catRow('vid');
 $('#vgCatX').onclick = () => { $('#vgCatRow').style.display = 'none'; };
 $('#vgCatOk').onclick = () => {
-  const name = $('#vgCatName').value.trim(), sub = $('#vgCatSub').value.trim();
+  let name = $('#vgCatName').value.trim(), sub = $('#vgCatSub').value.trim();
+  if (catRowFor === 'vid' && GAL.tab === 'dir' && GAL.dir && !GAL.dir.includes('/') && name && !sub) { sub = name; name = GAL.dir; }
   if (!name) { toast('Bitte einen Namen eingeben'); return; }
   const v = catRowFor === 'seq' ? catAdd(S.seqCats, name, sub) : vcatAdd(name, sub);
   save(); $('#vgCatName').value = $('#vgCatSub').value = ''; $('#vgCatRow').style.display = 'none';
@@ -2510,8 +2580,12 @@ function edOpen(k) {
   const isSeq = k[0] === 's', multi = isSeq && it.parts.length > 1, type = isSeq ? 'video' : it.media.type, name = isSeq ? it.name : it.media.name;
   const tw = GAL.target, tgtTxt = tw ? (tw.kind === 'joker' ? 'für den Joker' : `in Feld ${tw.f + 1}`) : '';
   $('#vgEd').innerHTML = `<div class="edHead"><b>${isSeq ? '✂ ' : type === 'video' ? '🎬 ' : '🖼 '}${esc(name)}</b><button class="b" id="edX">✕</button></div>
-    <div id="edMedia"></div>
-    ${type === 'video' ? `<div class="edRow"><button class="b" id="edB10">⏪ 10</button><button class="b" id="edB1">◀ 1</button><button class="b pri" id="edPlay">❚❚</button><button class="b" id="edF1">1 ▶</button><button class="b" id="edF10">10 ⏩</button><b id="edTime">0:00</b></div>
+    <div id="edMedia"${multi ? ' class="sq"' : ''}></div>
+    ${multi ? `<div class="edRow"><button class="b" id="msB10">⏪ 10</button><button class="b pri" id="msPlay">❚❚</button><button class="b" id="msF10">10 ⏩</button><b id="msTime">0:00</b></div>
+      <input id="msPos" type="range" min="0" max="1" step="0.05" value="0">
+      <div class="edLab">Teile und Übergänge</div><div id="edParts"></div>
+      <div class="edRow"><input id="msCard" placeholder="Text für eine Texttafel, z. B. „Und jetzt du …“"><select id="msCardDur"><option value="2">2 s</option><option value="3" selected>3 s</option><option value="5">5 s</option><option value="8">8 s</option></select><button class="b" id="msAddCard">＋ Texttafel ans Ende</button></div>` :
+    type === 'video' ? `<div class="edRow"><button class="b" id="edB10">⏪ 10</button><button class="b" id="edB1">◀ 1</button><button class="b pri" id="edPlay">❚❚</button><button class="b" id="edF1">1 ▶</button><button class="b" id="edF10">10 ⏩</button><b id="edTime">0:00</b></div>
       <input id="edPos" type="range" min="0" max="1" step="0.05" value="0">
       <div class="edLab">Vorschau-Sprünge</div><div id="edSnips"></div>
       ${multi ? `<div class="edLab">Teile dieser Sequenz</div><div id="edParts"></div>` : `
@@ -2538,7 +2612,7 @@ function edOpen(k) {
   if ($('#edCat')) $('#edCat').onchange = e => { it.cat = e.target.value; save(); vgRender(); };
   if ($('#edDel')) $('#edDel').onclick = e => { const b = e.target; if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Wirklich löschen? (Video bleibt)'; return; }
     S.seqs = S.seqs.filter(q => q !== it); GAL.sel = GAL.sel.filter(x => x !== k); save(); edClose(); vgRender(); toast('Sequenz gelöscht – das Video bleibt in der Galerie'); };
-  if (type === 'video') edVideo(); else edImage();
+  if (multi) edSeq(); else if (type === 'video') edVideo(); else edImage();
 }
 async function edImage() { const u = await mediaURL(ED.it.media.id); if (u) $('#edMedia').innerHTML = `<img src="${u}" alt="">`; }
 const edPart = () => ED.k[0] === 's' ? ED.it.parts[ED.pi] : null;
@@ -2590,18 +2664,47 @@ function edUi() {
     $('#edAB').textContent = `${mmss(ED.A)} – ${mmss(ED.B)} (${(ED.B - ED.A).toFixed(1)} s)`; }
 }
 function edPartsUi() {
-  const q = ED.it;
-  $('#edParts').innerHTML = q.parts.map((p, i) => `<div class="edPart ${i === ED.pi ? 'on' : ''}"><span>${i + 1}. ${esc(p.name)} · ${mmss(p.start)}–${mmss(p.end)}</span>
-    <button class="b" data-pp="up" data-i="${i}" ${i ? '' : 'disabled'}>▲</button><button class="b" data-pp="dn" data-i="${i}" ${i < q.parts.length - 1 ? '' : 'disabled'}>▼</button>
-    <button class="b" data-pp="del" data-i="${i}" ${q.parts.length > 1 ? '' : 'disabled'}>✕</button></div>`).join('');
+  const q = ED.it, TR = [0, 0.5, 1, 1.5, 2, 3];
+  $('#edParts').innerHTML = q.parts.map((p, i) => {
+    const last = i === q.parts.length - 1, tr = p.tr || {dur:1, text:''};
+    return `<div class="edPart"><span>${i + 1}. ${p.type === 'text' ? '📝 Texttafel' : '🎬 ' + esc(p.name)} · ${p.type === 'text' ? partLen(p) + ' s' : mmss(p.start) + '–' + mmss(p.end)}</span>
+      <button class="b" data-pp="go" data-i="${i}">▶</button><button class="b" data-pp="up" data-i="${i}" ${i ? '' : 'disabled'}>▲</button><button class="b" data-pp="dn" data-i="${i}" ${!last ? '' : 'disabled'}>▼</button>
+      <button class="b" data-pp="del" data-i="${i}" ${q.parts.length > 1 ? '' : 'disabled'}>✕</button></div>
+      ${p.type === 'text' ? `<div class="edTr"><input data-pt="${i}" value="${esc(p.text)}" placeholder="Text der Tafel"><select data-pd="${i}">${[2, 3, 5, 8].map(d => `<option value="${d}" ${+p.dur === d ? 'selected' : ''}>${d} s</option>`).join('')}</select></div>` : ''}
+      ${last ? '' : `<div class="edTr">↓ Übergang <select data-trd="${i}">${TR.map(d => `<option value="${d}" ${+tr.dur === d ? 'selected' : ''}>${d ? d + ' s überblenden' : 'harter Schnitt'}</option>`).join('')}</select>
+        <input data-trt="${i}" value="${esc(tr.text || '')}" placeholder="Text während des Übergangs (optional)"></div>`}`;
+  }).join('');
+  const P = q.parts, again = () => { save(); vgRender(); edOpen(ED.k); };
   $('#edParts').onclick = e => {
-    const b = e.target.closest('[data-pp]'); if (!b || b.disabled) return; const i = +b.dataset.i, P = q.parts;
+    const b = e.target.closest('[data-pp]'); if (!b || b.disabled) return; const i = +b.dataset.i;
+    if (b.dataset.pp === 'go') { if (ED.sp) { let g = 0; for (let k = 0; k < i; k++) g += partLen(P[k]) - (+(P[k].tr || {dur:1}).dur || 0); ED.sp.seek(g); ED.sp.play(); } return; }
     if (b.dataset.pp === 'del') P.splice(i, 1); else { const j = b.dataset.pp === 'up' ? i - 1 : i + 1; [P[i], P[j]] = [P[j], P[i]]; }
-    save(); vgRender(); edOpen(ED.k);
+    again();
   };
+  $('#edParts').onchange = e => {
+    const t = e.target, d = t.dataset;
+    if (d.trd != null) { const p = P[+d.trd]; p.tr = Object.assign({dur:1, text:''}, p.tr, {dur:+t.value}); again(); }
+    else if (d.trt != null) { const p = P[+d.trt]; p.tr = Object.assign({dur:1, text:''}, p.tr, {text:t.value}); save(); }
+    else if (d.pt != null) { P[+d.pt].text = t.value; save(); }
+    else if (d.pd != null) { P[+d.pd].dur = +t.value; again(); }
+  };
+}
+function edSeq() {
+  const q = ED.it;
+  ED.sp = seqPlayer($('#edMedia'), q.parts, {onTime:() => {
+    if (!ED.sp || !$('#msPlay')) return;
+    $('#msPlay').textContent = ED.sp.paused ? '▶' : '❚❚'; $('#msPos').max = ED.sp.total.toFixed(2); $('#msPos').value = ED.sp.time;
+    $('#msTime').textContent = mmss(ED.sp.time) + ' / ' + mmss(ED.sp.total); }});
+  $('#msPlay').onclick = () => ED.sp.paused ? ED.sp.play() : ED.sp.pause();
+  $('#msB10').onclick = () => ED.sp.seek(ED.sp.time - 10); $('#msF10').onclick = () => ED.sp.seek(ED.sp.time + 10);
+  $('#msPos').oninput = e => ED.sp.seek(+e.target.value);
+  $('#msAddCard').onclick = () => { const t = $('#msCard').value.trim(); if (!t) { toast('Bitte Text eingeben'); return; }
+    q.parts.push({type:'text', text:t, dur:+$('#msCardDur').value}); save(); vgRender(); edOpen(ED.k); };
+  edPartsUi();
 }
 function edSelUi() { const on = GAL.sel.includes(ED.k); $('#edSel').textContent = on ? '✓ Ausgewählt' : '☐ Auswählen'; $('#edSel').classList.toggle('on', on); }
 function edClose(keepLayout) {
+  if (ED.sp) { ED.sp.stop(); ED.sp = null; }
   if (ED.v) { ED.v.pause(); ED.v.removeAttribute('src'); ED.v.load(); }
   ED.v = null; ED.k = null; GAL.ed = null; $('#vgEd').innerHTML = '';
   if (!keepLayout) { $('#vgal').classList.remove('editing'); $('#vgGrid').querySelectorAll('.vgc.on').forEach(c => c.classList.remove('on')); }
@@ -2637,10 +2740,11 @@ function seqSaveDlg(name, cat, make, word) {
 
 $('#vgFiles').onclick = () => { $('#vgIn').value = ''; $('#vgIn').click(); };
 $('#vgDir').onclick = () => { const d = $('#vgInDir'); d.value = '';
-  if (!('webkitdirectory' in d) || window.AndroidApp) { $('#vgIn').value = ''; $('#vgIn').click(); toast('Im Auswahlfenster den Ordner öffnen und mehrere Videos markieren', 4000); }
+  if (!('webkitdirectory' in d) || window.AndroidApp) { $('#vgInDoc').value = ''; $('#vgInDoc').click(); toast('Ordner öffnen, ein Video lange drücken, dann weitere antippen (mehrere möglich)', 5000); }
   else d.click(); };
 $('#vgIn').addEventListener('change', e => vgAdd(e.target.files));
 $('#vgInDir').addEventListener('change', e => vgAdd(e.target.files));
+$('#vgInDoc').addEventListener('change', e => vgAdd(e.target.files));
 $('#vgClose').onclick = vgClose;
 $('#mGal').onclick = () => vgOpen(MI.t);
 
@@ -3682,7 +3786,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110204;
+const APP_BUILD = 2026110301;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
