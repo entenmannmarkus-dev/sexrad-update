@@ -132,6 +132,11 @@
   #result.show{display:block}
   #rMedia{position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
   #rMedia video,#rMedia img{width:100%;height:100%;object-fit:contain}
+  .sqv{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;background:#000}
+  .sqCard{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:6vh 8vw;background:radial-gradient(ellipse at center,#2a0a10,#000 75%);
+    color:#fff;font:600 min(8vh,6vw)/1.15 var(--disp,Georgia),serif;opacity:0;white-space:pre-line}
+  .sqTxt{position:absolute;left:6%;right:6%;bottom:16%;text-align:center;color:#fff;font:600 min(6.5vh,4.6vw)/1.2 var(--disp,Georgia),serif;
+    text-shadow:0 0 18px rgba(0,0,0,.95),0 2px 0 #000;opacity:0;pointer-events:none;white-space:pre-line;z-index:2}
   #rText{position:absolute;left:0;right:var(--rail);top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
     pointer-events:none;text-align:center;padding:4vh 3vw;font-family:Georgia,"Times New Roman",serif;font-weight:700;
     color:#f6e7c1;text-shadow:0 3px 0 #3a070b,0 0 24px #000,0 0 6px #000;text-transform:uppercase}
@@ -1442,8 +1447,21 @@ function showResult(w, i, depth, fieldOverride) {
     void $('#result').offsetWidth;
     $('#result').classList.add('show');
     $('#result').classList.remove('hasvid');
-    let vid = null;
-    if (f.media) {
+    let vid = null, sqp = null;
+    if (f.media && Array.isArray(f.media.parts) && f.media.parts.length > 1) {
+      // Sequenz aus mehreren Teilen: weiche Übergänge, ein Regler für die ganze Sequenz
+      const mm = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+      const upd = () => { if (!sqp) return; $('#rvPos').max = Math.max(0.1, sqp.total).toFixed(1); $('#rvPos').value = sqp.time;
+        $('#rvTime').textContent = mm(sqp.time) + ' / ' + mm(sqp.total); $('#rvPlay').textContent = sqp.paused ? '▶' : '❚❚'; };
+      sqp = seqPlayer(box, f.media.parts, {onEnd:() => { upd(); videoDone(); }, onTime:upd});
+      const seek = g => { clearInterval(autoT); clearTimeout(autoT); if (target) nx.innerHTML = label; sqp.seek(g); upd(); };
+      $('#rvBack').onclick = () => seek(sqp.time - 10);
+      $('#rvFwd').onclick = () => seek(sqp.time + 10);
+      $('#rvPlay').onclick = () => { if (sqp.paused) { clearInterval(autoT); clearTimeout(autoT); sqp.play(); } else sqp.pause(); upd(); };
+      $('#rvPos').oninput = () => seek(+$('#rvPos').value);
+      $('#result').classList.add('hasvid');
+      box._sqp = sqp;
+    } else if (f.media) {
       const url = await mediaURL(f.media.id);
       if (url && f.media.type === 'video') {
         const v = vid = document.createElement('video');
@@ -1485,7 +1503,7 @@ function showResult(w, i, depth, fieldOverride) {
     if (S.settings.speakMain) speak(resultLine(w, f, i));
     function done(next) {
       clearInterval(autoT); clearTimeout(autoT);
-      $('#result').classList.remove('show', 'hasvid'); box.querySelectorAll('video').forEach(x => x.pause()); box.innerHTML = '';
+      $('#result').classList.remove('show', 'hasvid'); if (box._sqp) { box._sqp.stop(); box._sqp = null; } box.querySelectorAll('video').forEach(x => x.pause()); box.innerHTML = '';
       nx.onclick = $('#rClose').onclick = null;
       stopSpeech();
       resolve(next);
@@ -2214,6 +2232,82 @@ $('#mOk').onclick = async () => {
     save(); renderPanel(); closeMediaDlg(false);
   } catch (err) { toast('Fehler beim Speichern: ' + err.message); }
 };
+
+/* =====================================================================
+   Sequenz-Player: Teile nacheinander, mit weicher Überblendung
+   (zwei Videos übereinander) und optionalem Text während des Übergangs.
+   Teile können auch Texttafeln sein ({type:'text', text, dur}).
+   ===================================================================== */
+const partLen = p => p.type === 'text' ? Math.max(0.5, +p.dur || 3) : Math.max(0.1, (+p.end || 0) - (+p.start || 0));
+function seqPlayer(box, parts, o = {}) {
+  box.innerHTML = '';
+  const mk = () => { const v = document.createElement('video'); v.playsInline = true; v.setAttribute('playsinline', ''); v.className = 'sqv'; v.muted = !!o.muted; box.appendChild(v); return v; };
+  const V = [mk(), mk()], card = document.createElement('div'), txt = document.createElement('div');
+  card.className = 'sqCard'; txt.className = 'sqTxt'; box.appendChild(card); box.appendChild(txt);
+  const P = {i:0, a:0, paused:false, done:false, tr:false, tick:0, card0:0, cardPause:0, stopped:false};
+  const offs = []; let tot = 0; parts.forEach((p, k) => { offs[k] = tot; tot += partLen(p) - (k < parts.length - 1 ? trDur(k) : 0); });
+  function trDur(k) { const t = parts[k] && parts[k].tr; const d = t ? +t.dur : 1; return clamp(isNaN(d) ? 1 : d, 0, Math.min(3, partLen(parts[k]) / 2, parts[k + 1] ? partLen(parts[k + 1]) / 2 : 3)); }
+  async function load(v, p, play) {
+    if (!p || p.type === 'text') return;
+    const u = await mediaURL(p.mid); if (!u || P.stopped) return;
+    const go = () => { try { v.currentTime = +p.start || 0; } catch (e) { } if (play) v.play().catch(() => { v.muted = true; v.play().catch(() => {}); }); };
+    if (v._u !== u) { v._u = u; v.src = u; v.addEventListener('loadedmetadata', go, {once:true}); } else go();
+  }
+  function showPart(k, play) {   // Teil k sofort (ohne Überblendung) zeigen
+    P.i = k; P.tr = false; const p = parts[k];
+    V.forEach(v => { v.pause(); v.style.transition = 'none'; v.style.opacity = 0; });
+    card.style.transition = 'none'; card.style.opacity = 0; txt.style.opacity = 0;
+    if (p.type === 'text') { card.textContent = p.text || ''; card.style.opacity = 1; P.card0 = performance.now(); }
+    else { P.a = 0; V[0].style.opacity = 1; load(V[0], p, play && !P.paused); }
+    preload();
+  }
+  function preload() { const n = parts[P.i + 1]; if (n && n.type !== 'text') load(V[1 - P.a], n, false); }
+  function cur() { const p = parts[P.i]; if (p.type === 'text') return Math.min(partLen(p), (P.paused ? P.cardPause : performance.now()) - P.card0) / 1000;
+    return Math.max(0, V[P.a].currentTime - (+p.start || 0)); }
+  function startTr() {
+    const k = P.i, n = parts[k + 1], d = trDur(k), t = parts[k].tr || {};
+    P.tr = true;
+    const fade = (el, on) => { el.style.transition = `opacity ${Math.max(0.01, d)}s linear`; el.style.opacity = on ? 1 : 0; };
+    if (t.text) { txt.textContent = t.text; txt.style.transition = 'opacity .35s'; txt.style.opacity = 1; }
+    const from = parts[k].type === 'text' ? card : V[P.a];
+    let to;
+    if (n.type === 'text') { card.style.transition = 'none'; card.style.opacity = 0; card.textContent = n.text || ''; void card.offsetWidth; to = card; }
+    else { to = V[1 - P.a]; to.style.transition = 'none'; to.style.opacity = 0; void to.offsetWidth; try { to.currentTime = +n.start || 0; } catch (e) { } to.play().catch(() => {}); }
+    if (from !== card || to !== card) { fade(to, true); fade(from, false); } else { card.style.opacity = 1; }
+    setTimeout(() => {
+      if (P.stopped) return;
+      if (from !== to && from.tagName === 'VIDEO') from.pause();
+      txt.style.opacity = 0;
+      P.i = k + 1; P.tr = false;
+      if (n.type === 'text') P.card0 = performance.now(); else P.a = 1 - P.a;
+      preload();
+    }, d * 1000 + 30);
+  }
+  function loop() {
+    if (P.stopped) return;
+    P.tick = requestAnimationFrame(loop);
+    if (P.paused || P.done || P.tr) { o.onTime && o.onTime(); return; }
+    const p = parts[P.i], len = partLen(p), t = cur(), last = P.i >= parts.length - 1;
+    if (!last && t >= len - trDur(P.i) - 0.02) startTr();
+    else if (last && t >= len - 0.05) { P.done = true; V.forEach(v => v.pause()); o.onEnd && o.onEnd(); }
+    o.onTime && o.onTime();
+  }
+  const api = {
+    get total() { return tot; }, get time() { return offs[P.i] + cur(); }, get paused() { return P.paused || P.done; }, get done() { return P.done; },
+    play() { if (P.done) { P.done = false; showPart(0, true); } P.paused = false; if (parts[P.i].type === 'text') P.card0 = performance.now() - P.cardPause * 1000; else V[P.a].play().catch(() => {}); },
+    pause() { P.paused = true; P.cardPause = cur(); V.forEach(v => v.pause()); },
+    seek(g) {   // g = Sekunden auf der ganzen Sequenz
+      g = clamp(g, 0, tot - 0.1); let k = 0; while (k < parts.length - 1 && g >= offs[k + 1]) k++;
+      P.done = false; showPart(k, !P.paused);
+      const p = parts[k], dt = g - offs[k];
+      if (p.type === 'text') { P.card0 = performance.now() - dt * 1000; P.cardPause = dt; }
+      else { const v = V[P.a], go = () => { try { v.currentTime = (+p.start || 0) + dt; } catch (e) { } }; v.readyState ? go() : v.addEventListener('loadedmetadata', () => setTimeout(go, 0), {once:true}); }
+    },
+    stop() { P.stopped = true; cancelAnimationFrame(P.tick); V.forEach(v => { v.pause(); v.removeAttribute('src'); v.load(); }); box.innerHTML = ''; }
+  };
+  showPart(0, true); loop();
+  return api;
+}
 
 /* =====================================================================
    Galerie: alle Videos/Fotos bleiben dauerhaft gespeichert.
