@@ -592,6 +592,14 @@
   #rHold{display:none}
   #result.hold #rHold{display:block;margin-top:3vh;font:700 min(2.6vh,15px) system-ui;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2);opacity:.75;animation:holdP 1.6s ease-in-out infinite}
   @keyframes holdP{50%{opacity:.3}}
+  .typGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:800px){.typGrid{grid-template-columns:1fr}}
+  .typBar{height:8px;border-radius:4px;background:linear-gradient(90deg,#f29ab4,#b3263f,#ff2a2a,#000);position:relative;margin:8px 0 2px}
+  .typBar i{position:absolute;top:-4px;height:16px;width:0;border-right:3px solid #fff;box-shadow:2px 0 8px #fff}
+  .typAns{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:820px;margin:22px auto 0}
+  .tyA{padding:24px 16px;border-radius:18px;border:2px solid rgba(255,255,255,.15);color:#fff;font:600 22px/1.2 var(--disp);min-height:96px}
+  .tyA.l1{background:linear-gradient(150deg,#f29ab4,#7a2a44)}.tyA.l2{background:linear-gradient(150deg,#b3263f,#3d0408)}
+  .tyA.l3{background:linear-gradient(150deg,#ff2a2a,#2a0002)}.tyA.l4{background:linear-gradient(150deg,#1a1a1c,#000);border-color:#5a0008;color:#ff3344}
   #portrait{display:none}
   @media (orientation:portrait){
     #portrait{display:block;position:fixed;top:8px;left:50%;transform:translateX(-50%);font-size:13px;color:#a8988a;z-index:5;pointer-events:none}
@@ -637,6 +645,7 @@
 <button id="bSafe" title="Safeword: sofort alles anhalten">STOPP</button>
 <div id="safe" class="ov"></div>
 <div id="edge" class="ov"></div>
+<div id="typ" class="ov"></div>
 <div id="lock"></div>
 <div id="camo"><div class="ch">Notizen</div><div class="cl">Einkaufen<small>Milch, Brot, Kaffee, Tomaten</small></div>
   <div class="cl">Termine<small>Zahnarzt Do 9:30 · Werkstatt anrufen</small></div><div class="cl">Ideen fürs Wochenende<small>Spaziergang, Freunde einladen</small></div>
@@ -1271,7 +1280,7 @@ function tween(ms, fn) {
 function segAt(w) { const n = w.fields.length; let a = (-(w.rot || 0)) % TAU; if (a < 0) a += TAU; return Math.floor(a / (TAU / n)) % n; }
 const fieldOk = f => !f.need || (S.flags && S.flags[f.need]);   // Feld nur möglich, wenn Merker gesetzt (z. B. eingefroren)
 function pickWeighted(fields) {
-  const ws = fields.map(f => fieldOk(f) ? Math.max(0, +f.weight || 0) : 0), tot = ws.reduce((a, b) => a + b, 0);
+  const ws = fields.map(f => fieldOk(f) ? Math.max(0, +f.weight || 0) * (typeof typFactor === 'function' ? typFactor(f) : 1) : 0), tot = ws.reduce((a, b) => a + b, 0);
   if (tot <= 0) { const ok = fields.map((f, i) => i).filter(i => fieldOk(fields[i])); return ok.length ? ok[Math.floor(Math.random() * ok.length)] : Math.floor(Math.random() * fields.length); }
   let r = Math.random() * tot;
   for (let i = 0; i < ws.length; i++) { r -= ws[i]; if (r < 0) return i; }
@@ -1353,6 +1362,7 @@ async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   if (useFocus) { await tween(350, (t, now) => { focus.p = 1 - t; render(now); }); focus = null; }
   render(); busy = false; setBusy(false); renderPanel(); updateRail();
   if (next) await runNext(next, depth + 1);   // Folge-Rad oder Speicherkarte (Kette)
+  if (depth === 0) typAfterSpin();
 }
 async function runNext(t, depth) {
   if (depth >= MAX_CHAIN) return;
@@ -3925,7 +3935,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110304;
+const APP_BUILD = 2026110305;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4161,7 +4171,7 @@ function renderHome() {
       `<div class="hLab">Schritt 3 von 3 · Fertig, ${esc(n.A)} & ${esc(n.B)}</div>
         <p class="tip" style="margin-top:0">Sollen wir euch passende Räder für <b>${STUFEN[baseStufe()]}</b> einrichten (Wo? → Vorspiel → Stellung → Abschluss)?
           Eure bisherigen Räder lassen sich mit ↩ VORHER zurückholen.</p>
-        <div class="hRow"><button class="hbtn" data-wz="fill">✔ Passende Räder einrichten</button><button class="hbtn alt" data-wz="keep">Meine Räder behalten</button><button class="hbtn alt" data-wz="1">◀ Zurück</button></div>`];
+        <div class="hRow"><button class="hbtn" data-h="typtest">🎯 Erst Typ-Test für beide</button><button class="hbtn" data-wz="fill">✔ Passende Räder einrichten</button><button class="hbtn alt" data-wz="keep">Meine Räder behalten</button><button class="hbtn alt" data-wz="1">◀ Zurück</button></div>`];
     H.innerHTML = `<div class="ovin"><h1 class="hTitle">Sex<em>Rad</em></h1><p class="hMotto">Wenn es sich um das eine dreht</p>${steps[wizStep] || steps[0]}
       <div class="tip"><b>So geht's:</b> Rad mit dem Finger anschubsen = drehen · lange auf ein Feld drücken = Feld bearbeiten ·
         ☰ MENÜ = Spielarten, Fragebogen und Einrichten · lange auf ☰ drücken = Tarnbildschirm.</div></div>`;
@@ -4182,6 +4192,7 @@ function renderHome() {
       <button class="tile" data-h="quick"><span class="ti">⚡</span><b>Schnell & spontan</b><small>Sofort drehen mit euren Rädern.</small></button>
       <button class="tile" data-h="quiz"><span class="ti">💞</span><b>Uns kennenlernen</b><small>Jeder wischt für sich durch die Vorlieben – Tabus bleiben geheim.</small></button>
       <button class="tile" data-h="lib"><span class="ti">📚</span><b>Vorlagen</b><small>Fertige Spiele: Wahrheit oder Pflicht, Blowjob, Spermerei, Fesseln …</small></button>
+      <button class="tile" data-h="typ"><span class="ti">🎯</span><b>Typ-Modus</b><small>${typOn() ? 'An · ' + esc(typInfo('a').n) + ' & ' + esc(typInfo('b').n) : 'Er und sie bekommen je ihren Typ – wer dreht, bekommt eher seine Vorlieben.'}</small></button>
       <button class="tile" data-h="extrem" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}><span class="ti">⛓</span><b>Extrem-Training</b><small>Nur Heavy Duty: Bondage, Anal, Kehle, Spermaspiele – wird mit jedem Mal härter.</small></button>
       <button class="tile" data-h="setup"><span class="ti">⚙</span><b>Eigenes Spiel</b><small>Felder, Videos und Räder selbst einrichten.</small></button>
     </div>
@@ -4216,6 +4227,8 @@ $('#home').addEventListener('click', e => {
     case 'quick': closeHome(); setTimeout(() => isSlot() ? slotSpin() : doSpin(S.active), 250); break;
     case 'night': closeHome(); gStart(); break;
     case 'extrem': if (stufeCap() >= 4) closeHome(); xtStart(); break;
+    case 'typ': typOpen(); break;
+    case 'typtest': S.settings.named = true; S.x.setup = true; wizOn = false; wizStep = 0; save(); typOpen('a'); break;
     case 'quiz': closeHome(); openQuiz('a'); break;
     case 'lib': openLib(); break;
     case 'setup': openSetup('fields'); break;
@@ -4246,6 +4259,7 @@ function renderMenu() {
       <button class="mb" data-m="mode">${isSlot() ? '🎡 Glücksrad' : '🎰 Slotmaschine'}<small>${isSlot() ? 'Ein Rad nach dem anderen drehen' : 'Alle Räder auf einmal ziehen'}</small></button>
       <button class="mb" data-m="lib">📚 Vorlagen<small>Fertige und eigene Spiele</small></button>
       <button class="mb" data-m="wop">🎲 Wahrheit oder Pflicht<small>Fragen und Aufgaben passend zur Stufe</small></button>
+      <button class="mb" data-m="typ">🎯 Typ-Modus: ${typOn() ? 'an' : 'aus'}<small>Typ-Test, wer dreht, was gelernt wurde</small></button>
       <button class="mb" data-m="extrem">⛓ Extrem-Training<small>Nur Heavy Duty · Bondage, Anal, Kehle, Sperma</small></button>
       <button class="mb" data-m="edge">⏳ Edging-Timer<small>Bis kurz davor – Stopp – nochmal</small></button>
       <button class="mb" data-m="wish">🤫 Geheime Wünsche<small>Jeder trägt verdeckt ein, das Rad verrät sie</small></button>
@@ -4280,6 +4294,7 @@ $('#menu').addEventListener('click', e => {
     case 'wop': { close(); loadTheme(THEMES.findIndex(t => t.wop)); setTimeout(() => doSpin(0), 400); break; }
     case 'timer': close(); openTimer(); break;
     case 'extrem': close(); xtStart(); break;
+    case 'typ': typOpen(); break;
     case 'edge': close(); edgeOpen(); break;
     case 'wish': close(); wishOpen(); break;
     case 'music': S.settings.music = !S.settings.music; save(); applyStufe(); renderMenu(); break;
@@ -4406,7 +4421,8 @@ const quizHasData = () => Object.values(QS().ans || {}).some(x => x && x.a && x.
 const stufeCap = () => quizHasData() ? stufeMax() : 4;
 const G = {on:false, k:0, spins:0, look:0, heat:0};   // geführter Abend „Heute Nacht“
 function baseStufe() { return clamp(+S.settings.stufe || (quizHasData() ? stufeSession() : 2), 1, stufeCap()); }
-function curStufe() { return G.on && G.look ? G.look : baseStufe(); }
+function curStufe() { if (G.on && G.look) return G.look; if (S.x && S.x.typ && S.x.typ.on) { const T = S.x.typ, s = T.turn || 'a', o = s === 'a' ? 'b' : 'a';
+  return clamp(Math.min(Math.round(T[s].t), Math.round(T[o].t) + 1), 1, 4); } return baseStufe(); }
 const LOOK = () => LOOKS[curStufe()] || LOOKS[2];
 function wheelPal(w) { return S.settings.stufeColors !== false ? LOOK().pal : (PALETTES[w.palette] || PALETTES.klassik); }
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -4421,6 +4437,8 @@ function applyStufe() {
 }
 function stufeChipUi() {
   const L = curStufe();
+  if (typeof typOn === 'function' && typOn() && !G.on) { const w = TYP().turn, n = NM();
+    $('#stufeChip').innerHTML = `🎯 ${esc(w === 'a' ? n.A : n.B)} dreht<b style="font-size:13px">${esc(typInfo(w).n)}</b><i>${[1, 2, 3, 4].map(k => `<span class="${k <= L ? 'on' : ''}"></span>`).join('')}</i>`; return; }
   $('#stufeChip').innerHTML = `${G.on ? 'Heute Nacht' : 'Stufe'}<b>${STUFEN[L]}</b><i>${[1, 2, 3, 4].map(k => `<span class="${k <= L ? 'on' : ''}"></span>`).join('')}</i>`;
 }
 function setStufe(L, quiet) {
@@ -4433,7 +4451,7 @@ function setStufe(L, quiet) {
   if ($('#menu').classList.contains('show')) renderMenu();
 }
 // Stufe in der Leiste antippen = eine Stufe höher (nach der höchsten wieder Soft)
-$('#stufeChip').onclick = () => { if (busy) return; const cap = stufeCap(), L = baseStufe(); setStufe(L >= cap ? 1 : L + 1); };
+$('#stufeChip').onclick = () => { if (busy) return; if (typeof typOn === 'function' && typOn() && !G.on) { const T = TYP(); T.turn = other(T.turn); save(); applyStufe(); typToast(); return; } const cap = stufeCap(), L = baseStufe(); setStufe(L >= cap ? 1 : L + 1); };
 
 /* ---------- Stimmungs-Hintergrund: Soft Herzen, Middle Glut, Hard rote Funken + Rauch, Heavy Duty Funkenregen + Herzschlag ---------- */
 const AMB_CFG = [null,
@@ -4587,7 +4605,7 @@ function resultDecor(w, f, i) {
 }
 const RES = {line:''};
 function resultButtons(w, f, i, target, done) {
-  $('#rKiss').onclick = () => { kissFx(); S.x.stats.kisses++; xtDone(f); heartReward(); save(); setTimeout(() => done(target), 700); };
+  $('#rKiss').onclick = () => { kissFx(); S.x.stats.kisses++; xtDone(f); heartReward(); typLearn(f, 0.3); save(); setTimeout(() => done(target), 700); };
   $('#rFeel').onclick = e => { const b = e.target.closest('[data-feel]'); if (!b) return;
     feel(w, i, +b.dataset.feel); document.querySelectorAll('#rFeel button').forEach(x => x.classList.toggle('on', x === b)); };
   $('#rGift').onclick = () => giftOpen(f.text || resultLine(w, f, i));
@@ -4619,6 +4637,7 @@ function feel(w, i, v) {
   if (v > 0) { S.x.stats.hot++; if (f) hlAdd(w, f, i); } else if (v < 0) S.x.stats.cold++;
   if (G.on) G.heat = clamp(G.heat + v, -2, 2);
   if (v < 0) xtDown(w && w.fields && w.fields[i]);
+  if (f) typLearn(f, v > 0 ? 1 : v < 0 ? -1 : 0.1);
   save();
   toast(v > 0 ? '🔥 Kommt öfter dran' + (G.on ? ' – und die nächste Phase wird heißer' : '') : v < 0 ? '🧊 Kommt seltener dran' + (G.on ? ' – nächste Phase etwas ruhiger' : '') : '👌 Bleibt genau so', 2400);
 }
@@ -5186,6 +5205,141 @@ function musicOff() {
   setTimeout(() => { N.osc.forEach(o => { try { o.stop(); } catch (e) {} }); try { N.lfo.stop(); } catch (e) {} }, 700);
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) musicOff(); else if (S.settings.music) musicOn(); });
+
+/* =====================================================================
+   Typ-Modus: keine feste Stufe, sondern ein Typ für ihn und einen für sie.
+   Wer dreht, bekommt eher seine Vorlieben. Die App merkt sich 🔥/🧊/💋 je Person
+   und schneidet die Räder mit jeder Runde mehr auf beide zu.
+   Schutz: Tabus von beiden fliegen immer raus, und nichts geht mehr als eine
+   Stufe über den sanfteren der beiden Typen hinaus.
+   ===================================================================== */
+const TYPES = {
+  m:[null,
+    {n:'Der sanfte Stupser', m:'Ganz sanft rein – und jede Sekunde genießen'},
+    {n:'Der Taktgeber', m:'Schön im Takt – rein, raus, nicht zu sanft, nicht zu hart'},
+    {n:'Der Zustoßer', m:'Wenn er zustößt, wackelt das ganze Bett'},
+    {n:'Der Hemmungslose', m:'Danach springt alles nur so rum – und alles ist eingesaut'}],
+  w:[null,
+    {n:'Die Zärtliche', m:'Streicheln, küssen, ganz nah sein'},
+    {n:'Die Genießerin', m:'Schön im Takt – und gern ein bisschen mehr'},
+    {n:'Die Fordernde', m:'Nimm mich richtig ran'},
+    {n:'Die Hemmungslose', m:'Je härter und dreckiger, desto besser'}],
+};
+const TYPQ = {
+  m:[['Wie stößt du am liebsten zu?', ['Sanft stupsen', 'Normal, schön im Takt', 'Hart zustoßen', 'So hart, dass alles wackelt und spritzt']],
+     ['Welches Tempo?', ['Ganz langsam', 'Gleichmäßig', 'Schnell und fest', 'Bis nichts mehr geht']],
+     ['Wie redest du dabei?', ['Zärtlich flüstern', 'Ein paar freche Sätze', 'Klare Ansagen', 'Richtig dreckig']],
+     ['Wer führt?', ['Sie führt', 'Abwechselnd', 'Ich bestimme', 'Sie gehört komplett mir']],
+     ['Wie soll es enden?', ['Kuscheln', 'In ihr kommen', 'Auf ihr', 'Überall verteilt – alles dreckig']],
+     ['Extras?', ['Lieber nichts', 'Mal ein Spielzeug', 'Fesseln, Klapse', 'Alles, was geht']]],
+  w:[['Wie soll er zustoßen?', ['Ganz sanft', 'Normal, schön im Takt', 'Hart', 'So hart, dass ich nur noch zittere']],
+     ['Welches Tempo?', ['Ganz langsam', 'Gleichmäßig', 'Schnell und fest', 'Ohne Pause, bis nichts mehr geht']],
+     ['Wie soll er mit dir reden?', ['Zärtlich', 'Ein bisschen frech', 'Bestimmend', 'Richtig dreckig']],
+     ['Wer führt?', ['Ich führe', 'Abwechselnd', 'Er bestimmt', 'Ich will benutzt werden']],
+     ['Wie soll es enden?', ['Kuscheln', 'In mir', 'Auf mir', 'Überall – je dreckiger, desto besser']],
+     ['Extras?', ['Lieber nichts', 'Mal ein Spielzeug', 'Fesseln, Klapse', 'Alles, was geht']]],
+};
+const TYP = () => { const T = S.x.typ = S.x.typ || {}; T.turn = T.turn || 'a'; if (T.auto == null) T.auto = true;
+  ['a', 'b'].forEach(k => { T[k] = T[k] || {t:2, done:false, g:k === 'a' ? 'm' : 'w', ans:[]}; });
+  T.learn = T.learn || {a:{}, b:{}}; T.hist = T.hist || []; return T; };
+const typOn = () => !!(S.x.typ && S.x.typ.on);
+const typLvl = who => clamp(Math.round(TYP()[who].t), 1, 4);
+const typInfo = who => TYPES[TYP()[who].g][typLvl(who)];
+const other = who => who === 'a' ? 'b' : 'a';
+// Stufe eines Feldes: aus dem Fragebogen, sonst grob am Text erkannt
+function lvlOf(f) {
+  if (f.qid && QLVL[f.qid]) return itemLvl(f.qid);
+  const t = String(f.text || '');
+  if (/sperma|spritz|schluck|arsch|anal|deepthroat|maul|fessel|knebel|fotze|benutz|dreckig|gesicht|bondage|würg|plug|dehner|gefesselt/i.test(t)) return 4;
+  if (/hart|doggy|klaps|befehl|tief|blas|leck|fick|stehend|tisch|reiter|schwanz|halsband|augenbinde/i.test(t)) return 3;
+  if (/küss|kuss|kuschel|massage|streichel|zärtlich|langsam|sanft|kerze|bad|dusche|nacken|feder|flüster/i.test(t)) return 1;
+  return 2;
+}
+const typKey = f => f.qid || String(f.text || '').replace(/\s+/g, ' ').trim().toLowerCase().slice(0, 60);
+function typFactor(f) {
+  if (!typOn() || !String(f.text || '').trim()) return 1;
+  const T = TYP(), s = T.turn, o = other(s), L = lvlOf(f);
+  if (f.qid && quizHasData() && isTabu(f.qid)) return 0;
+  if (!textOk(f.text || '')) return 0;
+  if (L > Math.min(typLvl(s), typLvl(o)) + 1) return 0;   // nie mehr als eine Stufe über dem sanfteren der beiden Typen
+  const fit = d => Math.exp(-(d * d) / 1.2);
+  let k = 0.12 + fit(L - T[s].t) + 0.3 * fit(L - T[o].t);
+  if (f.qid) { const e = eff(f.qid, s); if (e) k *= 0.6 + e / 5; }
+  const l = (T.learn[s] || {})[typKey(f)] || 0;
+  return k * Math.pow(2, clamp(l, -2.5, 2.5));
+}
+// Lernen: 🔥 = +, 🧊 = −, 💋 erledigt = leicht +. Der Typ wandert langsam mit.
+function typLearn(f, v) {
+  if (!typOn() || !f) return;
+  const T = TYP(), s = T.turn, key = typKey(f), L = lvlOf(f);
+  T.learn[s][key] = clamp((T.learn[s][key] || 0) + v, -3, 3);
+  if (v > 0.5) T[s].t = clamp(T[s].t + 0.08 * (L - T[s].t), 1, 4);
+  if (v < -0.5 && L >= T[s].t) T[s].t = clamp(T[s].t - 0.06, 1, 4);
+  T.hist.unshift({w:s, k:key, txt:String(f.text || '').replace(/\n/g, ' ').slice(0, 80), v, L, at:Date.now()}); T.hist = T.hist.slice(0, 300);
+  save();
+}
+function typAfterSpin() { if (!typOn()) return; const T = TYP(); if (T.auto) { T.turn = other(T.turn); save(); } stufeChipUi(); typToast(); }
+function typToast() { if (!typOn()) return; const n = NM(), w = TYP().turn; toast(`🎯 Jetzt dreht ${w === 'a' ? n.A : n.B} – ${typInfo(w).n}`, 2500); }
+
+/* ---------- Typ-Test und Typ-Seite ---------- */
+let TT = null;   // laufender Test {who, k}
+function typOpen(who) {
+  const T = TYP(); if (who) TT = {who, k:0, ans:[]};
+  $('#menu').classList.remove('show'); closeHome();
+  typRender(); $('#typ').classList.add('show');
+}
+function typRender() {
+  const T = TYP(), n = NM(), nm = k => k === 'a' ? n.A : n.B, X = $('#typ');
+  if (TT) {
+    const q = TYPQ[T[TT.who].g][TT.k];
+    X.innerHTML = `<button class="ovx" data-ty="x">✕</button><div class="ovin" style="text-align:center">
+      <div class="hLab">Typ-Test · ${esc(nm(TT.who))} · Frage ${TT.k + 1} von ${TYPQ.m.length}</div>
+      <p class="tip" style="margin:0 0 8px">Der andere schaut weg. Antworte ehrlich – es zählt nur für dich.</p>
+      <h2 class="hTitle" style="font-size:min(9vh,48px)">${esc(q[0])}</h2>
+      <div class="typAns">${q[1].map((a, i) => `<button class="tyA l${i + 1}" data-ta="${i + 1}">${esc(a)}</button>`).join('')}</div>
+      ${TT.k ? '<button class="hbtn alt" data-ty="back" style="margin-top:14px">◀ Zurück</button>' : ''}</div>`;
+    return;
+  }
+  const card = k => { const P = T[k], I = typInfo(k), top = Object.entries(T.learn[k] || {}).filter(e => e[1] > 0).sort((x, y) => y[1] - x[1]).slice(0, 4);
+    const pct = Math.round((P.t - 1) / 3 * 100);
+    return `<div class="ovcard typCard"><div class="hLab" style="margin:0">${esc(nm(k))} ${P.g === 'm' ? '♂' : '♀'}</div>
+      <h4 style="font-size:28px">${esc(I.n)}</h4><p style="font-style:italic;color:var(--acc2)">„${esc(I.m)}“</p>
+      <div class="typBar"><i style="width:${pct}%"></i></div><p style="font-size:12px">sanft ◀ ${P.t.toFixed(1)} ▶ hart · ${P.done ? 'Test gemacht' : '<b>Test noch offen</b>'}</p>
+      ${top.length ? `<p><b>Kommt bei ${esc(nm(k))} gut an:</b> ${top.map(e => esc((T.hist.find(h => h.k === e[0]) || {txt:e[0]}).txt)).join(' · ')}</p>` : ''}
+      <div class="hRow"><button class="hbtn" data-ty="test" data-w="${k}">${P.done ? '↻ Test wiederholen' : '▶ Typ-Test machen'}</button>
+        <button class="pill" data-ty="g" data-w="${k}">${P.g === 'm' ? '♂ → ♀' : '♀ → ♂'}</button></div>
+      <div class="hRow">${[1, 2, 3, 4].map(L => `<button class="pill ${typLvl(k) === L ? 'on' : ''}" data-ty="set" data-w="${k}" data-l="${L}">${esc(TYPES[P.g][L].n)}</button>`).join('')}</div></div>`; };
+  X.innerHTML = `<button class="ovx" data-ty="x">✕</button><div class="ovin">
+    <h2 class="hTitle" style="font-size:46px">🎯 Typ-Modus</h2>
+    <p class="hMotto">Keine feste Stufe: Wer dreht, bekommt eher seine Vorlieben – und mit jedem 🔥, 🧊 und 💋 passt es besser.</p>
+    <div class="typGrid">${card('a')}${card('b')}</div>
+    <div class="hRow"><button class="hbtn ${T.on ? 'alt' : ''}" data-ty="on">${T.on ? '■ Typ-Modus ausschalten' : '▶ Typ-Modus einschalten'}</button>
+      <button class="pill ${T.auto ? 'on' : ''}" data-ty="auto">🔁 Abwechselnd drehen: ${T.auto ? 'an' : 'aus'}</button>
+      <button class="pill" data-ty="turn">Jetzt dreht: <b>${esc(nm(T.turn))}</b></button>
+      <button class="pill" data-ty="reset">Gelerntes löschen</button></div>
+    <p class="tip">Schutz: Tabus aus dem Fragebogen fliegen immer raus, und es kommt nie etwas, das mehr als eine Stufe über dem sanfteren der beiden Typen liegt.
+      Oben rechts in der Leiste seht ihr, wer dran ist – antippen wechselt.</p></div>`;
+}
+$('#typ').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return; const d = b.dataset, T = TYP();
+  if (d.ta) { TT.ans[TT.k] = +d.ta; TT.k++;
+    if (TT.k >= TYPQ.m.length) { const P = T[TT.who]; P.ans = TT.ans.slice(); P.t = TT.ans.reduce((a, c) => a + c, 0) / TT.ans.length; P.done = true;
+      const who = TT.who; TT = null; save(); applyStufe(); toast(`🎯 ${who === 'a' ? NM().A : NM().B}: ${typInfo(who).n}`, 3500);
+      if (!T[other(who)].done) { TT = {who:other(who), k:0, ans:[]}; } }
+    typRender(); return; }
+  switch (d.ty) {
+    case 'x': TT = null; $('#typ').classList.remove('show'); break;
+    case 'back': TT.k = Math.max(0, TT.k - 1); typRender(); break;
+    case 'test': TT = {who:d.w, k:0, ans:[]}; typRender(); break;
+    case 'g': T[d.w].g = T[d.w].g === 'm' ? 'w' : 'm'; save(); typRender(); break;
+    case 'set': T[d.w].t = +d.l; save(); typRender(); applyStufe(); break;
+    case 'on': T.on = !T.on; if (T.on && G.on) gEnd(false); save(); applyStufe(); typRender();
+      if (T.on) { if (!T.a.done || !T.b.done) { TT = {who:T.a.done ? 'b' : 'a', k:0, ans:[]}; typRender(); } else typToast(); } break;
+    case 'auto': T.auto = !T.auto; save(); typRender(); break;
+    case 'turn': T.turn = other(T.turn); save(); typRender(); stufeChipUi(); applyStufe(); break;
+    case 'reset': if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Wirklich löschen?'; return; } T.learn = {a:{}, b:{}}; T.hist = []; save(); typRender(); break;
+  }
+});
 
 // Start: Sperre zuerst, sonst Startbildschirm
 if (S.x.pin) lockShow('unlock');
