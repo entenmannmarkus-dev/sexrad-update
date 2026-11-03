@@ -575,6 +575,15 @@
   body.bigbtn #rail .mbtn,body.bigbtn #rBtns .mbtn{min-height:62px;font-size:17px}
   body.bigbtn .spin{transform:scale(1.08)}
   body.bigbtn .qeRow .b,body.bigbtn .mb,body.bigbtn .pill{font-size:18px;padding:14px 16px}
+  #bSafe{position:fixed;left:12px;top:12px;z-index:62;width:46px;height:46px;border-radius:50%;border:2px solid #fff;background:#c40012;color:#fff;font:800 12px system-ui;box-shadow:0 4px 14px rgba(0,0,0,.6);opacity:.8;padding:0}
+  body.nosafe #bSafe{display:none}
+  #safe{z-index:150}
+  #edge select{padding:8px;border-radius:8px;background:#0c0c0e;color:#fff;border:1px solid #4a4a4e;font-size:16px}
+  #tense{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 45%,var(--glow) 100%)}
+  #tense.go{animation:tenseA var(--td,6s) ease-in forwards}
+  @keyframes tenseA{0%{opacity:0}55%{opacity:.15}70%{opacity:.5}76%{opacity:.25}82%{opacity:.7}88%{opacity:.35}94%{opacity:.85}100%{opacity:0}}
+  #rPre{font:italic 600 min(4vh,2.6vw) var(--disp);color:var(--acc2);text-transform:none;letter-spacing:.02em;margin-bottom:1vh;opacity:.9}
+  #result.hasvid #rPre{display:none}
   #portrait{display:none}
   @media (orientation:portrait){
     #portrait{display:block;position:fixed;top:8px;left:50%;transform:translateX(-50%);font-size:13px;color:#a8988a;z-index:5;pointer-events:none}
@@ -616,6 +625,10 @@
 <div id="guideBar"></div>
 <div id="kissFx">💋</div>
 <div id="nightV"></div>
+<div id="tense"></div>
+<button id="bSafe" title="Safeword: sofort alles anhalten">STOPP</button>
+<div id="safe" class="ov"></div>
+<div id="edge" class="ov"></div>
 <div id="lock"></div>
 <div id="camo"><div class="ch">Notizen</div><div class="cl">Einkaufen<small>Milch, Brot, Kaffee, Tomaten</small></div>
   <div class="cl">Termine<small>Zahnarzt Do 9:30 · Werkstatt anrufen</small></div><div class="cl">Ideen fürs Wochenende<small>Spaziergang, Freunde einladen</small></div>
@@ -625,7 +638,7 @@
 <div id="result">
   <div id="rMedia"></div>
   <div id="rVeil"><i></i><i></i></div>
-  <div id="rText"><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div></div>
+  <div id="rText"><div id="rPre"></div><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div></div>
   <div id="rVctl"><button id="rvBack" title="10 s zurück">⏪ 10</button><button id="rvPlay">❚❚</button><button id="rvFwd" title="10 s vor">10 ⏩</button>
     <input id="rvPos" type="range" min="0" max="1" step="0.1" value="0"><b id="rvTime">0:00 / 0:00</b></div>
   <div id="rBtns">
@@ -747,7 +760,7 @@ function newWheel(i) {
 function defaultState() {
   return {
     active:0,
-    settings:{stufe:0, stufeColors:true, amb:true, simple:true, home:true, named:false, night:false, reveal:true, lines:true, toyBeat:true, big:false, sound:true, spinSec:6, speakMain:false, autoNext:5, resultSec:3, mode:'rad', slotHist:[]},
+    settings:{stufe:0, stufeColors:true, amb:true, simple:true, home:true, named:false, music:false, softSnd:false, safe:true, pre:true, tense:true, night:false, reveal:true, lines:true, toyBeat:true, big:false, sound:true, spinSec:6, speakMain:false, autoNext:5, resultSec:3, mode:'rad', slotHist:[]},
     toy:{enabled:false, url:'ws://127.0.0.1:12345', master:100},
     quiz:{names:{a:'Er', b:'Sie'}, ans:{}, learn:{}, stufe:{}, stufeSel:0, lvlOv:{}, thr:2.5, map:{}, timer:true, custom:{}, session:null, fb:null, sessions:[]},   // Vorlieben-Fragebogen   // Sexspielzeug über Intiface Central
     joker:{num:'', text:'JOKER', weight:1, next:-1, card:null, media:null, seqs:[]},   // seqs = gespeicherte Abfolgen   // eigenständiges Joker-Feld
@@ -902,9 +915,10 @@ function tone(freq, dur, type, vol, t0 = 0, slideTo) {
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
   o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
 }
-function tick() { if (S.settings.sound) tone(2100, 0.035, 'square', 0.12, 0, 700); }
+function tick() { if (!S.settings.sound) return; if (S.settings.softSnd) tone(900, 0.05, 'sine', 0.08, 0, 600); else tone(2100, 0.035, 'square', 0.12, 0, 700); }
 function stopSound() {
   if (!S.settings.sound) return;
+  if (S.settings.softSnd) { [392, 493.88, 587.33].forEach((f, i) => tone(f, 2.2, 'sine', 0.1, i * 0.12)); return; }
   [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, 1.4, 'sine', 0.22, i * 0.07));
 }
 function beep(loud, dur = 0.22, f = 1000) { tone(f, dur, 'square', loud ? 0.5 : 0.18); }
@@ -1314,9 +1328,10 @@ async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   const w = S.wheels[idx], vis = visibleIdx();
   const useFocus = jockey || isSlot() || vis.length > 1 || !vis.includes(idx);
   if (useFocus) { focus = {idx, p:0, jockey}; await tween(450, (t, now) => { focus.p = t; render(now); }); }
-  const beatOff = spinBeat();
-  const res = await spinAnim(w, render, (secs || S.settings.spinSec) * (jockey ? 1.3 : 1));
-  beatOff(); stopSound();
+  const beatOff = spinBeat(), sDur = (secs || S.settings.spinSec) * (jockey ? 1.3 : 1);
+  if (S.settings.tense !== false) tenseOn(sDur);
+  const res = await spinAnim(w, render, sDur);
+  beatOff(); tenseOff(); stopSound();
   await flashWin(w, res, render);
   w.history = [resultLine(w, w.fields[res], res), ...(w.history || [])].slice(0, 5);
   if (depth === 0) LASTRUN.length = 0;
@@ -1948,6 +1963,11 @@ function renderPanel() {
     <label class="chk"><input type="checkbox" data-sp="night" ${S.settings.night ? 'checked' : ''}> Nachtmodus (gedimmt, rötlich, kein Aufblitzen)</label>
     <label class="chk"><input type="checkbox" data-sp="toyBeat" ${S.settings.toyBeat !== false ? 'checked' : ''}> Spielzeug pulsiert schon beim Drehen im Herzschlag</label>
     <label class="chk"><input type="checkbox" data-sp="big" ${S.settings.big ? 'checked' : ''}> Große Knöpfe</label>
+    <label class="chk"><input type="checkbox" data-sp="pre" ${S.settings.pre !== false ? 'checked' : ''}> Einladung über dem Ergebnis („Darf ich bitten …“ bis „Befehl:“)</label>
+    <label class="chk"><input type="checkbox" data-sp="tense" ${S.settings.tense !== false ? 'checked' : ''}> Spannung beim Drehen (Herzschlag am Rand kurz vor dem Stopp)</label>
+    <label class="chk"><input type="checkbox" data-sp="music" ${S.settings.music ? 'checked' : ''}> Stimmungsmusik (leiser Klangteppich je Stufe)</label>
+    <label class="chk"><input type="checkbox" data-sp="softSnd" ${S.settings.softSnd ? 'checked' : ''}> Weichere Geräusche beim Drehen</label>
+    <label class="chk"><input type="checkbox" data-sp="safe" ${S.settings.safe !== false ? 'checked' : ''}> Safeword-Knopf STOPP oben links</label>
     <label class="chk"><input type="checkbox" data-sp="home" ${S.settings.home !== false ? 'checked' : ''}> Startbildschirm beim Öffnen zeigen</label>
     <label class="chk"><input type="checkbox" data-sp="sound" ${S.settings.sound ? 'checked' : ''}> Tick- und Stopp-Ton</label>
     <label class="chk"><input type="checkbox" data-sp="speakMain" ${S.settings.speakMain ? 'checked' : ''}> Ergebnisse der Räder auch vorlesen</label>
@@ -2042,7 +2062,7 @@ function initPanelEvents() {
       S.settings[k] = el.type === 'checkbox' ? el.checked : +el.value;
       if (k === 'spinSec') $('#spinSecL').textContent = el.value + ' s';
       if (k === 'simple') applySimple();
-      if (['stufeColors', 'amb', 'night', 'big'].includes(k)) applyStufe();
+      if (['stufeColors', 'amb', 'night', 'big', 'music', 'safe'].includes(k)) applyStufe();
       save(); return;
     }
   });
@@ -3893,7 +3913,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110302;
+const APP_BUILD = 2026110303;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4158,9 +4178,10 @@ function renderHome() {
       <button class="pill ${S.settings.night ? 'on' : ''}" data-h="nightm">🌙 Nachtmodus ${S.settings.night ? 'an' : 'aus'}</button>
       <button class="pill" data-h="teaser">🌒 Vorfreude-Teaser</button>
       <button class="pill" data-h="wop">🎲 Wahrheit oder Pflicht</button>
+      <button class="pill" data-h="wish">🤫 Geheime Wünsche</button>
       <button class="pill" data-h="names">👥 Namen & Stufe neu</button>
       <button class="pill" data-h="nohome">${S.settings.home !== false ? 'Beim Öffnen nicht mehr zeigen' : 'Beim Öffnen wieder zeigen'}</button></div>
-    ${teaserCard}${vCard}
+    ${teaserCard}${vCard}${hlCard()}
     <div class="hRow" style="margin-top:20px"><button class="hbtn" data-h="close">Direkt zum Rad ▸</button>
       <span style="color:rgba(255,255,255,.55);font-size:14px">💋 ${S.x.stats.kisses} erledigt · 🔥 ${S.x.stats.hot} · 🧊 ${S.x.stats.cold}</span></div>
     <div class="tip">Tipp: Rad anschubsen = drehen · lange auf ein Feld drücken = bearbeiten · 🏠 in der Leiste bringt euch hierher zurück.</div></div>`;
@@ -4192,6 +4213,8 @@ $('#home').addEventListener('click', e => {
     case 'tReveal': teaserReveal(); break;
     case 'tShare': teaserShare(); break;
     case 'tDel': S.x.teaser = null; save(); renderHome(); break;
+    case 'hlPlay': hlPlay(); break;
+    case 'wish': closeHome(); wishOpen(); break;
     case 'vDone': { const v = S.x.vouchers.find(x => x.id === d.v); if (v) { v.done = Date.now(); save(); kissFx(); renderHome(); } break; }
     case 'names': wizOn = true; wizStep = 0; renderHome(); break;
     case 'nohome': S.settings.home = S.settings.home === false; save(); renderHome();
@@ -4212,6 +4235,8 @@ function renderMenu() {
       <button class="mb" data-m="lib">📚 Vorlagen<small>Fertige und eigene Spiele</small></button>
       <button class="mb" data-m="wop">🎲 Wahrheit oder Pflicht<small>Fragen und Aufgaben passend zur Stufe</small></button>
       <button class="mb" data-m="extrem">⛓ Extrem-Training<small>Nur Heavy Duty · Bondage, Anal, Kehle, Sperma</small></button>
+      <button class="mb" data-m="edge">⏳ Edging-Timer<small>Bis kurz davor – Stopp – nochmal</small></button>
+      <button class="mb" data-m="wish">🤫 Geheime Wünsche<small>Jeder trägt verdeckt ein, das Rad verrät sie</small></button>
       <button class="mb" data-m="timer">⏱ Timer-Rad<small>Alle paar Sekunden eine neue Ansage</small></button>
       <button class="mb" data-m="flow">🔗 Spielablauf<small>Mehrere Räder nacheinander</small></button>
       <button class="mb" data-m="quiz">💞 Fragebogen<small>Vorlieben, Stufen, Rückblick</small></button>
@@ -4226,6 +4251,7 @@ function renderMenu() {
       <button class="mb" data-m="pro">🛠 Profi-Ansicht<small>Alle Knöpfe wie früher in der Leiste</small></button></div>
     <div class="hLab">Ansicht & Diskretion</div><div class="mGrid">
       <button class="mb" data-m="nightm">🌙 Nachtmodus: ${S.settings.night ? 'an' : 'aus'}<small>Gedimmt, rötlich, kein Aufblitzen</small></button>
+      <button class="mb" data-m="music">🎵 Stimmungsmusik: ${S.settings.music ? 'an' : 'aus'}<small>Klangteppich je Stufe, ab Hard mit Herzschlag</small></button>
       <button class="mb" data-m="big">🔠 Große Knöpfe: ${S.settings.big ? 'an' : 'aus'}<small>Leichter zu treffen</small></button>
       <button class="mb" data-m="pin">🔒 PIN-Sperre: ${S.x.pin ? 'an' : 'aus'}<small>${S.x.pin ? 'Antippen = ausschalten' : 'Beim Öffnen PIN abfragen'}</small></button>
       <button class="mb" data-m="camo">🕶 Tarnbildschirm<small>Sofort neutrale Ansicht · auch: lange auf ☰ drücken</small></button></div></div>`;
@@ -4242,6 +4268,9 @@ $('#menu').addEventListener('click', e => {
     case 'wop': { close(); loadTheme(THEMES.findIndex(t => t.wop)); setTimeout(() => doSpin(0), 400); break; }
     case 'timer': close(); openTimer(); break;
     case 'extrem': close(); xtStart(); break;
+    case 'edge': close(); edgeOpen(); break;
+    case 'wish': close(); wishOpen(); break;
+    case 'music': S.settings.music = !S.settings.music; save(); applyStufe(); renderMenu(); break;
     case 'flow': close(); openFlowPick(); break;
     case 'quiz': close(); openQuiz('a'); break;
     case 'teaser': close(); teaserNew(); openHome(); break;
@@ -4373,6 +4402,7 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function applyStufe() {
   const R = document.documentElement; R.dataset.stufe = curStufe(); R.classList.toggle('night', !!S.settings.night);
   document.body.classList.toggle('guided', G.on); document.body.classList.toggle('bigbtn', !!S.settings.big);
+  document.body.classList.toggle('nosafe', S.settings.safe === false); if (S.settings.music) musicOn(); else musicOff();
   layerCache.clear(); $('#wbtns').dataset.key = '';
   stufeChipUi(); render();
   if ($('#timerView').classList.contains('show')) renderTimer();
@@ -4533,6 +4563,7 @@ function resultDecor(w, f, i) {
     txt.innerHTML = t.split('\n').map(line => line.split(/\s+/).filter(Boolean)
       .map(wd => `<span class="wd" style="animation-delay:${(0.7 + 0.16 * k++).toFixed(2)}s">${esc(wd)}</span>`).join(' ')).join('<br>\n');
   }
+  $('#rPre').textContent = S.settings.pre !== false && !(w && w.unit) ? pick(PRE[L]) : '';
   const line = S.settings.lines ? kopfkino(f, w, L) : '';
   const el = $('#rLine'); el.textContent = line; el.style.display = line ? '' : 'none';
   el.style.animationDelay = (S.settings.reveal ? 0.9 + 0.16 * k : 0.4).toFixed(2) + 's';
@@ -4543,7 +4574,7 @@ function resultDecor(w, f, i) {
 }
 const RES = {line:''};
 function resultButtons(w, f, i, target, done) {
-  $('#rKiss').onclick = () => { kissFx(); S.x.stats.kisses++; xtDone(f); save(); setTimeout(() => done(target), 700); };
+  $('#rKiss').onclick = () => { kissFx(); S.x.stats.kisses++; xtDone(f); heartReward(); save(); setTimeout(() => done(target), 700); };
   $('#rFeel').onclick = e => { const b = e.target.closest('[data-feel]'); if (!b) return;
     feel(w, i, +b.dataset.feel); document.querySelectorAll('#rFeel button').forEach(x => x.classList.toggle('on', x === b)); };
   $('#rGift').onclick = () => giftOpen(f.text || resultLine(w, f, i));
@@ -4572,7 +4603,7 @@ function feel(w, i, v) {
     else if (v < 0) f.weight = Math.max(1, Math.round(f.weight || 1) - 1);
     if (f.qid && v) ['a', 'b'].forEach(k => { const e = eff(f.qid, k); if (e) (QS().learn[f.qid] = QS().learn[f.qid] || {})[k] = clamp(e + 0.4 * v, 1.5, 5); });
   }
-  if (v > 0) S.x.stats.hot++; else if (v < 0) S.x.stats.cold++;
+  if (v > 0) { S.x.stats.hot++; if (f) hlAdd(w, f, i); } else if (v < 0) S.x.stats.cold++;
   if (G.on) G.heat = clamp(G.heat + v, -2, 2);
   if (v < 0) xtDown(w && w.fields && w.fields[i]);
   save();
@@ -4982,6 +5013,166 @@ $('#quiz').addEventListener('click', e => {
   if (d.swback) { const id = SW.last.pop(); if (id && QS().ans[id]) { delete QS().ans[id][who]; save(); renderQuiz(); } }
 });
 
+
+/* =====================================================================
+   Stufe 4: Safeword, Edging-Timer, Strip, Szenarien, Sinnes-Rad, geheime Wünsche,
+   Herzen & Belohnungen, Highlights, Spannung beim Drehen, Stimmungsmusik, weiche Töne
+   ===================================================================== */
+/* ---------- Safeword: sofort alles anhalten ---------- */
+function safeShow() {
+  toyStop(); stopSpeech(); edgeStop(); musicOff();
+  document.querySelectorAll('video').forEach(v => v.pause());
+  const n = NM();
+  $('#safe').innerHTML = `<div class="ovin" style="text-align:center;padding-top:8vh">
+    <div style="font-size:80px">🤍</div><h2 class="hTitle" style="font-size:48px">Pause</h2>
+    <p class="hMotto">Alles ist angehalten. Atmet durch, ${esc(n.A)} und ${esc(n.B)}. Ist alles okay?</p>
+    <div class="hRow" style="justify-content:center"><button class="hbtn" data-sf="on">✔ Alles gut – weiter</button>
+      <button class="hbtn alt" data-sf="soft">🕯 Sanfter weiter (Soft)</button><button class="hbtn alt" data-sf="end">Für heute aufhören</button></div>
+    <p class="tip">Das Safeword gilt immer – egal welche Stufe. Wer es sagt oder hier drückt, beendet sofort.</p></div>`;
+  $('#safe').classList.add('show');
+}
+$('#bSafe').onclick = safeShow;
+$('#safe').addEventListener('click', e => {
+  const b = e.target.closest('[data-sf]'); if (!b) return; const a = b.dataset.sf;
+  $('#safe').classList.remove('show');
+  if (a === 'on') { if (S.settings.music) musicOn(); return; }
+  if (a === 'soft') { setStufe(1); return; }
+  if (a === 'end') { if ($('#result').classList.contains('show')) $('#rClose').click(); if (G.on) gEnd(false); openHome(); toast('🤍 Für heute ist Schluss. Kuscheln ist auch schön.', 4000); }
+});
+
+/* ---------- Edging-Timer: anheizen – Stopp – anheizen … ---------- */
+const EDGE = {t:0, phase:'', round:0, left:0, cfg:{rounds:5, on:60, off:20}};
+function edgeOpen() {
+  const c = EDGE.cfg;
+  $('#edge').innerHTML = `<button class="ovx" data-eg="x">✕</button><div class="ovin" style="text-align:center">
+    <h2 class="hTitle" style="font-size:46px">⏳ Edging</h2><p class="hMotto">Bis kurz davor – dann Stopp. Erst in der letzten Runde darf gekommen werden.</p>
+    <div id="egBig" style="font:700 min(26vh,160px)/1 var(--disp);color:#fff;margin:10px 0">${c.on}</div>
+    <div id="egTxt" style="font:600 28px var(--disp);color:var(--acc2);min-height:40px">Bereit?</div>
+    <div class="hRow" style="justify-content:center">Runden <select id="egR">${[3, 5, 7, 10].map(v => `<option ${v === c.rounds ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      Anheizen <select id="egOn">${[30, 45, 60, 90, 120].map(v => `<option value="${v}" ${v === c.on ? 'selected' : ''}>${v} s</option>`).join('')}</select>
+      Stopp <select id="egOff">${[10, 20, 30, 45].map(v => `<option value="${v}" ${v === c.off ? 'selected' : ''}>${v} s</option>`).join('')}</select></div>
+    <div class="hRow" style="justify-content:center"><button class="hbtn" data-eg="go">▶ Start</button><button class="hbtn alt" data-eg="stop">■ Stopp</button></div>
+    <p class="tip">Mit verbundenem Spielzeug steigt die Stärke in jeder Runde – in den Pausen ist es aus.</p></div>`;
+  $('#edge').classList.add('show');
+}
+function edgeStop() { clearInterval(EDGE.t); EDGE.t = 0; if (EDGE.phase) { EDGE.phase = ''; toyLevel(0); } }
+function edgeTick() {
+  EDGE.left--;
+  const big = $('#egBig'), tx = $('#egTxt'), c = EDGE.cfg;
+  if (EDGE.left <= 0) {
+    if (EDGE.phase === 'on' && EDGE.round >= c.rounds) { edgeStop(); big.textContent = '💦'; tx.textContent = 'Jetzt darfst du kommen!'; stopSound(); return; }
+    if (EDGE.phase === 'on') { EDGE.phase = 'off'; EDGE.left = c.off; toyLevel(0); beep(true, 0.5, 600); speakShort('Stopp!'); }
+    else { EDGE.phase = 'on'; EDGE.round++; EDGE.left = c.on; beep(false, 0.2, 1200); speakShort(EDGE.round >= c.rounds ? 'Letzte Runde.' : 'Weiter.'); }
+  }
+  if (EDGE.phase === 'on' && S.toy.enabled) toyLevel(clamp(0.25 + 0.6 * EDGE.round / c.rounds + 0.15 * (1 - EDGE.left / c.on), 0, 1));
+  big.textContent = EDGE.left; big.style.color = EDGE.phase === 'on' ? '#fff' : '#7fc8ff';
+  tx.textContent = EDGE.phase === 'on' ? `Runde ${EDGE.round} / ${c.rounds} – anheizen${EDGE.round >= c.rounds ? ' (jetzt bis zum Ende)' : ''}` : '✋ STOPP – nicht kommen!';
+}
+const speakShort = t => { if (S.settings.speakMain) speak(t); };
+$('#edge').addEventListener('click', e => {
+  const b = e.target.closest('[data-eg]'); if (!b) return; const a = b.dataset.eg;
+  if (a === 'x') { edgeStop(); $('#edge').classList.remove('show'); return; }
+  if (a === 'stop') { edgeStop(); $('#egTxt').textContent = 'Angehalten'; return; }
+  if (a === 'go') { edgeStop(); const c = EDGE.cfg; c.rounds = +$('#egR').value; c.on = +$('#egOn').value; c.off = +$('#egOff').value;
+    EDGE.phase = 'on'; EDGE.round = 1; EDGE.left = c.on + 1; edgeTick(); EDGE.t = setInterval(edgeTick, 1000); }
+});
+
+/* ---------- Weitere fertige Spiele: Strip, Szenarien, Sinnes-Rad, geheime Wünsche ---------- */
+THEMES.push(
+  {name:'Strip-Rad', icon:'👙', stufe:2, rad:true, get wheels() { const n = NM(); return [
+    {title:'Wer verliert?', fields:[{t:n.A, to:1}, {t:n.B, to:1}, {t:'Beide', to:1}, {t:'Nochmal drehen', end:true}]},
+    {title:'Was kommt weg?', fields:['Ein Teil deiner Wahl', 'Oberteil', 'Hose / Rock', 'Socken', 'Unterwäsche oben', 'Unterwäsche unten', 'Der andere entscheidet', 'Mit den Zähnen ausziehen lassen']}]; }},
+  {name:'Szenarien', icon:'🎬', stufe:2, wheels:[
+    {title:'Rollen', fields:['Chef & Sekretärin', 'Fremde an der Hotelbar', 'Masseur & Kundin', 'Fotograf & Model', 'Handwerker & Hausherrin', 'Polizist & Verdächtige', 'Arzt & Patientin', 'Taxifahrer & Fahrgast']},
+    {title:'Ort', fields:['Schlafzimmer', 'Sofa', 'Küche', 'Badezimmer', 'Flur an der Wand', 'Auto (geparkt)']},
+    {title:'Twist', fields:['Sie hat das Sagen', 'Er hat das Sagen', 'Kein Wort sprechen', 'Augen verbunden', 'Nur 10 Minuten Zeit', 'Ganz langsam', 'Erwischt-werden-Gefühl', 'Kleidung bleibt halb an']}]},
+  {name:'Sinnes-Rad', icon:'🪶', stufe:1, wheels:[
+    {title:'Sinn', fields:['Augenbinde – nur fühlen', 'Eiswürfel über die Haut', 'Feder oder Seidentuch', 'Warmes Massageöl', 'Ein Duft am Hals', 'Musik und Langsamkeit', 'Kerzenlicht – nur anschauen', 'Flüstern ins Ohr']},
+    {title:'Wo?', fields:['Nacken', 'Rücken', 'Innenschenkel', 'Bauch', 'Brüste', 'Füße', 'Lippen', 'Überall']},
+    {title:'Wie lange?', fields:['1 Minute', '2 Minuten', '3 Minuten', 'Bis sie stoppt']}]},
+  {name:'Geheime Wünsche', icon:'🤫', stufe:2, rad:true, get wheels() {
+    const ws = (S.x.wishes || []).filter(x => textOk(x.text));
+    const fs = ws.map(x => ({t:x.text, end:true}));
+    if (!fs.length) fs.push({t:'Noch keine Wünsche – unter ☰ → 🤫 eintragen', end:true});
+    if (fs.length < 2) fs.push({t:'Freie Wahl – wünsch dir was', end:true});
+    return [{title:'Geheimer Wunsch', fields:fs}]; }},
+);
+function wishOpen() {
+  const n = NM(), Q = $('#qedit'); let who = 'a';
+  const draw = () => { const mine = (S.x.wishes || []).filter(x => x.who === who).length;
+    Q.innerHTML = `<h5>🤫 Geheimer Wunsch von ${esc(who === 'a' ? n.A : n.B)}</h5>
+      <p style="margin:0 0 8px;font-size:13px;color:#bba98f">Der andere schaut weg. Der Wunsch bleibt verdeckt, bis er beim Drehen kommt. (${mine} gespeichert)</p>
+      <textarea id="wsText" placeholder="Was wünschst du dir heimlich?"></textarea>
+      <div class="qeRow"><button class="b pri" data-ws="save">🤫 Verdeckt speichern</button><button class="b" data-ws="swap">Jetzt ${esc(who === 'a' ? n.B : n.A)}</button>
+        <button class="b" data-ws="play">🎲 Wünsche drehen</button><button class="b" data-ws="x">Schließen</button></div>`; };
+  draw(); qeShow(null);
+  Q.onclick = e => {
+    const b = e.target.closest('[data-ws]'); if (!b) return; const a = b.dataset.ws;
+    if (a === 'save') { const t = $('#wsText').value.trim(); if (!t) return; (S.x.wishes = S.x.wishes || []).push({who, text:t, at:Date.now()}); save(); toast('🤫 Verdeckt gespeichert'); draw(); qeShow(null); return; }
+    if (a === 'swap') { who = who === 'a' ? 'b' : 'a'; draw(); qeShow(null); return; }
+    if (a === 'play') { qeHide(); const i = THEMES.findIndex(t => t.name === 'Geheime Wünsche'); loadTheme(i); setTimeout(() => doSpin(0), 400); return; }
+    qeHide();
+  };
+}
+
+/* ---------- Herzen & Belohnungen, Highlights ---------- */
+function heartReward() {
+  const k = S.x.stats.kisses;
+  if (k > 0 && k % 10 === 0) {
+    const n = NM(), to = Math.random() < 0.5 ? 'a' : 'b';
+    const v = {id:'g' + uid(), text:'Belohnung: ein Wunsch, den der andere erfüllt – heute oder wann du willst', to, from:to === 'a' ? 'b' : 'a', created:Date.now(), done:false, lvl:curStufe()};
+    S.x.vouchers.unshift(v); save();
+    setTimeout(() => toast(`💖 ${k} Herzen gesammelt! ${to === 'a' ? n.A : n.B} bekommt einen Wunsch-Gutschein (unter 🏠 Start)`, 5000), 900);
+  }
+}
+function hlAdd(w, f, i) {
+  const t = String(f.text || resultLine(w, f, i)).replace(/\n/g, ' ').trim(); if (!t) return;
+  const H = S.x.hl = S.x.hl || [], ex = H.find(x => x.text === t);
+  if (ex) { ex.n++; ex.at = Date.now(); } else H.unshift({text:t, n:1, at:Date.now()});
+  H.sort((a, b) => b.n - a.n || b.at - a.at); S.x.hl = H.slice(0, 30);
+}
+function hlCard() {
+  const H = (S.x.hl || []).slice(0, 6); if (!H.length) return '';
+  return `<div class="ovcard"><h4>🔥 Eure Highlights</h4>${H.map(x => `<p>${esc(x.text)} ${x.n > 1 ? `<b style="color:var(--acc2)">×${x.n}</b>` : ''}</p>`).join('')}
+    <div class="hRow"><button class="hbtn" data-h="hlPlay">🎲 Highlights drehen</button></div></div>`;
+}
+function hlPlay() {
+  const H = (S.x.hl || []).slice(0, 12); if (!H.length) return;
+  closeHome(); applyWheelSet('Highlights', [{title:'Eure Highlights', fields:H.map(x => ({text:x.text, weight:Math.min(5, x.n), next:-1}))}], true, 'Spiel');
+  setTimeout(() => doSpin(0), 400);
+}
+
+/* ---------- Einladung statt Etikett: kleiner Satz über dem Ergebnis ---------- */
+const PRE = [null, ['Darf ich bitten …', 'Wie wäre es mit …', 'Für dich, ganz zärtlich:'], ['Jetzt ist dran:', 'Na los:', 'Mach mal:'],
+  ['Keine Ausrede:', 'Du machst jetzt:', 'Sofort:'], ['Befehl:', 'Du gehorchst:', 'Kein Widerspruch:']];
+
+/* ---------- Spannung beim Drehen: Herzschlag-Rand, der kurz vor dem Stopp stärker wird ---------- */
+function tenseOn(secs) { const T = $('#tense'); if (!T || reduceMotion) return; T.style.setProperty('--td', secs + 's'); T.classList.remove('go'); void T.offsetWidth; T.classList.add('go'); }
+function tenseOff() { const T = $('#tense'); if (T) T.classList.remove('go'); }
+
+/* ---------- Stimmungsmusik: leiser Klangteppich je Stufe (ohne Dateien, live erzeugt) ---------- */
+const MUS = {nodes:null, L:0};
+function musicOn() {
+  const a = ac(); if (!a || !S.settings.music) return;
+  const L = curStufe(); if (MUS.nodes && MUS.L === L) return; musicOff(); MUS.L = L;
+  const roots = [0, 220, 174.6, 146.8, 110][L], chord = [1, 1.5, 2, 2.52].map(r => r * roots);
+  const out = a.createGain(); out.gain.value = 0; out.gain.linearRampToValueAtTime(0.06, a.currentTime + 3);
+  const lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = [0, 1800, 1200, 900, 650][L]; lp.Q.value = 4;
+  const lfo = a.createOscillator(), lg = a.createGain(); lfo.frequency.value = [0, 0.08, 0.12, 0.25, 0.9][L]; lg.gain.value = lp.frequency.value * 0.5;
+  lfo.connect(lg).connect(lp.frequency); lfo.start();
+  const osc = chord.map((f, k) => { const o = a.createOscillator(); o.type = L >= 3 ? 'sawtooth' : 'sine'; o.frequency.value = f; o.detune.value = (k - 1.5) * 6; o.connect(lp); o.start(); return o; });
+  lp.connect(out).connect(a.destination);
+  // Herzschlag-Bass ab Hard
+  let beat = 0;
+  if (L >= 3) beat = setInterval(() => { tone(55, 0.18, 'sine', 0.25); tone(50, 0.16, 'sine', 0.18, 0.24); }, L === 4 ? 850 : 1050);
+  MUS.nodes = {out, osc, lfo, beat};
+}
+function musicOff() {
+  const N = MUS.nodes; if (!N) return; MUS.nodes = null; clearInterval(N.beat);
+  const a = ac(); try { N.out.gain.cancelScheduledValues(a.currentTime); N.out.gain.setValueAtTime(N.out.gain.value, a.currentTime); N.out.gain.linearRampToValueAtTime(0, a.currentTime + 0.6); } catch (e) {}
+  setTimeout(() => { N.osc.forEach(o => { try { o.stop(); } catch (e) {} }); try { N.lfo.stop(); } catch (e) {} }, 700);
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) musicOff(); else if (S.settings.music) musicOn(); });
 
 // Start: Sperre zuerst, sonst Startbildschirm
 if (S.x.pin) lockShow('unlock');
