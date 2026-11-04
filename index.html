@@ -624,6 +624,39 @@
   #bWho small{display:block;font-size:11px;opacity:.75;font-weight:500}
   body.simple #bWho{display:block}
   #portrait{display:none}
+  /* ---------- Einfache Ansicht 2.0: große Knöpfe, ein DREHEN für alles ---------- */
+  body.simple #bHome{display:none}
+  body.simple .wspin{display:none}
+  body.simple #bSpin{display:block!important}
+  body.simple{--rail:150px}
+  body.simple #rail{gap:16px}
+  body.simple #rail .mbtn{width:132px;min-height:62px;font-size:17px;border-radius:16px}
+  body.simple #rail .spin{width:136px;height:136px;font-size:21px}
+  body.simple #stufeChip{width:132px}
+  @media (max-width:520px){body.simple{--rail:128px} body.simple #rail .mbtn,body.simple #stufeChip{width:116px;font-size:15px} body.simple #rail .spin{width:116px;height:116px;font-size:19px}}
+  #spinNext{display:none;max-width:130px;margin-top:-8px;font-size:14px;font-weight:700;color:#e9c77a;text-align:center;line-height:1.2}
+  body.simple #spinNext.on{display:block}
+  .hGrid.big{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .tile.big{min-height:150px;padding:22px 20px}
+  .tile.big .ti{font-size:46px}
+  .tile.big b{font-size:27px}
+  .tile.big small{font-size:16px}
+  .hGo{display:block;width:100%;margin:22px 0 6px;padding:20px;border-radius:18px;font-size:22px;font-weight:800}
+  details.hMore{margin-top:22px;border:1px solid #4a3328;border-radius:16px;padding:4px 16px 14px;background:rgba(20,10,12,.5)}
+  details.hMore>summary{cursor:pointer;list-style:none;padding:14px 0 8px;font-size:19px;font-weight:700;color:#e9c77a}
+  details.hMore>summary::-webkit-details-marker{display:none}
+  details.hMore>summary{display:block}
+  details.hMore>summary::marker{content:''}
+  details.hMore>summary::before,details.hMore[open]>summary::before{content:none}
+  @media (max-width:1000px){.ov>.ovin{padding-top:104px}}
+  @media (max-width:520px){.mGrid{grid-template-columns:repeat(2,minmax(0,1fr))} #menu .mb{font-size:17px;min-height:88px;padding:12px}}
+  details.hMore[open]>summary .arr{transform:rotate(180deg)}
+  details.hMore>summary .arr{display:inline-block;transition:transform .2s}
+  .mTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 4px}
+  .mTabs button{padding:16px 6px;border-radius:16px;border:1px solid #5a3a2a;background:#1a0d0f;font-size:18px;font-weight:800;color:#d8c8b0}
+  .mTabs button.on{background:linear-gradient(160deg,#8a1a22,#3a080c);border-color:var(--acc);color:#fff;box-shadow:0 0 14px var(--glow)}
+  #menu .mb{font-size:19px;min-height:96px}
+  #menu .mb small{font-size:14px}
   @media (orientation:portrait){
     #portrait{display:block;position:fixed;top:8px;left:50%;transform:translateX(-50%);font-size:13px;color:#a8988a;z-index:5;pointer-events:none}
   }
@@ -639,6 +672,7 @@
   <div id="wlabel"></div>
   <button id="bWho" class="mbtn" title="Wer dreht? Antippen = wechseln">👤 Er dreht</button>
   <button id="bSpin" class="spin">DREHEN</button>
+  <div id="spinNext"></div>
   <button id="bMenu" class="mbtn">☰ MENÜ</button>
   <button id="bTimer" class="mbtn">⏱ TIMER</button>
   <button id="bMode" class="mbtn gold">🎰 SLOT</button>
@@ -1368,7 +1402,7 @@ function fieldFlags(f) {
 async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   if (busy) return;
   busy = true; ac(); setBusy(true); closePanel();
-  S.active = idx; updateRail();
+  S.active = idx; LASTW = idx; updateRail();
   const w = S.wheels[idx], vis = visibleIdx();
   const useFocus = jockey || isSlot() || vis.length > 1 || !vis.includes(idx);
   if (useFocus) { focus = {idx, p:0, jockey}; await tween(450, (t, now) => { focus.p = t; render(now); }); }
@@ -1389,7 +1423,15 @@ async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   if (useFocus) { await tween(350, (t, now) => { focus.p = 1 - t; render(now); }); focus = null; }
   render(); busy = false; setBusy(false); renderPanel(); updateRail();
   if (next) await runNext(next, depth + 1);   // Folge-Rad oder Speicherkarte (Kette)
-  if (depth === 0) typAfterSpin();
+  if (depth === 0) { typAfterSpin(); advanceWheel(); }
+}
+/* Einfache Ansicht: der große DREHEN-Knopf nimmt danach automatisch das nächste Rad */
+let LASTW = 0;
+function advanceWheel() {
+  if (S.settings.simple === false || isSlot()) return;
+  const v = visibleIdx(); if (v.length < 2) return;
+  const k = v.indexOf(LASTW); if (k < 0) return;
+  S.active = v[(k + 1) % v.length]; save(); render(); updateRail();
 }
 async function runNext(t, depth) {
   if (depth >= MAX_CHAIN) return;
@@ -1810,6 +1852,8 @@ function updateRail() {
   $('#bEnd').style.display = S.quiz.session ? '' : 'none';
   $('#bMode').innerHTML = isSlot() ? '🎡 RAD' : '🎰 SLOT';
   $('#bSpin').textContent = isSlot() ? 'ZIEHEN' : 'DREHEN';
+  const nv = visibleIdx(), sn = $('#spinNext'), showN = !isSlot() && nv.length > 1 && w.enabled;
+  sn.classList.toggle('on', showN); sn.textContent = showN ? '▶ ' + (w.title || 'Rad ' + (S.active + 1)) : '';
 }
 function setBusy(b) {
   ['#bSpin', '#bJoker', '#bTimer', '#bUndo', '#bMode', '#bFlow'].forEach(s => $(s).disabled = b);
@@ -3962,7 +4006,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110306;
+const APP_BUILD = 2026110307;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4191,17 +4235,17 @@ function renderHome() {
       `<div class="hLab">Schritt 1 von 3 · Wer spielt heute?</div>
         <div class="wizIn"><input id="wzA" value="${esc(n.A)}" placeholder="Name 1"><input id="wzB" value="${esc(n.B)}" placeholder="Name 2"></div>
         <div class="hRow"><button class="hbtn alt" data-wzp="Er|Sie">Er & Sie</button><button class="hbtn alt" data-wzp="Sie|Sie">Sie & Sie</button><button class="hbtn alt" data-wzp="Er|Er">Er & Er</button></div>
-        <div class="hRow"><button class="hbtn" data-wz="1">Weiter ▶</button></div>`,
+        <button class="hbtn hGo" data-wz="1">Weiter ▶</button>`,
       `<div class="hLab">Schritt 2 von 3 · Wie heiß soll es werden?</div>
         <p class="tip" style="margin-top:0">Farben, Sprüche und Animationen werden mit jeder Stufe dominanter. Ihr könnt jederzeit wechseln.</p>
-        ${stufeButtons()}<div class="hRow"><button class="hbtn" data-wz="2">Weiter ▶</button><button class="hbtn alt" data-wz="0">◀ Zurück</button></div>`,
+        ${stufeButtons()}<button class="hbtn hGo" data-wz="2">Weiter ▶</button><div class="hRow"><button class="hbtn alt" data-wz="0">◀ Zurück</button></div>`,
       `<div class="hLab">Schritt 3 von 3 · Fertig, ${esc(n.A)} & ${esc(n.B)}</div>
         <p class="tip" style="margin-top:0">Sollen wir euch passende Räder für <b>${STUFEN[baseStufe()]}</b> einrichten (Wo? → Vorspiel → Stellung → Abschluss)?
           Eure bisherigen Räder lassen sich mit ↩ VORHER zurückholen.</p>
-        <div class="hRow"><button class="hbtn" data-h="typtest">🎯 Erst Typ-Test für beide</button><button class="hbtn" data-wz="fill">✔ Passende Räder einrichten</button><button class="hbtn alt" data-wz="keep">Meine Räder behalten</button><button class="hbtn alt" data-wz="1">◀ Zurück</button></div>`];
+        <button class="hbtn hGo" data-wz="fill">✔ Los geht's – passende Räder einrichten</button>
+        <div class="hRow"><button class="hbtn alt" data-h="typtest">🎯 Erst Typ-Test für beide</button><button class="hbtn alt" data-wz="keep">Meine Räder behalten</button><button class="hbtn alt" data-wz="1">◀ Zurück</button></div>`];
     H.innerHTML = `<div class="ovin"><h1 class="hTitle">Sex<em>Rad</em></h1><p class="hMotto">Wenn es sich um das eine dreht</p>${steps[wizStep] || steps[0]}
-      <div class="tip"><b>So geht's:</b> Rad mit dem Finger anschubsen = drehen · lange auf ein Feld drücken = Feld bearbeiten ·
-        ☰ MENÜ = Spielarten, Fragebogen und Einrichten · lange auf ☰ drücken = Tarnbildschirm.</div></div>`;
+</div>`;
     return;
   }
   const open = S.x.vouchers.filter(v => !v.done), T = S.x.teaser, hm = d => new Date(d).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
@@ -4214,27 +4258,31 @@ function renderHome() {
   H.innerHTML = `<button class="ovx" data-h="close" title="Zum Rad">✕</button><div class="ovin">
     <h1 class="hTitle">Sex<em>Rad</em></h1><p class="hMotto">Wenn es sich um das eine dreht · ${esc(n.A)} & ${esc(n.B)}</p>
     <div class="hLab">Was habt ihr heute vor?</div>
-    <div class="hGrid">
-      <button class="tile main" data-h="night"><span class="ti">🌙</span><b>Heute Nacht</b><small>Geführter Abend in 6 Phasen – von Ankommen bis Höhepunkt. Wird mit jeder Phase heißer.</small></button>
-      <button class="tile" data-h="quick"><span class="ti">⚡</span><b>Schnell & spontan</b><small>Sofort drehen mit euren Rädern.</small></button>
-      <button class="tile" data-h="quiz"><span class="ti">💞</span><b>Uns kennenlernen</b><small>Jeder wischt für sich durch die Vorlieben – Tabus bleiben geheim.</small></button>
-      <button class="tile" data-h="lib"><span class="ti">📚</span><b>Vorlagen</b><small>Fertige Spiele: Wahrheit oder Pflicht, Blowjob, Spermerei, Fesseln …</small></button>
-      <button class="tile" data-h="typ"><span class="ti">🎯</span><b>Typ-Modus</b><small>${typOn() ? 'An · ' + esc(typInfo('a').n) + ' & ' + esc(typInfo('b').n) : 'Er und sie bekommen je ihren Typ – wer dreht, bekommt eher seine Vorlieben.'}</small></button>
-      <button class="tile" data-h="extrem" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}><span class="ti">⛓</span><b>Extrem-Training</b><small>Nur Heavy Duty: Bondage, Anal, Kehle, Spermaspiele – wird mit jedem Mal härter.</small></button>
-      <button class="tile" data-h="setup"><span class="ti">⚙</span><b>Eigenes Spiel</b><small>Felder, Videos und Räder selbst einrichten.</small></button>
+    <div class="hGrid big">
+      <button class="tile big main" data-h="night"><span class="ti">🌙</span><b>Heute Nacht</b><small>Geführter Abend, wird immer heißer</small></button>
+      <button class="tile big" data-h="quick"><span class="ti">🎡</span><b>Sofort drehen</b><small>Mit euren Rädern loslegen</small></button>
+      <button class="tile big" data-h="wop"><span class="ti">🎲</span><b>Wahrheit oder Pflicht</b><small>Passend zur Stufe</small></button>
+      <button class="tile big" data-h="typ"><span class="ti">🎯</span><b>Typ-Modus</b><small>${typOn() ? 'An · ' + esc(typInfo('a').n) + ' & ' + esc(typInfo('b').n) : 'Jeder bekommt, was zu ihm passt'}</small></button>
     </div>
     <div class="hLab">Stufe für heute</div>${stufeButtons()}
+    <button class="hbtn hGo" data-h="close">Zum Rad ▸</button>
+    <span style="color:rgba(255,255,255,.55);font-size:15px">💋 ${S.x.stats.kisses} erledigt · 🔥 ${S.x.stats.hot} · 🧊 ${S.x.stats.cold}</span>
+    ${teaserCard}${vCard}${hlCard()}
+    <details class="hMore"><summary>Mehr Spiele & Extras <span class="arr">▾</span></summary>
+    <div class="hGrid">
+      <button class="tile" data-h="quiz"><span class="ti">💞</span><b>Uns kennenlernen</b><small>Vorlieben – Tabus bleiben geheim</small></button>
+      <button class="tile" data-h="lib"><span class="ti">📚</span><b>Vorlagen</b><small>Fertige Spiele</small></button>
+      <button class="tile" data-h="extrem" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}><span class="ti">⛓</span><b>Extrem-Training</b><small>Nur Heavy Duty</small></button>
+      <button class="tile" data-h="wish"><span class="ti">🤫</span><b>Geheime Wünsche</b><small>Verdeckt eintragen</small></button>
+      <button class="tile" data-h="setup"><span class="ti">⚙</span><b>Eigenes Spiel</b><small>Felder und Räder einrichten</small></button>
+    </div>
     <div class="hRow">
       <button class="pill ${S.settings.night ? 'on' : ''}" data-h="nightm">🌙 Nachtmodus ${S.settings.night ? 'an' : 'aus'}</button>
       <button class="pill" data-h="teaser">🌒 Vorfreude-Teaser</button>
-      <button class="pill" data-h="wop">🎲 Wahrheit oder Pflicht</button>
-      <button class="pill" data-h="wish">🤫 Geheime Wünsche</button>
       <button class="pill" data-h="names">👥 Namen & Stufe neu</button>
       <button class="pill" data-h="nohome">${S.settings.home !== false ? 'Beim Öffnen nicht mehr zeigen' : 'Beim Öffnen wieder zeigen'}</button></div>
-    ${teaserCard}${vCard}${hlCard()}
-    <div class="hRow" style="margin-top:20px"><button class="hbtn" data-h="close">Direkt zum Rad ▸</button>
-      <span style="color:rgba(255,255,255,.55);font-size:14px">💋 ${S.x.stats.kisses} erledigt · 🔥 ${S.x.stats.hot} · 🧊 ${S.x.stats.cold}</span></div>
-    <div class="tip">Tipp: Rad anschubsen = drehen · lange auf ein Feld drücken = bearbeiten · 🏠 in der Leiste bringt euch hierher zurück.</div></div>`;
+    <div class="tip">Tipp: Rad anschubsen = drehen · lange auf ein Feld drücken = bearbeiten · ← oben links bringt euch ins Menü.</div>
+    </details></div>`;
 }
 $('#home').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
@@ -4244,7 +4292,7 @@ $('#home').addEventListener('click', e => {
     if ($('#wzA')) { S.quiz.names = S.quiz.names || {}; S.quiz.names.a = $('#wzA').value.trim() || 'Er'; S.quiz.names.b = $('#wzB').value.trim() || 'Sie'; save(); }
     if (d.wz === 'fill' || d.wz === 'keep') {
       S.settings.named = true; S.x.setup = true; wizOn = false; wizStep = 0; save();
-      if (d.wz === 'fill') applyWheelSet('Start ' + STUFEN[baseStufe()], starterWheels(baseStufe()), true, 'Start');
+      if (d.wz === 'fill') applyWheelSet(STUFEN[baseStufe()], starterWheels(baseStufe()), true, 'Start');
       renderHome(); return;
     }
     wizStep = +d.wz; renderHome(); return;
@@ -4275,42 +4323,46 @@ $('#home').addEventListener('click', e => {
 });
 
 /* ---------- Menü ☰ ---------- */
+let menuTab = 'play';
 function openMenu() { closePanel(); renderMenu(); $('#menu').classList.add('show'); }
 function renderMenu() {
   const nw = $('#bUpd').classList.contains('new'), open = S.x.vouchers.filter(v => !v.done).length;
   $('#menu').innerHTML = `<button class="ovx" data-m="close">✕</button><div class="ovin">
-    <h2 class="hTitle" style="font-size:46px">Menü</h2><p class="hMotto">Spielart wählen und einrichten</p>
-    <div class="hLab">Stufe</div>${stufeButtons()}
+    <h2 class="hTitle" style="font-size:46px">Menü</h2>
+    <div class="mTabs"><button data-mt="play" class="${menuTab === 'play' ? 'on' : ''}">🎲 Spielen</button><button data-mt="set" class="${menuTab === 'set' ? 'on' : ''}">⚙ Einrichten${nw ? ' 🔴' : ''}</button><button data-mt="view" class="${menuTab === 'view' ? 'on' : ''}">🌙 Ansicht</button></div>
+    ${menuTab === 'play' ? `<div class="hLab">Stufe</div>${stufeButtons()}
     <div class="hLab">Spielen</div><div class="mGrid">
       <button class="mb" data-m="night">🌙 Heute Nacht<small>Geführter Abend in 6 Phasen</small></button>
-      <button class="mb" data-m="mode">${isSlot() ? '🎡 Glücksrad' : '🎰 Slotmaschine'}<small>${isSlot() ? 'Ein Rad nach dem anderen drehen' : 'Alle Räder auf einmal ziehen'}</small></button>
-      <button class="mb" data-m="lib">📚 Vorlagen<small>Fertige und eigene Spiele</small></button>
       <button class="mb" data-m="wop">🎲 Wahrheit oder Pflicht<small>Fragen und Aufgaben passend zur Stufe</small></button>
       <button class="mb" data-m="typ">🎯 Typ-Modus: ${typOn() ? 'an' : 'aus'}<small>Typ-Test, wer dreht, was gelernt wurde</small></button>
+      <button class="mb" data-m="lib">📚 Vorlagen<small>Fertige und eigene Spiele</small></button>
+      <button class="mb" data-m="mode">${isSlot() ? '🎡 Glücksrad' : '🎰 Slotmaschine'}<small>${isSlot() ? 'Ein Rad nach dem anderen drehen' : 'Alle Räder auf einmal ziehen'}</small></button>
+      <button class="mb" data-m="home">🏠 Startbildschirm<small>${open ? open + ' offene Gutscheine' : 'Was habt ihr heute vor?'}</small></button></div>
+    <details class="hMore"><summary>Weitere Spielarten <span class="arr">▾</span></summary><div class="mGrid">
       <button class="mb" data-m="extrem">⛓ Extrem-Training<small>Nur Heavy Duty · Bondage, Anal, Kehle, Sperma</small></button>
       <button class="mb" data-m="edge">⏳ Edging-Timer<small>Bis kurz davor – Stopp – nochmal</small></button>
       <button class="mb" data-m="wish">🤫 Geheime Wünsche<small>Jeder trägt verdeckt ein, das Rad verrät sie</small></button>
       <button class="mb" data-m="timer">⏱ Timer-Rad<small>Alle paar Sekunden eine neue Ansage</small></button>
       <button class="mb" data-m="flow">🔗 Spielablauf<small>Mehrere Räder nacheinander</small></button>
       <button class="mb" data-m="quiz">💞 Fragebogen<small>Vorlieben, Stufen, Rückblick</small></button>
-      <button class="mb" data-m="teaser">🌒 Vorfreude-Teaser<small>Morgens drehen, abends enthüllen</small></button>
-      <button class="mb" data-m="home">🏠 Startbildschirm<small>${open ? open + ' offene Gutscheine' : 'Was habt ihr heute vor?'}</small></button></div>
-    <div class="hLab">Einrichten</div><div class="mGrid">
+      <button class="mb" data-m="teaser">🌒 Vorfreude-Teaser<small>Morgens drehen, abends enthüllen</small></button></div></details>` : ''}
+    ${menuTab === 'set' ? `<div class="hLab">Einrichten</div><div class="mGrid">
       <button class="mb" data-m="setup">⚙ Felder & Räder<small>Texte, Videos, wie oft, danach weiter mit</small></button>
       <button class="mb" data-m="gal">🗂 Galerie & Ordner<small>Videos, Sequenzen, Zufall aus Ordnern</small></button>
       <button class="mb" data-m="cards">💾 Gespeicherte Spiele<small>Speichern, laden, teilen</small></button>
       <button class="mb" data-m="opts">🔧 Optionen<small>Ton, Drehdauer, Enthüllung, Sprüche, Export</small></button>
       <button class="mb ${nw ? 'new' : ''}" data-m="upd">⟳ Update<small>${nw ? 'Neue Version verfügbar!' : 'Neue Version suchen'}</small></button>
-      <button class="mb" data-m="pro">🛠 Profi-Ansicht<small>Alle Knöpfe wie früher in der Leiste</small></button></div>
-    <div class="hLab">Ansicht & Diskretion</div><div class="mGrid">
+      <button class="mb" data-m="pro">🛠 Profi-Ansicht<small>Alle Knöpfe wie früher in der Leiste</small></button></div>` : ''}
+    ${menuTab === 'view' ? `<div class="hLab">Ansicht & Diskretion</div><div class="mGrid">
       <button class="mb" data-m="nightm">🌙 Nachtmodus: ${S.settings.night ? 'an' : 'aus'}<small>Gedimmt, rötlich, kein Aufblitzen</small></button>
       <button class="mb" data-m="music">🎵 Stimmungsmusik: ${S.settings.music ? 'an' : 'aus'}<small>Klangteppich je Stufe, ab Hard mit Herzschlag</small></button>
       <button class="mb" data-m="big">🔠 Große Knöpfe: ${S.settings.big ? 'an' : 'aus'}<small>Leichter zu treffen</small></button>
       <button class="mb" data-m="pin">🔒 PIN-Sperre: ${S.x.pin ? 'an' : 'aus'}<small>${S.x.pin ? 'Antippen = ausschalten' : 'Beim Öffnen PIN abfragen'}</small></button>
-      <button class="mb" data-m="camo">🕶 Tarnbildschirm<small>Sofort neutrale Ansicht · auch: lange auf ☰ drücken</small></button></div></div>`;
+      <button class="mb" data-m="camo">🕶 Tarnbildschirm<small>Sofort neutrale Ansicht · auch: lange auf ☰ drücken</small></button></div>` : ''}</div>`;
 }
 $('#menu').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.mt) { menuTab = b.dataset.mt; renderMenu(); return; }
   const m = b.dataset.m; if (!m) return;
   const close = () => $('#menu').classList.remove('show');
   switch (m) {
