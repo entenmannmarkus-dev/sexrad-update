@@ -382,6 +382,31 @@
   #vgEd .b.pri,#vgSaveRow .b.pri,#vgCatRow .b.pri,#vgSelBar .b.pri{background:#6a1016;border-color:#c9a24e}
   #vgEd .b.on{background:#2e5a1c;border-color:#9fe39f}
   .vgc{transition:transform .15s}
+  .qeSt summary{cursor:pointer;font:700 14px system-ui;color:#e9c77a;margin:6px 0}.qeSt textarea{min-height:90px}
+  .vgc .st{position:absolute;top:6px;right:6px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.7);border:2px solid #8a7a5a;color:#d8c8a0;font:800 19px/1 system-ui;display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:2}
+  .vgc .st.on{border-color:#ffd24a;color:#ffd24a;box-shadow:0 0 10px rgba(255,210,74,.6)}
+  .vgc .tg{position:absolute;left:6px;right:6px;bottom:30px;font:700 11px system-ui;color:#ffe08a;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vgf.drag{opacity:.4}.vgf.dropOn,#vgFilter .chip.dropOn{outline:3px solid #ffd24a;outline-offset:2px}
+  #dirGhost{position:fixed;z-index:200;pointer-events:none;padding:12px 16px;border-radius:12px;background:#3a2810;border:2px solid #ffd24a;color:#fff;font:800 16px system-ui;transform:translate(-50%,-120%)}
+  #rVid{display:none;margin-top:1.2vh;font:600 min(3.4vh,2.4vw)/1.3 system-ui;color:#ffe08a;text-transform:none;letter-spacing:0;max-width:90%}
+  #rVid.on{display:block}
+  /* Einsortier-Tool */
+  #sorter .ovin{max-width:1200px;padding-left:max(24px,72px)}
+  .soBtns .hbtn{min-height:58px;font-size:18px;padding:10px 14px}
+  .soGrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+  @media (max-width:820px){.soGrid{grid-template-columns:1fr}}
+  .soVid{background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center}
+  .soVid video,.soVid img{width:100%;height:100%;object-fit:contain}
+  .soFr{display:flex;gap:6px;margin-top:8px}.soFr img{flex:1;min-width:0;height:64px;object-fit:cover;border-radius:8px;border:1px solid #5a4520;cursor:pointer}
+  .soCat{font:800 12px system-ui;letter-spacing:.12em;text-transform:uppercase;color:#c9a24e;margin:10px 0 4px}
+  .soChips{display:flex;flex-wrap:wrap;gap:6px}
+  .soChips button{padding:8px 11px;border-radius:11px;border:1px solid #5a3a2a;background:#1a0d0f;font:700 14px system-ui;color:#e8d8c0}
+  .soChips button.on{background:linear-gradient(160deg,#8a1a22,#3a080c);border-color:var(--acc);color:#fff}
+  .soChips button.sug{border-color:#ffd24a;color:#ffe08a}
+  #soDesc{width:100%;min-height:74px;margin-top:6px;border-radius:12px;background:#120a0b;color:#f0e2c4;border:1px solid #5a4520;padding:10px;font:500 15px/1.35 system-ui}
+  .soBtns{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .soBtns .hbtn{flex:1;min-width:150px}
+  .soPick{max-height:46vh;overflow:auto;padding-right:4px}
   .vgf{border-radius:12px;border:2px solid #5a4520;background:linear-gradient(160deg,#2a1d10,#120c08);padding:16px 14px;cursor:pointer;min-height:120px;display:flex;flex-direction:column;gap:4px}
   .vgf span{font-size:40px;line-height:1}.vgf b{color:#ffe08a;font:700 18px system-ui}.vgf small{color:#b9a27a}
   .vgc.on{border-color:#e0464e;box-shadow:0 0 18px rgba(224,70,78,.7);transform:scale(1.04);z-index:1}
@@ -784,7 +809,7 @@
 <div id="result">
   <div id="rMedia"></div>
   <div id="rVeil"><i></i><i></i></div>
-  <div id="rText"><div id="rPre"></div><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div><div id="rKt"></div><div id="rHold"></div>
+  <div id="rText"><div id="rPre"></div><div id="rNum"></div><div id="rTxt"></div><div id="rVid"></div><div id="rUnit"></div><div id="rLine"></div><div id="rKt"></div><div id="rHold"></div>
     <div id="rDone"><div class="rdQ" id="rdQ">Wie wurde es erfüllt?</div>
       <div class="rdB"><button data-done="2" class="ok">✔ Erfüllt</button><button data-done="1" class="half">½ Teilweise</button><button data-done="0" class="no">✘ Nicht erfüllt</button><button data-done="3" class="later">⏭ Nächstes Mal</button></div>
       <div class="rdS"><div id="rFeel"><button data-feel="1" title="Mehr davon">🔥 mehr davon</button><button data-feel="0" title="Passt">👌 passt</button><button data-feel="-1" title="Weniger davon">🧊 weniger</button></div>
@@ -838,12 +863,12 @@
 <div id="fpick"><div id="fpickBox"><div class="jt">🔗 Ablauf starten</div><div id="fpickList"></div><button class="mbtn" id="fpickX" style="width:100%;margin-top:8px">Schließen</button></div></div>
 <div id="fbuild"><div id="fbBox"></div></div>
 <div id="vgal"><div id="vgHead"><span class="t">🗂 Galerie</span>
-  <div class="vgTabs"><button data-tab="vid" id="tabVid">🎬 Videos & Fotos</button><button data-tab="seq" id="tabSeq">✂ Sequenzen</button><button data-tab="dir" id="tabDir">📁 Ordner</button></div>
-  <button class="b" id="vgFiles">＋ Videos / Fotos</button><button class="b" id="vgDir">📂 Aus Dateien-App</button><button class="b" id="vgClose">Schließen</button></div>
+  <div class="vgTabs"><button data-tab="vid" id="tabVid">🎬 Videos & Fotos</button><button data-tab="seq" id="tabSeq">✂ Sequenzen</button><button data-tab="dir" id="tabDir">📁 Ordner</button><button data-tab="fav" id="tabFav">⭐ Favoriten</button></div>
+  <button class="b pri" id="vgSort">🧭 Einsortieren</button><button class="b" id="vgFiles">＋ Videos / Fotos</button><button class="b" id="vgDir">📂 Aus Dateien-App</button><button class="b" id="vgClose">Schließen</button></div>
   <div id="vgFilter"></div>
   <div id="vgSelBar"><b id="vgSelN"></b>
     <button class="b pri" id="vgSpread"></button><button class="b pri" id="vgJoin">🎞 Zu einer Sequenz zusammensetzen</button>
-    <select id="vgCat"></select><button class="b" id="vgCatNewBtn">＋ Ordner</button><button class="b" id="vgLibBtn">📁 In Ordner legen</button><button class="b" id="vgOut">Aus diesem Ordner nehmen</button>
+    <select id="vgCat"></select><button class="b" id="vgCatNewBtn">＋ Ordner</button><button class="b" id="vgLibBtn">📁 In Ordner legen</button><button class="b" id="vgOut">Aus diesem Ordner nehmen</button><button class="b" id="vgFavAdd">⭐ Vormerken</button><select id="vgFavDir"></select><button class="b" id="vgFavMv">⭐ In diese Liste</button><button class="b" id="vgFavRm">☆ Aus Favoriten</button>
     <button class="b" id="vgAll">☑ Alle</button><button class="b" id="vgNone">✕ Auswahl aufheben</button></div>
   <div id="vgCatRow"><b id="vgCatTitle"></b><input id="vgCatName" placeholder="Kategorie, z. B. Blowjob"><input id="vgCatSub" placeholder="Unterkategorie (optional)"><button class="b pri" id="vgCatOk">✔ Anlegen</button><button class="b" id="vgCatX">✕</button></div>
   <div id="vgSaveRow"></div>
@@ -856,6 +881,7 @@
 <button id="bToyStop" title="Alle Spielzeuge sofort aus">■ NOT-AUS</button>
 <div id="paywall"></div>
 <div id="cmdBar"></div>
+<div id="sorter" class="ov"></div>
 <div id="toast"></div>
 <div id="portrait">Für die beste Ansicht das Tablet quer halten</div>
 
@@ -1849,6 +1875,8 @@ function showResult(w, i, depth, fieldOverride) {
   return new Promise(async resolve => {
     let f = fieldOverride || w.fields[i]; const box = $('#rMedia');
     if (!f.media && f.vcat) { const m = vlibPick(f.vcat); if (m) f = Object.assign({}, f, {media:m}); }
+    if (!f.media && !f.vcat && w.vcat) { const m = vlibPick(w.vcat); if (m) f = Object.assign({}, f, {media:m}); }
+    if (!f.media && !f.vcat && f.qid && S.settings.tagVid !== false) { const L = S.gal.filter(g => g.tags && g.tags.includes(f.qid)); if (L.length) f = Object.assign({}, f, {media:{...pick(L).media}}); }
     box.innerHTML = '';
     $('#rNum').textContent = f.num !== '' ? f.num : '';
     $('#rTxt').textContent = f.text || (f.num === '' ? 'Feld ' + (i + 1) : '');
@@ -1867,6 +1895,8 @@ function showResult(w, i, depth, fieldOverride) {
     const hold = !!w.hold;   // z. B. Wahrheit oder Pflicht: groß stehen lassen, bis angetippt wird
     let left = hold ? 0 : f.kstep ? 1 : +S.settings.autoNext || 0, autoT = 0;
     if (f.kt) ktShow(f);
+    else if (f.steps) stepsShow(f);
+    { const g = f.media && galTags(f.media.id), el = $('#rVid'); el.textContent = g ? '🎬 ' + (g.desc || soDesc(g.tags)) : ''; el.classList.toggle('on', !!g); }
     const startCountdown = () => {
       if (!(target && left > 0)) return;
       const upd = () => { nx.innerHTML = label + '<br><small>(' + left + ')</small>'; };
@@ -2806,6 +2836,9 @@ function galList() {
     return out;
   }
   if (GAL.tab === 'vid') return S.gal.slice().reverse().map(g => ({k:'g:' + g.gid, it:g, type:g.media.type, mid:g.media.id, name:g.media.name, t0:0}));
+  if (GAL.tab === 'fav') return FAV().filter(x => !GAL.fdir || x.dir === GAL.fdir).map(x => { const it = galByKey(x.k); if (!it) return null;
+    if (x.k[0] === 'g') return {k:x.k, it, type:it.media.type, mid:it.media.id, name:it.media.name, t0:0, fd:x.dir};
+    const v = it.parts.find(p => p.type !== 'text'); return v ? {k:x.k, it, type:'video', mid:v.mid, name:it.name, t0:+v.start || 0, fd:x.dir} : null; }).filter(Boolean);
   const f = GAL.filt;
   return S.seqs.filter(q => !f || q.cat === f || q.cat.startsWith(f + '/')).slice().reverse()
     .map(q => { const v = q.parts.find(x => x.type !== 'text'); return {k:'s:' + q.id, it:q, type:'video', mid:v.mid, name:q.name, t0:+v.start || 0}; });
@@ -2832,8 +2865,9 @@ async function vgAdd(files, quiet) {
     S.gal.push(g); out.push(g); n++;
   }
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  importAdd(out.filter(g => list.some(f => f.name === g.media.name)));
   save();
-  if (!quiet) { GAL.tab = 'vid'; vgRender(); toast(`${n} in der Galerie gespeichert – antippen zum Bearbeiten, Kreis zum Auswählen`, 3500); }
+  if (!quiet) { GAL.tab = 'vid'; vgRender(); toast(`${n} gespeichert und in den Import-Ordner gelegt – mit „🧭 Einsortieren“ ordnest du sie Video für Video ein`, 5000); }
   return out;
 }
 // Medien ab einem Feld einsetzen (Rad: dieses und folgende Felder; Joker/Timer: nur das erste)
@@ -2860,27 +2894,194 @@ function galInsert(t, ms) {
 let vgObs = null;
 function vgRender() {
   const g = $('#vgGrid'), L = galList();
-  $('#tabVid').classList.toggle('on', GAL.tab === 'vid'); $('#tabSeq').classList.toggle('on', GAL.tab === 'seq'); $('#tabDir').classList.toggle('on', GAL.tab === 'dir');
+  $('#tabVid').classList.toggle('on', GAL.tab === 'vid'); $('#tabSeq').classList.toggle('on', GAL.tab === 'seq'); $('#tabDir').classList.toggle('on', GAL.tab === 'dir'); $('#tabFav').classList.toggle('on', GAL.tab === 'fav');
+  $('#tabFav').textContent = `⭐ Favoriten (${FAV().length})`; const ni = importList().length; $('#vgSort').textContent = ni ? `🧭 Einsortieren (${ni} neu)` : '🧭 Einsortieren';
   $('#tabVid').textContent = `🎬 Videos & Fotos (${S.gal.length})`; $('#tabSeq').textContent = `✂ Sequenzen (${S.seqs.length})`; $('#tabDir').textContent = `📁 Ordner (${vcats().length})`;
   if (GAL.tab === 'dir') { dirRender(g, L); return; }
   $('#vgFilter').innerHTML = GAL.tab !== 'seq' ? '' : [['', 'Alle']].concat(seqCats().flatMap(c => [[c.name, c.name]].concat(c.subs.map(sb => [c.name + '/' + sb, '› ' + sb]))))
     .map(([v, l]) => `<button class="chip ${GAL.filt === v ? 'on' : ''}" data-filt="${esc(v)}">${esc(l)}</button>`).join('') + `<button class="chip" data-act="scNew">＋ Kategorie</button>`;
-  $('#vgFilter').style.display = GAL.tab === 'seq' ? '' : 'none';
+  $('#vgFilter').style.display = GAL.tab === 'seq' || GAL.tab === 'fav' ? '' : 'none';
+  if (GAL.tab === 'fav') $('#vgFilter').innerHTML = [['', 'Alle']].concat(FAVD().map(d => [d, d])).map(([v, l]) => `<button class="chip ${(GAL.fdir || '') === v ? 'on' : ''}" data-fdir="${esc(v)}">${v ? '⭐ ' : ''}${esc(l)} ${v ? '(' + FAV().filter(x => x.dir === v).length + ')' : ''}</button>`).join('') + `<button class="chip" data-act="favNew">＋ Liste</button>`;
   $('#vgInfo').textContent = GAL.tab === 'vid'
     ? (S.gal.length ? 'Antippen = groß ansehen und bearbeiten · Kreis oben links = auswählen (mehrere möglich) · alles bleibt dauerhaft gespeichert' : '')
+    : GAL.tab === 'fav' ? (FAV().length ? 'Vorgemerkte Videos in eigenen Listen. Kreis = auswählen, dann „⭐ In diese Liste“ zum Umsortieren.' : '')
     : (S.seqs.length ? 'Sequenzen sind gespeicherte Ausschnitte. Mehrere auswählen = zu einer neuen Sequenz zusammensetzen.' : '');
   g.innerHTML = L.length ? L.map(x => `<div class="vgc ${GAL.sel.includes(x.k) ? 'sel' : ''} ${GAL.ed === x.k ? 'on' : ''}" data-k="${x.k}">
       ${x.type === 'video' ? `<video data-mid="${x.mid}" data-t0="${x.t0}" muted playsinline preload="none"></video>` : `<img data-mid="${x.mid}" alt="">`}
       <b class="dur">${x.k[0] === 's' ? (x.it.parts.length > 1 ? x.it.parts.length + ' Teile · ' : '') + mmss(seqLen(x.it)) : ''}</b>
-      <b class="ck" data-ck="${x.k}">${GAL.sel.includes(x.k) ? GAL.sel.indexOf(x.k) + 1 : ''}</b>
-      <div class="vi"><span>${esc(x.name)}</span>${x.k[0] === 's' ? `<small>${esc(x.it.cat.replace('/', ' › '))}</small>` : ''}</div></div>`).join('')
-    : `<div id="vgEmpty">${GAL.tab === 'vid' ? 'Noch nichts in der Galerie.<br>Mit „＋ Videos / Fotos“ oder „📁 Ordner“ hinzufügen – alles wird dauerhaft gespeichert.' : 'Noch keine Sequenzen.<br>Video antippen, Anfang und Ende einstellen, „✂ Als Sequenz speichern“.'}</div>`;
+      <b class="ck" data-ck="${x.k}">${GAL.sel.includes(x.k) ? GAL.sel.indexOf(x.k) + 1 : ''}</b>${starH(x)}
+      <div class="vi"><span>${esc(x.name)}</span>${x.k[0] === 's' ? `<small>${esc(x.it.cat.replace('/', ' › '))}</small>` : x.fd ? `<small>⭐ ${esc(x.fd)}</small>` : ''}</div></div>`).join('')
+    : `<div id="vgEmpty">${GAL.tab === 'fav' ? 'Noch nichts vorgemerkt.<br>Bei jedem Video oben rechts auf ☆ tippen.' : GAL.tab === 'vid' ? 'Noch nichts in der Galerie.<br>Mit „＋ Videos / Fotos“ oder „📁 Ordner“ hinzufügen – alles wird dauerhaft gespeichert.' : 'Noch keine Sequenzen.<br>Video antippen, Anfang und Ende einstellen, „✂ Als Sequenz speichern“.'}</div>`;
   if (vgObs) vgObs.disconnect();
   vgObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { vgObs.unobserve(e.target); vgThumb(e.target); } }), {root:g, rootMargin:'200px'}) : null;
   g.querySelectorAll('[data-mid]').forEach(v => vgObs ? vgObs.observe(v) : vgThumb(v));
   vgBar();
 }
+/* ---------- Favoriten: ☆ vormerken, eigene Listen ---------- */
+const FAV = () => (S.fav = Array.isArray(S.fav) ? S.fav : []);
+const FAVD = () => (S.favDirs = Array.isArray(S.favDirs) && S.favDirs.length ? S.favDirs : ['Lieblinge', 'Aufgaben']);
+const isFav = k => FAV().some(x => x.k === k);
+function favAdd(k, dir) { const L = FAV(); const e = L.find(x => x.k === k); if (e) { if (dir) e.dir = dir; } else L.unshift({k, dir:dir || GAL.fdir || FAVD()[0], at:Date.now()}); if (dir && !FAVD().includes(dir)) FAVD().push(dir); save(); }
+function favToggle(k) { const L = FAV(), i = L.findIndex(x => x.k === k); if (i >= 0) { L.splice(i, 1); save(); return false; } favAdd(k); return true; }
+const galTags = mid => { const g = S.gal.find(x => x.media.id === mid); return g && g.tags && g.tags.length ? g : null; };
+const tagLabel = id => { const it = itemById(id); return it ? it.l : id; };
+/* ---------- Import-Ordner: alles Neue landet zuerst hier, das Einsortier-Tool ordnet es ein ---------- */
+const IMPORT = 'Import';
+function importAdd(gs) {
+  if (!gs || !gs.length) return; vcatAdd(IMPORT);
+  gs.forEach(g => { if (!S.vlib.some(x => x.cat === IMPORT && x.media.id === g.media.id)) S.vlib.push({cat:IMPORT, media:{...g.media}}); });
+  save();
+}
+const importList = () => [...new Map(S.vlib.filter(x => x.cat === IMPORT).map(x => [x.media.id, x])).values()].map(x => S.gal.find(g => g.media.id === x.media.id)).filter(Boolean);
+const unsorted = () => S.gal.filter(g => !S.vlib.some(x => x.media.id === g.media.id && x.cat !== IMPORT));
+/* ---------- Ordner verschieben: ziehen oder „↪ Verschieben“ ---------- */
+function dirMove(src, dst) {
+  dst = dst || ''; const L = vcats(), [st, ss] = src.split('/'), name = ss || st;
+  if (!src || src === dst || (!ss && (dst === st || !dst)) || (ss && dst === st)) { toast('Liegt schon dort'); return; }
+  if (!ss) { const c = L.find(x => x.name === st); if (c && c.subs.length) toast(`Unterordner von „${st}“ werden in „${dst} › ${st}“ zusammengefasst`, 4500); }
+  const to = dst ? catAdd(L, dst, name) : catAdd(L, name);
+  const ren = c => (c === src || c.startsWith(src + '/')) ? to : c;
+  S.vlib.forEach(x => { x.cat = ren(x.cat); });
+  const seen = new Set(); S.vlib = S.vlib.filter(x => { const k = x.cat + '|' + x.media.id + '|' + (x.media.start || 0); if (seen.has(k)) return false; seen.add(k); return true; });
+  S.wheels.forEach(w => { if (w.vcat) w.vcat = ren(w.vcat); w.fields.forEach(f => { if (f.vcat && !f.vcat.startsWith('seq:')) f.vcat = ren(f.vcat); }); });
+  if (ss) { const c = L.find(x => x.name === st); if (c) c.subs = c.subs.filter(x => x !== ss); }
+  else S.vcats = L.filter(x => x.name !== st);
+  GAL.dir = dst || ''; save(); vgRender(); toast(`„${name}“ liegt jetzt in ${dst ? '„' + dst + '“' : 'der obersten Ebene'}`, 3000);
+}
+const DRAG = {t:0, src:null, on:false, ghost:null, swallow:0};
+$('#vgGrid').addEventListener('pointerdown', e => {
+  const f = e.target.closest('.vgf'); if (!f || GAL.tab !== 'dir') return;
+  DRAG.src = f.dataset.dir; DRAG.x = e.clientX; DRAG.y = e.clientY;
+  clearTimeout(DRAG.t); DRAG.t = setTimeout(() => { DRAG.on = true; f.classList.add('drag'); if (navigator.vibrate) try { navigator.vibrate(30); } catch (e2) {}
+    const g = DRAG.ghost = document.createElement('div'); g.id = 'dirGhost'; g.textContent = '📁 ' + DRAG.src.replace('/', ' › '); document.body.appendChild(g);
+    g.style.left = DRAG.x + 'px'; g.style.top = DRAG.y + 'px'; }, 380);
+});
+addEventListener('pointermove', e => {
+  if (!DRAG.src) return;
+  if (!DRAG.on) { if (Math.hypot(e.clientX - DRAG.x, e.clientY - DRAG.y) > 12) { clearTimeout(DRAG.t); DRAG.src = null; } return; }
+  e.preventDefault(); DRAG.ghost.style.left = e.clientX + 'px'; DRAG.ghost.style.top = e.clientY + 'px';
+  document.querySelectorAll('.dropOn').forEach(x => x.classList.remove('dropOn'));
+  const t = document.elementFromPoint(e.clientX, e.clientY), tg = t && (t.closest('.vgf') || t.closest('#vgFilter .chip[data-dir]'));
+  if (tg && tg.dataset.dir !== DRAG.src) tg.classList.add('dropOn');
+}, {passive:false});
+addEventListener('pointerup', e => {
+  clearTimeout(DRAG.t); if (!DRAG.src) return;
+  const was = DRAG.on, src = DRAG.src; DRAG.src = null; DRAG.on = false;
+  if (DRAG.ghost) { DRAG.ghost.remove(); DRAG.ghost = null; }
+  document.querySelectorAll('.vgf.drag').forEach(x => x.classList.remove('drag'));
+  const tg = document.querySelector('.dropOn'); document.querySelectorAll('.dropOn').forEach(x => x.classList.remove('dropOn'));
+  if (!was) return; DRAG.swallow = Date.now();
+  if (tg) dirMove(src, tg.dataset.dir.split('/')[0]);
+});
+/* ---------- Ordner → Rad: Unterordner werden Felder (Zufallsvideo daraus), sonst die Videos selbst ---------- */
+const cleanName = n => String(n || '').replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim().slice(0, 40);
+function dirWheel(d) {
+  const C = vcats(), [top, sub] = d.split('/'), c = C.find(x => x.name === top);
+  let fields = !sub && c && c.subs.filter(sb => dirCount(top + '/' + sb)).length >= 2
+    ? c.subs.filter(sb => dirCount(top + '/' + sb)).slice(0, MAX_FIELDS).map(sb => Object.assign(newField(sb), {vcat:top + '/' + sb})) : null;
+  if (!fields) { const ms = [...new Map(S.vlib.filter(x => x.cat === d || x.cat.startsWith(d + '/')).map(x => [x.media.id, x.media])).values()].slice(0, MAX_FIELDS);
+    fields = ms.map(m => Object.assign(newField(cleanName(m.name)), {media:{...m}})); }
+  if (fields.length < 2) { toast('Für ein Rad braucht der Ordner mindestens 2 Videos oder 2 Unterordner mit Videos', 4500); return; }
+  let wi = S.wheels.findIndex(w => !w.enabled); if (wi < 0) wi = S.active;
+  Object.assign(S.wheels[wi], {title:(sub || top).slice(0, 30), fields, enabled:true, vcat:d, history:[]});
+  S.active = wi; save(); vgClose(); render(); renderPanel(); updateRail();
+  toast(`🎡 Rad „${sub || top}“: ${fields.length} Felder, jedes spielt ein Video aus dem Ordner`, 4500);
+}
+/* ---------- Einsortieren: Video für Video ansehen, Praktiken antippen → landet im passenden Ordner ---------- */
+const SO = {q:[], i:0, tags:[], dirs:[], done:0, v:null};
+const SO_CATS = () => QUIZ.filter(c => c.id !== 'ort');
+const soTok = n => String(n || '').toLowerCase().replace(/\.[^.]+$/, '').split(/[^a-zäöüß0-9]+/).filter(t => t.length >= 3 && !/^\d+$/.test(t));
+function soSuggest(g) {
+  const L = S.sortL = S.sortL || {}, sc = {};
+  soTok(g.media.name).forEach(t => Object.entries(L[t] || {}).forEach(([q, n]) => { sc[q] = (sc[q] || 0) + n; }));
+  // Wortgleichheit mit Praktiken (z. B. „blowjob“ im Dateinamen)
+  const toks = soTok(g.media.name).join(' ');
+  SO_CATS().forEach(c => quizItems(c).forEach(it => { const w = it.l.toLowerCase().split(/[^a-zäöüß]+/).filter(x => x.length >= 5);
+    if (w.some(x => toks.includes(x))) sc[it.id] = (sc[it.id] || 0) + 1; }));
+  return Object.entries(sc).sort((a, b) => b[1] - a[1]).filter(x => x[1] >= 1).slice(0, 6).map(x => x[0]);
+}
+const soFolder = id => { const c = QUIZ.find(q => q.id === id.split('.')[0]), it = itemById(id); return c && it ? [c.name.replace(/\//g, '-'), it.l.replace(/\//g, '-')] : null; };
+function soDesc(tags) {
+  if (!tags.length) return '';
+  const lv = Math.max(...tags.map(t => itemLvl(t) || 1)), cats = [...new Set(tags.map(t => (QUIZ.find(q => q.id === t.split('.')[0]) || {}).name).filter(Boolean))];
+  return `Im Video: ${tags.map(tagLabel).join(', ')}. Stufe: ${STUFEN[clamp(lv, 1, 4)]}. Passt als Aufgabe zu ${cats.join(', ')} – genau so nachmachen.`;
+}
+function soOpen(all) {
+  const q = importList(); SO.q = q.length && !all ? q : unsorted().filter(g => g.media.type === 'video');
+  SO.i = 0; SO.done = 0; SO.all = !q.length || all;
+  if (!SO.q.length) { toast('Nichts einzusortieren – alle Videos liegen schon in Ordnern', 4000); return; }
+  vgClose(); $('#menu').classList.remove('show'); closeHome(); $('#sorter').classList.add('show'); soRender();
+}
+function soClose() { if (SO.v) { SO.v.pause(); SO.v.removeAttribute('src'); SO.v.load(); SO.v = null; } $('#sorter').classList.remove('show'); save(); }
+async function soFrames(u, box) {
+  try { const v = document.createElement('video'); v.muted = true; v.preload = 'auto'; v.src = u; v.playsInline = true;
+    await new Promise((r, j) => { v.onloadedmetadata = r; v.onerror = j; setTimeout(j, 8000); });
+    const d = v.duration || 0, cv = document.createElement('canvas'); cv.width = 240; cv.height = 150; const cx = cv.getContext('2d');
+    for (const p of [0.12, 0.37, 0.62, 0.87]) { if (!$('#sorter').classList.contains('show') || box.dataset.u !== u) return;
+      v.currentTime = d * p; await new Promise(r => { v.onseeked = r; setTimeout(r, 3000); });
+      cx.drawImage(v, 0, 0, 240, 150); const im = new Image(); im.src = cv.toDataURL('image/jpeg', 0.7); im.dataset.t = (d * p).toFixed(1); box.appendChild(im); }
+    v.removeAttribute('src'); v.load();
+  } catch (e) { box.innerHTML = '<small style="color:#9c8a6c">Vorschaubilder gehen bei diesem Video nicht</small>'; }
+}
+async function soRender() {
+  const X = $('#sorter'), g = SO.q[SO.i];
+  if (!g) { X.innerHTML = `<button class="ovx" data-so="x">✕</button><div class="ovin"><h2 class="hTitle" style="font-size:44px">🧭 Fertig</h2>
+    <p class="hMotto">${SO.done} von ${SO.q.length} Videos eingeordnet. ${importList().length ? importList().length + ' liegen noch im Import-Ordner.' : 'Der Import-Ordner ist leer.'}</p>
+    <div class="soBtns"><button class="hbtn hGo" data-so="gal">🗂 Zur Galerie</button><button class="hbtn" data-so="x">Schließen</button></div></div>`; return; }
+  const sug = soSuggest(g); SO.tags = (g.tags || []).slice(); SO.dirs = []; SO.sug = sug;
+  const allDirs = vcats().map(c => c.name).filter(n => n !== IMPORT);
+  const chip = it => `<button class="${SO.tags.includes(it.id) ? 'on' : ''} ${sug.includes(it.id) ? 'sug' : ''}" data-tag="${esc(it.id)}">${esc(it.l)}</button>`;
+  const auto = SO.q.slice(SO.i).filter(x => soSuggest(x).length).length;
+  X.innerHTML = `<button class="ovx" data-so="x">✕</button><div class="ovin">
+    <h2 class="hTitle" style="font-size:40px">🧭 Einsortieren · ${SO.i + 1} von ${SO.q.length}</h2>
+    <p class="hMotto">Video ansehen, antippen was passiert – es landet automatisch im passenden Ordner (z. B. „Vorspiel › Blasen“). Die App lernt mit und schlägt beim nächsten Mal selbst vor (gelb umrandet).</p>
+    <div class="soGrid"><div><div class="soVid" id="soVid"></div><div class="soFr" id="soFr"></div>
+      <div class="edLab" style="margin-top:10px">${esc(g.media.name)}</div>
+      <div class="soCat">Auswertung (wird zum Video gespeichert)</div><textarea id="soDesc" placeholder="Wird aus den angetippten Praktiken geschrieben – du kannst es ändern">${esc(g.desc || soDesc(SO.tags))}</textarea></div>
+    <div><div class="soPick">${sug.length ? `<div class="soCat">⭐ Vorschlag</div><div class="soChips">${sug.map(id => itemById(id)).filter(Boolean).map(chip).join('')}</div>` : ''}
+      ${SO_CATS().map(c => `<div class="soCat">${esc(c.name)}</div><div class="soChips">${quizItems(c).filter(it => textOk(it.l)).map(chip).join('')}</div>`).join('')}
+      <div class="soCat">Zusätzlich in Ordner</div><div class="soChips">${allDirs.map(n => `<button data-dir2="${esc(n)}">📁 ${esc(n)}</button>`).join('') || '<small>Noch keine eigenen Ordner</small>'}</div></div>
+      <div class="soBtns"><button class="hbtn hGo" data-so="ok">✔ Einordnen & weiter</button><button class="hbtn" data-so="fav">${isFav('g:' + g.gid) ? '★ Vorgemerkt' : '☆ Vormerken'}</button>
+        <button class="hbtn" data-so="skip">⏭ Überspringen</button>${auto >= 2 ? `<button class="hbtn" data-so="auto">⚡ ${auto} mit Vorschlag automatisch einordnen</button>` : ''}</div></div></div></div>`;
+  const u = await mediaURL(g.media.id); if (!u || SO.q[SO.i] !== g) return;
+  if (g.media.type === 'image') { $('#soVid').innerHTML = `<img src="${u}" alt="">`; return; }
+  const v = SO.v = document.createElement('video'); v.src = u; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.controls = true; v.setAttribute('playsinline', '');
+  $('#soVid').appendChild(v); v.play().catch(() => {});
+  const fr = $('#soFr'); fr.dataset.u = u; soFrames(u, fr);
+}
+function soApply(g, tags, dirs, desc) {
+  g.tags = tags.slice(); g.desc = desc || soDesc(tags);
+  S.vlib = S.vlib.filter(x => !(x.cat === IMPORT && x.media.id === g.media.id));
+  const put = cat => { if (!S.vlib.some(x => x.cat === cat && x.media.id === g.media.id)) S.vlib.push({cat, media:{...g.media}}); };
+  tags.forEach(t => { const f = soFolder(t); if (f) put(vcatAdd(f[0], f[1])); });
+  dirs.forEach(put);
+  const L = S.sortL = S.sortL || {};
+  soTok(g.media.name).forEach(tk => tags.forEach(t => { L[tk] = L[tk] || {}; L[tk][t] = Math.min(50, (L[tk][t] || 0) + 1); }));
+}
+$('#sorter').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) { const im = e.target.closest('#soFr img'); if (im && SO.v) { SO.v.currentTime = +im.dataset.t; SO.v.play().catch(() => {}); } return; }
+  const g = SO.q[SO.i], d = b.dataset;
+  if (d.tag) { const i = SO.tags.indexOf(d.tag); i >= 0 ? SO.tags.splice(i, 1) : SO.tags.push(d.tag);
+    document.querySelectorAll(`#sorter [data-tag="${CSS.escape(d.tag)}"]`).forEach(x => x.classList.toggle('on', SO.tags.includes(d.tag)));
+    const ta = $('#soDesc'); if (ta && (!ta.dataset.man)) ta.value = soDesc(SO.tags); return; }
+  if (d.dir2) { const i = SO.dirs.indexOf(d.dir2); i >= 0 ? SO.dirs.splice(i, 1) : SO.dirs.push(d.dir2); b.classList.toggle('on', SO.dirs.includes(d.dir2)); return; }
+  const next = () => { if (SO.v) { SO.v.pause(); SO.v = null; } SO.i++; save(); soRender(); };
+  switch (d.so) {
+    case 'x': soClose(); break;
+    case 'gal': soClose(); GAL.tab = 'dir'; GAL.dir = ''; vgOpen(null); break;
+    case 'fav': favToggle('g:' + g.gid); b.textContent = isFav('g:' + g.gid) ? '★ Vorgemerkt' : '☆ Vormerken'; break;
+    case 'skip': next(); break;
+    case 'ok': if (!SO.tags.length && !SO.dirs.length) { toast('Erst antippen, was im Video passiert – oder ⏭ Überspringen'); return; }
+      soApply(g, SO.tags, SO.dirs, $('#soDesc').value.trim()); SO.done++; toast(`✔ Eingeordnet: ${SO.tags.map(tagLabel).concat(SO.dirs).join(', ')}`, 2500); next(); break;
+    case 'auto': { let n = 0; for (let j = SO.i; j < SO.q.length; j++) { const x = SO.q[j], sg = soSuggest(x); if (sg.length) { soApply(x, sg.slice(0, 3), [], ''); n++; } }
+      SO.done += n; SO.i = SO.q.length; save(); toast(`⚡ ${n} Videos nach Vorschlag eingeordnet – in der Galerie kannst du jedes noch ändern`, 5000); soRender(); break; }
+  }
+});
+$('#sorter').addEventListener('input', e => { if (e.target.id === 'soDesc') e.target.dataset.man = 1; });
+$('#vgSort').onclick = () => soOpen(false);
 /* ---------- Ordner-Ansicht: eigene Ordner und Unterordner, Zufall daraus ---------- */
+const starH = x => { const g = x.k[0] === 'g' && x.it.tags && x.it.tags.length ? x.it : null;
+  return `<b class="st ${isFav(x.k) ? 'on' : ''}" data-st="${x.k}">${isFav(x.k) ? '★' : '☆'}</b>${g ? `<b class="tg">${esc(g.tags.map(tagLabel).join(' · '))}</b>` : ''}`; };
 const dirCount = path => new Set(S.vlib.filter(x => x.cat === path || x.cat.startsWith(path + '/')).map(x => x.media.id)).size;
 function dirRender(g, L) {
   const d = GAL.dir, top = d.split('/')[0], C = vcats(), c = C.find(x => x.name === top);
@@ -2892,25 +3093,38 @@ function dirRender(g, L) {
     (d.includes('/') ? `<button class="chip on" data-dir="${esc(d)}">› ${esc(d.split('/')[1])}</button>` : '') +
     (d.includes('/') ? '' : `<button class="chip" data-act="dirNew">＋ ${d ? 'Unterordner' : 'Ordner'}</button>`) +
     (d && dirCount(d) ? `<button class="chip" data-act="dirRnd">🎲 Zufall testen</button>` : '') +
+    (d === IMPORT && dirCount(d) ? `<button class="chip" data-act="dirSort">🧭 Alle einsortieren</button>` : '') +
+    (d && dirCount(d) ? `<button class="chip" data-act="dirWheel">🎡 Rad daraus machen</button><button class="chip" data-act="dirCouple">🔗 Ans aktuelle Rad koppeln</button>` : '') +
+    (d && d !== IMPORT ? `<button class="chip" data-act="dirMv">↪ Verschieben</button>` : '') +
     (d ? `<button class="chip" data-act="dirDel">🗑 Ordner löschen</button>` : '');
-  $('#vgInfo').textContent = !d ? 'Eigene Ordner und Unterordner. Ein Feld mit „🎲 zufällig aus Ordner“ spielt per Zufall ein Video daraus. Videos legst du unter „🎬 Videos & Fotos“ mit dem Kreis auswählen → „📁 In Ordner legen“.'
+  $('#vgInfo').textContent = !d ? 'Ordner lange drücken und auf einen anderen ziehen = hineinverschieben (auf „📁 Alle Ordner“ = nach oben). Eigene Ordner und Unterordner. Ein Feld mit „🎲 zufällig aus Ordner“ spielt per Zufall ein Video daraus. Videos legst du unter „🎬 Videos & Fotos“ mit dem Kreis auswählen → „📁 In Ordner legen“.'
     : `${dirCount(d)} Videos in „${d.replace('/', ' › ')}“${tiles.length ? ' (mit Unterordnern)' : ''} · Antippen = bearbeiten · Kreis = auswählen`;
   g.innerHTML = tiles.map(t => `<div class="vgf" data-dir="${esc(t.path)}"><span>📁</span><b>${esc(t.name)}</b><small>${dirCount(t.path)} Videos${t.sub ? ' · ' + t.sub + ' Unterordner' : ''}</small></div>`).join('') +
     L.map(x => `<div class="vgc ${GAL.sel.includes(x.k) ? 'sel' : ''} ${GAL.ed === x.k ? 'on' : ''}" data-k="${x.k}">
       ${x.type === 'video' ? `<video data-mid="${x.mid}" data-t0="${x.t0}" muted playsinline preload="none"></video>` : `<img data-mid="${x.mid}" alt="">`}<b class="dur"></b>
-      <b class="ck" data-ck="${x.k}">${GAL.sel.includes(x.k) ? GAL.sel.indexOf(x.k) + 1 : ''}</b><div class="vi"><span>${esc(x.name)}</span></div></div>`).join('') +
+      <b class="ck" data-ck="${x.k}">${GAL.sel.includes(x.k) ? GAL.sel.indexOf(x.k) + 1 : ''}</b>${starH(x)}<div class="vi"><span>${esc(x.name)}</span></div></div>`).join('') +
     (!tiles.length && !L.length ? `<div id="vgEmpty">${d ? 'Dieser Ordner ist noch leer.<br>Unter „🎬 Videos & Fotos“ Videos mit dem Kreis auswählen und „📁 In Ordner legen“.' : 'Noch keine Ordner.<br>Mit „＋ Ordner“ oben anlegen.'}</div>` : '');
   if (vgObs) vgObs.disconnect();
   vgObs = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { vgObs.unobserve(e.target); vgThumb(e.target); } }), {root:g, rootMargin:'200px'}) : null;
   g.querySelectorAll('[data-mid]').forEach(v => vgObs ? vgObs.observe(v) : vgThumb(v));
   vgBar();
 }
-$('#vgGrid').addEventListener('click', e => { const f = e.target.closest('.vgf'); if (f) { GAL.dir = f.dataset.dir; GAL.sel = []; edClose(); vgRender(); } }, true);
+$('#vgGrid').addEventListener('click', e => { const st = e.target.closest('[data-st]');
+  if (st) { e.stopImmediatePropagation(); const on = favToggle(st.dataset.st); st.classList.toggle('on', on); st.textContent = on ? '★' : '☆'; toast(on ? '⭐ Vorgemerkt in „' + (FAV().find(x => x.k === st.dataset.st) || {}).dir + '“' : '☆ Aus den Favoriten genommen', 2200); if (GAL.tab === 'fav') vgRender(); else $('#tabFav').textContent = `⭐ Favoriten (${FAV().length})`; return; }
+  if (Date.now() - DRAG.swallow < 400) { e.stopImmediatePropagation(); return; }
+  const f = e.target.closest('.vgf'); if (f) { GAL.dir = f.dataset.dir; GAL.sel = []; edClose(); vgRender(); } }, true);
 $('#vgFilter').addEventListener('click', e => {
   if (GAL.tab !== 'dir') return;
   const b = e.target.closest('button'); if (!b) return; e.stopImmediatePropagation();
   const a = b.dataset.act;
   if (a === 'dirNew') { catRow('vid'); return; }
+  if (a === 'dirSort') { soOpen(false); return; }
+  if (a === 'dirWheel') { dirWheel(GAL.dir); return; }
+  if (a === 'dirCouple') { const w = S.wheels[S.active]; w.vcat = GAL.dir; save(); toast(`🔗 „${w.title || 'Rad'}“: jedes Feld ohne eigenes Video spielt jetzt zufällig eins aus „${GAL.dir.replace('/', ' › ')}“`, 5000); return; }
+  if (a === 'dirMv') { const src = GAL.dir, top = src.split('/')[0], opts = vcats().map(c => c.name).filter(n => n !== top && n !== IMPORT);
+    const row = $('#vgSaveRow'); row.style.display = 'block';
+    row.innerHTML = `<div class="edRow"><b>„${esc(src.replace('/', ' › '))}“ verschieben nach</b><select id="mvTo">${src.includes('/') ? '<option value="">📁 Oberste Ebene</option>' : ''}${opts.map(n => `<option value="${esc(n)}">📁 ${esc(n)}</option>`).join('')}</select><button class="b pri" id="mvOk">↪ Verschieben</button><button class="b" id="mvX">✕</button></div>`;
+    $('#mvX').onclick = () => { row.innerHTML = ''; }; $('#mvOk').onclick = () => { const t = $('#mvTo').value; row.innerHTML = ''; dirMove(src, t); }; return; }
   if (a === 'dirRnd') { const m = vlibPick(GAL.dir), gi = m && S.gal.find(x => x.media.id === m.id); if (gi) edOpen('g:' + gi.gid); return; }
   if (a === 'dirDel') {
     const n = dirCount(GAL.dir);
@@ -2944,6 +3158,9 @@ function vgBar() {
   $('#vgSpread').textContent = tw ? `In Feld ${tw.f + 1}${n > 1 ? ' und folgende' : ''} einfügen` : GAL.target ? 'Übernehmen' : `Auf Felder von „${S.wheels[S.active].title || 'Rad ' + (S.active + 1)}“ verteilen`;
   $('#vgJoin').style.display = GAL.tab === 'seq' && n >= 2 ? '' : 'none';
   $('#vgOut').style.display = GAL.tab === 'dir' && GAL.dir ? '' : 'none';
+  $('#vgFavAdd').style.display = GAL.tab !== 'fav' ? '' : 'none';
+  ['#vgFavMv', '#vgFavRm', '#vgFavDir'].forEach(q => { $(q).style.display = GAL.tab === 'fav' ? '' : 'none'; });
+  $('#vgFavDir').innerHTML = FAVD().map(d => `<option ${d === GAL.fdir ? 'selected' : ''}>${esc(d)}</option>`).join('');
   const sel = $('#vgCat'), keep = sel.value; sel.innerHTML = vcatOpts('', true, true); if (keep) sel.value = keep;
 }
 $('#vgGrid').addEventListener('click', e => {
@@ -2956,12 +3173,19 @@ function vgToggle(k) {
   $('#vgGrid').querySelectorAll('.vgc').forEach(c => { const j = GAL.sel.indexOf(c.dataset.k); c.classList.toggle('sel', j >= 0); c.querySelector('.ck').textContent = j >= 0 ? j + 1 : ''; });
   vgBar(); if (GAL.ed === k) edSelUi();
 }
-$('#vgHead').addEventListener('click', e => { const t = e.target.closest('[data-tab]'); if (!t) return; GAL.tab = t.dataset.tab; GAL.sel = []; GAL.dir = ''; edClose(); vgRender(); });
+$('#vgHead').addEventListener('click', e => { const t = e.target.closest('[data-tab]'); if (!t) return; GAL.tab = t.dataset.tab; GAL.sel = []; GAL.dir = ''; GAL.fdir = ''; edClose(); vgRender(); });
 $('#vgFilter').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.act === 'scNew') { catRow('seq'); return; }
+  if (b.dataset.act === 'favNew') { const row = $('#vgSaveRow'); row.style.display = 'block';
+    row.innerHTML = `<div class="edRow"><input id="fdName" placeholder="Name der Liste, z. B. Heute Abend"><button class="b pri" id="fdOk">✔ Anlegen</button><button class="b" id="fdX">✕</button></div>`;
+    $('#fdX').onclick = () => { row.innerHTML = ''; }; $('#fdOk').onclick = () => { const n = $('#fdName').value.trim(); if (!n) return; if (!FAVD().includes(n)) FAVD().push(n); GAL.fdir = n; row.innerHTML = ''; save(); vgRender(); }; return; }
+  if (b.dataset.fdir != null) { GAL.fdir = b.dataset.fdir; vgRender(); return; }
   GAL.filt = b.dataset.filt; vgRender();
 });
+$('#vgFavAdd').onclick = () => { GAL.sel.forEach(k => favAdd(k)); toast(`⭐ ${GAL.sel.length} vorgemerkt`, 2500); GAL.sel = []; vgRender(); };
+$('#vgFavMv').onclick = () => { const d = $('#vgFavDir').value; GAL.sel.forEach(k => favAdd(k, d)); toast(`⭐ ${GAL.sel.length} in „${d}“`, 2500); GAL.sel = []; vgRender(); };
+$('#vgFavRm').onclick = () => { S.fav = FAV().filter(x => !GAL.sel.includes(x.k)); GAL.sel = []; save(); vgRender(); };
 $('#vgAll').onclick = () => { const L = galList().map(x => x.k); GAL.sel = GAL.sel.length === L.length ? [] : L; vgRender(); };
 $('#vgNone').onclick = () => { GAL.sel = []; vgRender(); };
 
@@ -3042,7 +3266,8 @@ function edOpen(k) {
     <div class="edActs">
       <button class="b" id="edSel"></button>
       ${tw ? `<button class="b pri" id="edTake">✔ ${type === 'video' && !multi ? 'Bereich ' : ''}${tgtTxt} übernehmen</button>` : ''}
-      ${type === 'video' && !multi ? `<button class="b pri" id="edSeq">✂ ${isSeq ? 'Als neue Sequenz' : 'Bereich als Sequenz'} speichern</button>` : ''}
+      ${type === 'video' && !multi ? `<button class="b pri" id="edSeq">✂ ${isSeq ? 'Als neue Sequenz' : 'Bereich als Sequenz'} speichern</button><button class="b pri" id="edQuick">⭐ Bereich speichern → „Aufgaben“</button>` : ''}
+      <button class="b" id="edFav">${isFav(k) ? '★ Vorgemerkt' : '☆ Vormerken'}</button>
       ${isSeq && !multi ? '<button class="b" id="edUpd">💾 Bereich dieser Sequenz ändern</button>' : ''}
       ${isSeq ? `<label class="edCat">Kategorie <select id="edCat">${seqCatOpts(it.cat)}</select></label><button class="b" id="edDel">🗑 Sequenz löschen</button>` : ''}
     </div>
@@ -3052,6 +3277,12 @@ function edOpen(k) {
   $('#edX').onclick = () => edClose();
   $('#edSel').onclick = () => vgToggle(k);
   if ($('#edTake')) $('#edTake').onclick = edTake;
+  $('#edFav').onclick = () => { const on = favToggle(k); $('#edFav').textContent = on ? '★ Vorgemerkt' : '☆ Vormerken'; };
+  if ($('#edQuick')) $('#edQuick').onclick = () => {   // Ausschnitt nach Schieberegler sofort speichern und in die Favoritenliste „Aufgaben“
+    if (!S.seqCats.some(c => c.name === 'Aufgaben')) S.seqCats.push({name:'Aufgaben', subs:[]});
+    const q = {id:'q' + uid(), name:(isSeq ? it.name : name.replace(/\.[^.]+$/, '')) + ' ' + mmss(ED.A) + '–' + mmss(ED.B), cat:'Aufgaben', added:Date.now(),
+      parts:[{mid:ED.mid, type:'video', mime:ED.mime, name:ED.srcName, start:+ED.A.toFixed(2), end:+ED.B.toFixed(2)}]};
+    S.seqs.push(q); favAdd('s:' + q.id, 'Aufgaben'); save(); vgRender(); toast(`⭐ Ausschnitt ${mmss(ED.A)}–${mmss(ED.B)} gespeichert und in „Aufgaben“ vorgemerkt`, 3500); };
   if ($('#edSeq')) $('#edSeq').onclick = () => seqSaveDlg(isSeq ? it.name + ' (Teil)' : name.replace(/\.[^.]+$/, ''), isSeq ? it.cat : (GAL.filt || (seqCats()[0] && seqCats()[0].name) || ''),
       () => ({parts:[{mid:ED.mid, type:'video', mime:ED.mime, name:ED.srcName, start:+ED.A.toFixed(2), end:+ED.B.toFixed(2)}]}), 'gespeichert');
   if ($('#edUpd')) $('#edUpd').onclick = () => { Object.assign(it.parts[0], {start:+ED.A.toFixed(2), end:+ED.B.toFixed(2)}); save(); vgRender(); edOpen(k); toast('Bereich der Sequenz geändert'); };
@@ -3170,7 +3401,8 @@ function seqSaveDlg(name, cat, make, word) {
   const html = `<div class="edLab">Neue Sequenz</div><div class="edRow">
     <input id="sqName" value="${esc(name)}" placeholder="Name der Sequenz">
     <select id="sqCat"><option value="">Kategorie wählen …</option>${seqCatOpts(cat)}</select>
-    <button class="b" id="sqNew">＋ Kategorie</button><button class="b pri" id="sqOk">💾 Speichern</button><button class="b" id="sqX">✕</button></div>`;
+    <button class="b" id="sqNew">＋ Kategorie</button><button class="b pri" id="sqOk">💾 Speichern</button><button class="b" id="sqX">✕</button></div>
+    <label class="edChk"><input type="checkbox" id="sqFav" ${S.settings.seqFav !== false ? 'checked' : ''}> ⭐ Auch in die Favoritenliste „Aufgaben“</label>`;
   const host = $('#vgEd').innerHTML ? $('#edSave') : $('#vgSaveRow');
   host.innerHTML = html; host.style.display = 'block';
   $('#sqNew').onclick = () => catRow('seq', v => { $('#sqCat').innerHTML = '<option value="">Kategorie wählen …</option>' + seqCatOpts(v); });
@@ -3178,7 +3410,7 @@ function seqSaveDlg(name, cat, make, word) {
   $('#sqOk').onclick = () => {
     const c = $('#sqCat').value; if (!c) { toast('Bitte Kategorie wählen oder mit ＋ anlegen'); return; }
     const q = Object.assign({id:'q' + uid(), name:$('#sqName').value.trim() || 'Sequenz', cat:c, added:Date.now()}, make());
-    S.seqs.push(q); save(); host.innerHTML = '';
+    S.seqs.push(q); S.settings.seqFav = $('#sqFav').checked; if ($('#sqFav').checked) favAdd('s:' + q.id, 'Aufgaben'); save(); host.innerHTML = '';
     GAL.tab = 'seq'; GAL.filt = ''; GAL.sel = []; edClose(); vgRender();
     toast(`Sequenz „${q.name}“ ${word} (${c.replace('/', ' › ')})`, 3500);
   };
@@ -3877,7 +4109,7 @@ function themeWheels(t) {
   return t.wheels.map((tw, k) => ({title:tw.title, ...(tw.hold ? {hold:true} : {}), fields:tw.fields.map((x, j) => Object.assign({text:thText(x),
     next:typeof x === 'object' && x.to != null ? x.to : (typeof x === 'object' && x.end) || k >= t.wheels.length - 1 ? -1 : k + 1,
     weight:typeof x === 'object' && x.w ? x.w : 1},
-    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train', 'qid', 'kstep', 'kt', 'kmode'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
+    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train', 'qid', 'kstep', 'kt', 'kmode', 'steps'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
     toy:tw.stufe ? {lvl:STUFE_TOY[Math.min(4, j + 1)], sec:30, pat:j >= 2 ? 'steigernd' : 'welle', dev:''} : undefined}))}));
 }
 // alle möglichen Abläufe eines Themas (für Liste und Test)
@@ -4289,7 +4521,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110311;
+const APP_BUILD = 2026110312;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4641,7 +4873,8 @@ function renderMenu() {
       <button class="mb" data-m="teaser">🌒 Vorfreude-Teaser<small>Morgens drehen, abends enthüllen</small></button></div></details>` : ''}
     ${menuTab === 'set' ? `<div class="hLab">Einrichten</div><div class="mGrid">
       <button class="mb" data-m="setup">⚙ Felder & Räder<small>Texte, Videos, wie oft, danach weiter mit</small></button>
-      <button class="mb" data-m="gal">🗂 Galerie & Ordner<small>Videos, Sequenzen, Zufall aus Ordnern</small></button>
+      <button class="mb" data-m="gal">🗂 Galerie & Ordner<small>Videos, Sequenzen, Favoriten, Zufall aus Ordnern</small></button>
+      <button class="mb" data-m="sort">🧭 Videos einsortieren<small>Import-Ordner Video für Video auswerten und in Ordner legen</small></button>
       <button class="mb" data-m="cards">💾 Gespeicherte Spiele<small>Speichern, laden, teilen</small></button>
       <button class="mb" data-m="opts">🔧 Optionen<small>Ton, Drehdauer, Enthüllung, Sprüche, Export</small></button>
       <button class="mb ${nw ? 'new' : ''}" data-m="upd">⟳ Update<small>${nw ? 'Neue Version verfügbar!' : 'Neue Version suchen'}</small></button>
@@ -4679,6 +4912,7 @@ $('#menu').addEventListener('click', e => {
     case 'home': openHome(); break;
     case 'setup': openSetup('fields'); break;
     case 'gal': close(); vgOpen(null); break;
+    case 'sort': close(); soOpen(false); break;
     case 'cards': openSetup('cards'); break;
     case 'opts': openSetup('opts'); break;
     case 'upd': close(); updOpen(); break;
@@ -4753,6 +4987,9 @@ function quickEdit(wi, fi, px, py) {
     Q.innerHTML = `<h5>✏ Feld ${fi + 1} · ${esc(w.title || 'Rad ' + (wi + 1))}</h5>
       <textarea id="qeText" placeholder="Was soll passieren?">${esc(f.text)}</textarea>
       <div class="qeRow">Wie oft? <select id="qeW">${oftOpts(f.weight)}</select> Danach weiter mit: <select id="qeN" style="flex:1;min-width:120px">${nextOptsQ(f, wi)}</select></div>
+      <details class="qeSt" ${f.steps ? 'open' : ''}><summary>📋 Vorgehensweise (Schritt für Schritt)</summary>
+        <textarea id="qeSteps" placeholder="Eine Zeile pro Schritt. Mit Zeit: Schritt | Sekunden&#10;z. B.&#10;Auf die Knie | 20&#10;Blasen ohne Hände | 60&#10;Sperma im Mund zeigen">${esc(f.steps || '')}</textarea></details>
+      <div class="qeRow">🎲 Video aus Ordner <select id="qeV" style="flex:1;min-width:120px">${vcatOpts(f.vcat)}</select></div>
       <div class="qeRow"><button class="b" data-qe="media">${f.media ? '🎬 Video/Foto ändern' : '🎬 Video / Foto'}</button>
         <button class="b" data-qe="voice">🎙 ${f.voice ? 'Neu aufnehmen' : 'Eigene Stimme'}</button>${f.voice ? '<button class="b" data-qe="vplay">▶ 🎙</button><button class="b" data-qe="vdel">🗑 🎙</button>' : ''}</div>
       <div class="qeRow"><button class="b" data-qe="add" ${w.fields.length >= MAX_FIELDS ? 'disabled' : ''}>＋ Feld dazu</button>
@@ -4764,6 +5001,8 @@ function quickEdit(wi, fi, px, py) {
   Q.style.left = clamp(px - W / 2, 10, innerWidth - W - 10) + 'px'; Q.style.top = clamp(py - H / 2, 10, innerHeight - H - 10) + 'px';
   Q.oninput = e => {
     if (e.target.id === 'qeText') { f.text = e.target.value; save(); return; }
+    if (e.target.id === 'qeSteps') { f.steps = e.target.value.trim() ? e.target.value : undefined; save(); return; }
+    if (e.target.id === 'qeV') { f.vcat = e.target.value || undefined; save(); return; }
     if (e.target.id === 'qeW') { f.weight = clamp(+e.target.value || 0, 0, 100); save(); return; }
     if (e.target.id === 'qeN') { const v = e.target.value; f.next = v[0] === 'w' ? +v.slice(1) : -1; f.card = v[0] === 'c' ? v.slice(1) : null; save(); }
   };
@@ -5476,6 +5715,8 @@ function ktShow(f) {
       steps.push({l:x.id === 'arsch' ? 'IN DEN ARSCH' : x.id === 'maul' ? 'INS MAUL' : 'IN DIE FOTZE', s:sec});
     });
     $('#rTxt').textContent = steps[0].l;
+  } else if (f.kmode === 'steps') {
+    steps = f._st.map((x, i) => ({l:`${i + 1}. ${x.l}`, s:x.s || 20}));
   } else if (f.kmode === 'atm2') {
     steps = [{l:'IN DEN ARSCH', s:sec}, {l:'Kondom ab / abwischen', s:20, pause:true}, {l:'INS MAUL', s:Math.round(sec / 2)}];
     $('#rTxt').textContent = String(f.text);
@@ -5483,7 +5724,7 @@ function ktShow(f) {
     steps = [{l:'Haltung einnehmen', s:5, pause:true}, {l:'Halten und gehorchen', s:sec}];
     $('#rTxt').textContent = skSub().toUpperCase() + ', GEHORCHE:\n' + cmd;
   } else { steps = [{l:'Los!', s:sec}]; $('#rTxt').textContent = cmd; }
-  f.kcmd = $('#rTxt').textContent;
+  if (f.kmode !== 'steps') f.kcmd = $('#rTxt').textContent;
   { const L = $('#rTxt').textContent.length; $('#rTxt').style.fontSize = L > 110 ? 'min(5.2vh,3.6vw)' : L > 60 ? 'min(6.5vh,4.5vw)' : 'min(9vh,6vw)'; }
   if (document.body.classList.contains('sk')) { $('#rKt').className = 'on'; requestAnimationFrame(skFit); }
   let k = 0, left = steps[0].s; const el = $('#rKt'); el.className = 'on';
@@ -5503,6 +5744,14 @@ function ktShow(f) {
     left = steps[k].s; speak(steps[k].l); draw();
     if (f.kmode === 'skf' && !steps[k].rad && !steps[k].pause) { $('#rTxt').textContent = steps[k].l; skFit(); }
   }, 1000)};
+}
+/* Vorgehensweise: Schritte nacheinander, mit Zeit läuft der Timer Schritt für Schritt */
+function parseSteps(t) { return String(t || '').split('\n').map(x => x.trim()).filter(Boolean).map(x => { const m = x.match(/^(.*?)\s*\|\s*(\d+)\s*s?$/); return m ? {l:m[1], s:+m[2]} : {l:x, s:0}; }); }
+function stepsShow(f) {
+  const st = parseSteps(f.steps); if (!st.length) return;
+  $('#rTxt').textContent = (f.text ? f.text + '\n' : '') + st.map((x, i) => `${i + 1}. ${x.l}${x.s ? ' (' + x.s + ' s)' : ''}`).join('\n');
+  { const L = $('#rTxt').textContent.length; $('#rTxt').style.fontSize = L > 110 ? 'min(5.2vh,3.6vw)' : L > 60 ? 'min(6.5vh,4.5vw)' : 'min(9vh,6vw)'; }
+  if (st.some(x => x.s)) ktShow(Object.assign({}, f, {kt:1, kmode:'steps', _st:st}));
 }
 function ktDone(f, ok) {
   if (!f || !f.kt) return;
