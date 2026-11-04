@@ -464,6 +464,31 @@
   #amb{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
   #stage{z-index:1}
   #rail{z-index:2}
+  /* Befehls-Anzeige: Ergebnis bleibt groß stehen, am Ende der ganze Ablauf */
+  #cmdBar{position:fixed;left:max(14px,var(--cmdL,14px));right:calc(var(--rail) + 14px);bottom:3vh;z-index:20;display:none;pointer-events:none;
+    text-align:center;background:rgba(8,4,5,.84);border:1px solid #8a6a36;border-radius:22px;padding:14px 20px 16px;box-shadow:0 10px 40px rgba(0,0,0,.8);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#f6e7c8}
+  #cmdBar.on{display:block;animation:wIn .4s ease-out}
+  #cmdBar .cbPrev{font:600 clamp(14px,1.8vw,20px) system-ui;color:#c9a24e;margin-bottom:4px}
+  #cmdBar .cbT{font:700 clamp(13px,1.5vw,17px) system-ui;letter-spacing:.12em;text-transform:uppercase;color:#c9a24e}
+  #cmdBar .cbX{font:700 clamp(30px,5vw,64px)/1.1 Georgia,'Times New Roman',serif;text-shadow:0 2px 0 #000}
+  #cmdBar.fin{top:9vh;bottom:4vh;overflow:auto;pointer-events:auto;display:none;flex-direction:column;justify-content:center;background:rgba(8,4,5,.94)}
+  #cmdBar.fin.on{display:flex}
+  #cmdBar .cbH{font:800 clamp(16px,2vw,22px) system-ui;letter-spacing:.18em;text-transform:uppercase;color:#e0464e;margin-bottom:1.5vh}
+  #cmdBar .cbL{margin:.8vh 0}
+  #cmdBar .cbL b{display:block;font:700 clamp(12px,1.4vw,16px) system-ui;letter-spacing:.14em;text-transform:uppercase;color:#c9a24e}
+  #cmdBar .cbL span{font:700 clamp(24px,3.6vw,48px)/1.15 Georgia,'Times New Roman',serif}
+  #cmdBar .cbD{font:700 clamp(22px,3.3vw,44px)/1.3 Georgia,'Times New Roman',serif;max-width:1100px;margin:0 auto;text-shadow:0 2px 0 #000}
+  #cmdBar .cbS{margin-top:2vh;font:600 clamp(13px,1.5vw,17px) system-ui;color:#d8c39a;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 10px}
+  #cmdBar .cbS b{color:#c9a24e;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.8em}
+  #cmdBar .cbS i{color:#e0464e;font-style:normal}
+  #cmdBar .cbB{display:flex;gap:12px;justify-content:center;margin-top:2vh;flex-wrap:wrap}
+  #cmdBar .cbB button{min-height:54px;padding:8px 22px;border-radius:14px;border:1px solid #8a6a36;background:#1a0d0f;color:#f6e7c8;font:800 18px system-ui}
+  #cmdBar .cbF{margin-top:1.6vh;font:600 clamp(13px,1.5vw,17px) system-ui;color:#9c8a6c}
+  #cmdBar.fin{justify-content:flex-start}
+  #cmdBar.fin>:first-child{margin-top:auto}#cmdBar.fin>:last-child{margin-bottom:auto}
+  @media (max-width:700px){#cmdBar{left:10px!important;right:calc(var(--rail) + 8px);padding:10px 12px}
+    #cmdBar.fin{top:124px;bottom:10px}#cmdBar .cbD{font-size:19px}#cmdBar .cbS{font-size:12px}#cmdBar .cbX{font-size:26px}}
   .spin,.wspin{background:radial-gradient(circle at 38% 30%,var(--sp1) 0,var(--sp2) 42%,var(--sp3) 100%);border-color:var(--spB);color:var(--spT)}
   .spin{box-shadow:0 0 0 2px var(--acc),0 0 22px var(--glow),inset 0 4px 10px rgba(255,255,255,.2),inset 0 -8px 14px rgba(0,0,0,.6),0 10px 24px rgba(0,0,0,.8)}
   :root[data-stufe="4"] .spin,:root[data-stufe="4"] .wspin{text-shadow:0 0 10px #ff0022;animation:hdPulse 1.1s infinite}
@@ -625,9 +650,33 @@
   #bWho small{display:block;font-size:11px;opacity:.75;font-weight:500}
   body.simple #bWho{display:block}
   #portrait{display:none}
+  /* Ergebnis in der einfachen Ansicht: nur die Anweisung, groß; Erledigt-Knöpfe seitlich */
+  body.simple #rPre,body.simple #rLine{display:none}
+  body.simple #rTxt{font-size:min(17vh,10vw);line-height:1.04}
+  body.simple #result.hold #rTxt{font-size:min(13vh,7.4vw)}
+  #rBtns #rDone{position:static;opacity:1!important;animation:none!important;transform:none;display:none;width:100%;margin:0}
+  #rBtns #rDone.on{display:flex;flex-direction:column;gap:10px;align-items:stretch}
+  #rBtns #rDone .rdQ{font:800 18px system-ui;color:#fff;text-align:center;margin:0}
+  #rBtns #rDone .rdB{display:flex;flex-direction:column;gap:10px}
+  #rBtns #rDone .rdB button{width:100%;min-height:66px;font:800 19px system-ui;border-radius:16px;padding:8px 4px}
+  #rBtns #rDone .rdB .half,#rBtns #rDone .rdS{display:none}
+  .rdB .later{background:linear-gradient(#3a3a5a,#1a1a2e);border:1px solid #7a7ab0;color:#e6e6ff}
+  #rKt{margin-top:2vh;font:800 min(12vh,8vw)/1 system-ui;color:#fff;font-variant-numeric:tabular-nums;display:none}
+  #rKt.on{display:block}
+  #rKt small{display:block;font:700 min(4.5vh,3vw) system-ui;color:var(--acc2);margin-bottom:1vh;letter-spacing:.04em}
+  #rKt.end{color:#7fff9a}
+  /* Kommando-Training */
+  .ktGrid{display:flex;flex-wrap:wrap;gap:10px}
+  .ktT{padding:14px 16px;border-radius:14px;border:1px solid #5a3a2a;background:#1a0d0f;font:700 17px system-ui;color:#e8d8c0}
+  .ktT.on{background:linear-gradient(160deg,#8a1a22,#3a080c);border-color:var(--acc);color:#fff;box-shadow:0 0 12px var(--glow)}
+  .ktSl{display:grid;grid-template-columns:150px 1fr 60px;align-items:center;gap:12px;margin:10px 0}
+  .ktSl b{font-size:18px}.ktSl output{font:800 22px system-ui;text-align:center}
+  .ktSl input{width:100%;accent-color:var(--acc);height:34px}
+  @media (max-width:520px){.ktSl{grid-template-columns:1fr 50px}.ktSl b{grid-column:1/-1}}
   /* ---------- Einfache Ansicht 2.0: große Knöpfe, ein DREHEN für alles ---------- */
   body.simple #bHome{display:none}
   body.simple .wspin{display:none}
+  body.simple #wbtns .hist{display:none}
   body.simple #bSpin{display:block!important}
   body.simple{--rail:150px}
   body.simple #rail{gap:16px}
@@ -706,6 +755,7 @@
 <div id="safe" class="ov"></div>
 <div id="edge" class="ov"></div>
 <div id="typ" class="ov"></div>
+<div id="kt" class="ov"></div>
 <div id="lock"></div>
 <div id="camo"><div class="ch">Notizen</div><div class="cl">Einkaufen<small>Milch, Brot, Kaffee, Tomaten</small></div>
   <div class="cl">Termine<small>Zahnarzt Do 9:30 · Werkstatt anrufen</small></div><div class="cl">Ideen fürs Wochenende<small>Spaziergang, Freunde einladen</small></div>
@@ -715,9 +765,9 @@
 <div id="result">
   <div id="rMedia"></div>
   <div id="rVeil"><i></i><i></i></div>
-  <div id="rText"><div id="rPre"></div><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div><div id="rHold"></div>
+  <div id="rText"><div id="rPre"></div><div id="rNum"></div><div id="rTxt"></div><div id="rUnit"></div><div id="rLine"></div><div id="rKt"></div><div id="rHold"></div>
     <div id="rDone"><div class="rdQ" id="rdQ">Wie wurde es erfüllt?</div>
-      <div class="rdB"><button data-done="2" class="ok">✔ Erfüllt</button><button data-done="1" class="half">½ Teilweise</button><button data-done="0" class="no">✘ Nicht erfüllt</button></div>
+      <div class="rdB"><button data-done="2" class="ok">✔ Erfüllt</button><button data-done="1" class="half">½ Teilweise</button><button data-done="0" class="no">✘ Nicht erfüllt</button><button data-done="3" class="later">⏭ Nächstes Mal</button></div>
       <div class="rdS"><div id="rFeel"><button data-feel="1" title="Mehr davon">🔥 mehr davon</button><button data-feel="0" title="Passt">👌 passt</button><button data-feel="-1" title="Weniger davon">🧊 weniger</button></div>
         <button id="rGift">🎁 Gutschein</button></div></div></div>
   <div id="rVctl"><button id="rvBack" title="10 s zurück">⏪ 10</button><button id="rvPlay">❚❚</button><button id="rvFwd" title="10 s vor">10 ⏩</button>
@@ -786,6 +836,7 @@
 <div id="jpick"><div id="jpickBox"><div class="jt">★ Joker – Abfolge wählen</div><div id="jpickList"></div><button class="mbtn" id="jpickX" style="width:100%">Abbrechen</button></div></div>
 <button id="bToyStop" title="Alle Spielzeuge sofort aus">■ NOT-AUS</button>
 <div id="paywall"></div>
+<div id="cmdBar"></div>
 <div id="toast"></div>
 <div id="portrait">Für die beste Ansicht das Tablet quer halten</div>
 
@@ -1079,7 +1130,32 @@ function makeSegLayer(w, R) {
     x.lineWidth = R * 0.013; x.strokeStyle = 'rgba(0,0,0,.45)'; x.stroke();
     x.lineWidth = R * 0.0065; x.strokeStyle = LOOK().div; x.stroke();
   }
+  drawSegLabels(x, w, c, R, ri, P);
   return cv;
+}
+// Beschriftung der Felder: groß und gut lesbar (geheime Wünsche bleiben verdeckt)
+function segLabels(w) {
+  if (w.title === 'Geheimer Wunsch' || S.settings.labels === false) return [];
+  return w.fields.map(f => String(f.num !== '' && f.num != null ? f.num + (f.text ? ' ' + f.text : '') : f.text || '').replace(/\s+/g, ' ').trim());
+}
+function segLum(col) { const m = /^#?([0-9a-f]{6})$/i.exec(String(col).trim()); if (!m) return 0.3; const v = parseInt(m[1], 16);
+  return (0.299 * (v >> 16 & 255) + 0.587 * (v >> 8 & 255) + 0.114 * (v & 255)) / 255; }
+function drawSegLabels(x, w, c, R, ri, P) {
+  const labs = segLabels(w), n = w.fields.length, seg = TAU / n; if (!labs.length) return;
+  const r0 = R * 0.24, r1 = ri * 0.94, maxW = r1 - r0, arcH = 2 * (R * 0.62) * Math.sin(Math.min(seg, Math.PI / 2) / 2);
+  const fs = Math.max(R * 0.05, Math.min(R * 0.15, arcH * 0.5));
+  for (let i = 0; i < n; i++) {
+    let t = labs[i]; if (!t) continue;
+    const a = -Math.PI / 2 + (i + 0.5) * seg, left = Math.cos(a) < 0, light = segLum(segColor(P, i, n)) > 0.55;
+    x.save(); x.translate(c, c); x.rotate(left ? a + Math.PI : a);
+    x.textBaseline = 'middle'; x.textAlign = left ? 'left' : 'right';
+    let size = fs; x.font = `700 ${size}px Georgia, serif`;
+    while (size > R * 0.045 && x.measureText(t).width > maxW) { size -= 1; x.font = `700 ${size}px Georgia, serif`; }
+    if (x.measureText(t).width > maxW) { while (t.length > 2 && x.measureText(t + '…').width > maxW) t = t.slice(0, -1); t += '…'; }
+    x.lineWidth = size * 0.18; x.strokeStyle = light ? 'rgba(255,255,255,.35)' : 'rgba(0,0,0,.55)'; x.lineJoin = 'round';
+    x.fillStyle = light ? '#2a0a0e' : '#fff3dc';
+    const px = left ? -r1 : r1; x.strokeText(t, px, 0); x.fillText(t, px, 0); x.restore();
+  }
 }
 function segColor(P, i, n) { return (n % 2 === 1 && i === n - 1) ? P.c : (i % 2 ? P.b : P.a); }
 
@@ -1208,7 +1284,7 @@ function drawBulbs(ctx, R, mode) {   // Jockey/Timer-Lichter auf den Nieten
 /* Ein Rad an Position (cx,cy) mit Radius R zeichnen */
 function drawWheel(ctx, w, cx, cy, R, o = {}) {
   const Rc = Math.max(20, Math.round(o.cacheR || R)), sc = R / Rc;
-  const seg = cached(`s|${Rc}|${w.fields.length}|${w.palette}|${curStufe()}|${S.settings.stufeColors}`, () => makeSegLayer(w, Rc));
+  const seg = cached(`s|${Rc}|${w.fields.length}|${w.palette}|${curStufe()}|${S.settings.stufeColors}|${segLabels(w).join('¦')}`, () => makeSegLayer(w, Rc));
   const over = cached(`o|${Rc}|${curStufe()}`, () => makeOverLayer(Rc));
   ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc);
   if (o.alpha != null) ctx.globalAlpha = o.alpha;
@@ -1238,6 +1314,7 @@ function visibleIdx() { return S.wheels.map((w, i) => w.enabled ? i : -1).filter
 const TOP_K = 1.23, H_K = 2.25;
 function fitR(cw, ch) { return Math.min(cw / 2.04, ch / H_K); }
 function gridLayout(n, W, H, btnH = 0) {
+  if (n > 1 && S.settings.simple !== false && !isSlot()) return focusLayout(n, W, H);
   const bh = n > 1 ? btnH : btnH * 0.62;   // Platz unter dem Rad: Dreh-Button (ab 2 Rädern) + Ergebnisleiste
   let best = null;
   for (let cols = 1; cols <= n; cols++) {
@@ -1251,6 +1328,15 @@ function gridLayout(n, W, H, btnH = 0) {
     const offX = (W - inRow * cw) / 2;
     out.push({cx:offX + (col + 0.5) * cw, cy:row * ch + (ch - bh - H_K * R) / 2 + TOP_K * R, R});
   }
+  return out;
+}
+// aktives Rad groß in der Mitte, die übrigen als kleine Vorschau in einer Spalte links
+function focusLayout(n, W, H) {
+  const vis = visibleIdx(), ka = Math.max(0, vis.indexOf(S.active)), stripW = Math.min(W * 0.2, H / Math.max(3, n - 1) * 0.9);
+  const big = fitR(W - stripW, H * 0.98), out = [], others = vis.map((_, k) => k).filter(k => k !== ka);
+  const rs = Math.min(stripW / 2.3, H / (others.length * H_K + 0.5));
+  others.forEach((k, j) => { out[k] = {cx:stripW / 2 + 4, cy:(j + 0.5) * (H / others.length) + rs * 0.1, R:rs}; });
+  out[ka] = {cx:stripW + (W - stripW) / 2, cy:(H - H_K * big) / 2 + TOP_K * big, R:big};
   return out;
 }
 function bigRect(W, H) { const R = fitR(W, H); return {cx:W / 2, cy:(H - H_K * R) / 2 + TOP_K * R, R}; }
@@ -1402,7 +1488,7 @@ function fieldFlags(f) {
 }   // Ergebnisse des letzten Durchlaufs (für Abläufe)
 async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   if (busy) return;
-  busy = true; ac(); setBusy(true); closePanel();
+  busy = true; ac(); setBusy(true); closePanel(); if (depth === 0) cmdHide();
   S.active = idx; LASTW = idx; updateRail();
   const w = S.wheels[idx], vis = visibleIdx();
   const useFocus = jockey || isSlot() || vis.length > 1 || !vis.includes(idx);
@@ -1417,14 +1503,126 @@ async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   fieldFlags(w.fields[res]);
   gAfterSpin(idx);
   LASTRUN.push(String(w.fields[res].text || resultLine(w, w.fields[res], res)).replace(/\n/g, ' '));
+  roundAdd(idx, w, LASTRUN[LASTRUN.length - 1], depth);
   quizLog(w.fields[res]);
   save();
   const next = await showResult(w, res, depth);
   w._hl = null;
   if (useFocus) { await tween(350, (t, now) => { focus.p = 1 - t; render(now); }); focus = null; }
   render(); busy = false; setBusy(false); renderPanel(); updateRail();
-  if (next) await runNext(next, depth + 1);   // Folge-Rad oder Speicherkarte (Kette)
-  if (depth === 0) { typAfterSpin(); advanceWheel(); }
+  if (next) { cmdShow(true); await runNext(next, depth + 1); }   // Folge-Rad oder Speicherkarte (Kette)
+  if (depth === 0) { typAfterSpin(); advanceWheel(); cmdShow(); }
+}
+/* Einfache Ansicht: Ergebnis bleibt bis zum nächsten Drehen groß stehen;
+   ist die Runde durch, steht nur noch der ganze Ablauf als Befehl da */
+const ROUND = {items:[], idxs:[]};
+const cmdOn = () => S.settings.simple !== false && !isSlot() && S.settings.cmdBar !== false;
+function roundAdd(idx, w, txt, depth) {
+  const v = visibleIdx();
+  if (depth === 0 && (ROUND.idxs.includes(idx) || idx === v[0])) { ROUND.items = []; ROUND.idxs = []; }
+  const f = w.fields.find(x => String(x.text || '').replace(/\n/g, ' ') === txt) || {};
+  ROUND.items.push({t:String(w.title || '').trim(), x:String(txt || '').trim(), q:f.qid || '', kt:!!(f.kt || f.kstep)}); ROUND.idxs.push(idx);
+}
+function roundReset(name) { ROUND.items = []; ROUND.idxs = []; if (name != null) S.x.setName = String(name); cmdHide(); }
+/* Ablauf als Beschreibung: Satzbausteine je nach Modus (Soft … Heavy Duty, BDSM, Sklaven-Training).
+   Lernt mit: „Passt so“ macht die benutzten Bausteine häufiger, „Anders“ seltener. */
+const ABL_ORT = {'ort.bett':'im Bett', 'ort.sofa':'auf dem Sofa', 'ort.dusche_o':'unter der Dusche', 'ort.kueche':'in der Küche', 'ort.boden':'auf dem Boden',
+  'ort.spiegel':'vor dem Spiegel', 'ort.auto':'im Auto', 'ort.draussen':'draußen', 'ort.treppe':'auf der Treppe'};
+const ABL = {
+  ort:[null, ['Ihr macht es euch {o} gemütlich.', 'Heute ganz in Ruhe {o}.'], ['Heute passiert es {o}.', 'Ihr trefft euch {o}.'],
+    ['{A} nimmt {B} {o} ran.', '{O} geht es los, keine Ausreden.'], ['{O} wird heute gefickt, und zwar richtig.', '{A} fickt {B} {o}, ohne lange zu fackeln.'],
+    ['{B} kniet {o} und wartet auf Befehle.', '{O}: auf die Knie, Sklavin, und warten.']],
+  vor:[null, ['Ihr beginnt zärtlich mit {x}.', 'Zum Einstimmen: {x}, ganz langsam.'], ['Zuerst {x}, bis ihr richtig heiß seid.', 'Ihr fangt mit {x} an.'],
+    ['Erst gibt es {x}, und zwar fordernd.', '{X} zum Aufwärmen, keine halben Sachen.'], ['Erst {x}, bis es tropft.', 'Zum Anheizen: {x}, dreckig und ohne Pause.'],
+    ['Befehl: {x}, bis der Herr zufrieden ist.', 'Die Sklavin beginnt mit {x}, nur auf Kommando.']],
+  pos:[null, ['Dann liebt ihr euch so: {x}.', 'Danach findet ihr zueinander: {x}.'], ['Dann wechselt ihr die Stellung: {x}.', 'Danach geht es weiter: {x}.'],
+    ['Dann nimmt {A} sie hart ran: {x}.', 'Dann {x}, tief und kräftig.'], ['Dann wird {B} durchgefickt: {x}, bis sie zittert.', 'Dann {x}, hart und ohne Rücksicht.'],
+    ['Dann befiehlt der Herr: {x}. Kein Wort ohne Erlaubnis.', 'Stellung {x}, die Sklavin hält still und dient.']],
+  fin:[null, ['Zum Schluss kommt {A} {x}.', 'Am Ende lässt {A} sich gehen, {x}.'], ['Zum Finale spritzt {A} {x}.', 'Am Ende kommt {A} {x}.'],
+    ['Am Ende spritzt {A} ihr {x}.', 'Zum Schluss pumpt {A} alles {x}.'], ['Zum Schluss wichst {A} ihr die volle Ladung {x}.', 'Am Ende kriegt {B} alles {x}, bis zum letzten Tropfen.'],
+    ['Zum Schluss markiert der Herr seine Sklavin: {x}.', 'Als Belohnung bekommt die Sklavin alles {x}.']],
+  gen:[null, ['{S} {x}, ganz entspannt.', '{S} {x}.'], ['{S} {x}.', '{S}: {x}.'], ['{S} {x}, ohne Pause.', '{S} {x}, und zwar fordernd.'],
+    ['{S} {x}, hart und dreckig.', '{S} {x}, bis nichts mehr geht.'], ['{S} befiehlt der Herr: {x}.', '{S}: {x}. Gehorchen, ohne zu fragen.']]
+};
+const ABL_STEP = ['Zuerst', 'Dann', 'Danach', 'Anschließend', 'Dann'];
+function ablStyle() {
+  const n = S.x.setName || '';
+  if (/Sklaven|BDSM/i.test(n)) return 5;
+  return clamp(curStufe() || 2, 1, 4);
+}
+function ablPick(key, lv, used) {
+  const arr = (ABL[key] || ABL.gen)[lv] || ABL.gen[2], W = S.x.abl = S.x.abl || {};
+  const ws = arr.map((_, j) => W[key + lv + '.' + j] || 1), sum = ws.reduce((a, b) => a + b, 0);
+  let r = Math.random() * sum, j = 0; while (j < ws.length - 1 && (r -= ws[j]) > 0) j++;
+  used.push(key + lv + '.' + j); return arr[j];
+}
+function ablText(used) {
+  const it = ROUND.items.filter(x => x.x), lv = ablStyle(), n = NM(), out = [];
+  if (/Sklaven/.test(S.x.setName || '')) {
+    const g = re => (it.find(x => re.test(x.t)) || {}).x || '', low = t => t.replace(/^[A-ZÄÖÜ ]+: /, m => m.charAt(0) + m.slice(1, -2).toLowerCase() + ': ');
+    const sp = it.filter(x => /^Spermaspiel/.test(x.t)).map(x => x.x), parts = [];
+    if (g(/^Haltung/)) parts.push(`${skSub()}, ${g(/^Aufgabe/) ? 'erst die Haltung ' + low(g(/^Haltung/)) + ', dann: ' + g(/^Aufgabe/) : low(g(/^Haltung/))}${g(/streng/) ? ' – ' + g(/streng/) : ''}${g(/lange/) ? ', ' + g(/lange/) : ''}.`);
+    if (g(/Loch/)) parts.push(`Dann wird gefickt: zuerst ${g(/Loch/).toLowerCase() === 'maul' ? 'ins Maul' : g(/Loch/).toLowerCase() === 'arsch' ? 'in den Arsch' : 'in die Fotze'}, danach fast nur Arsch, die Löcher wechseln nach Timer und Rad.`);
+    if (g(/^Finale/)) { const fz = g(/^Finale/); parts.push(/ARSCH → MAUL/.test(fz) ? `Zum Schluss erst in den Arsch, nach dem Abwischen ins Maul, ${fz.replace(/^ARSCH → MAUL\s*/, '')}.` : `Zum Schluss: ${fz.replace(/\n/g, ', ')}.`); }
+    if (sp.length) parts.push(sp.length > 1 ? `Danach zwei Spermaspiele: 1. ${sp[0]}. 2. ${sp[1]}.` : `Danach ein Spermaspiel: ${sp[0]}.`);
+    if (parts.length) return parts.join(' ');
+  }
+  if (it.some(x => x.kt)) {   // Kommando: Befehl als ein Satz
+    const t = it.map(x => /[a-zäöüß]/.test(x.x) ? x.x : x.x.toLowerCase()).join(', ').replace(/(\d+) Sekunden$/, '$1 Sekunden lang');
+    return t.charAt(0).toUpperCase() + t.slice(1) + '.';
+  }
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  let k = 0;
+  it.forEach((x, j) => {
+    const cat = (x.q || '').split('.')[0] || (/^wo\??$/i.test(x.t) ? 'ort' : /vorspiel/i.test(x.t) ? 'vor' : /stellung/i.test(x.t) ? 'pos' : /abschluss|abspritzen|finale/i.test(x.t) ? 'fin' : '');
+    const key = ABL[cat] ? cat : 'gen', last = j === it.length - 1 && it.length > 1;
+    const o = ABL_ORT[x.q] || ('beim Punkt „' + x.x + '“'), xs = x.x.replace(/\s+/g, ' ');
+    const S0 = last && key === 'gen' ? 'Zum Schluss' : ABL_STEP[Math.min(k, ABL_STEP.length - 1)];
+    let t = ablPick(key, lv, used).replace(/\{S\}/g, S0).replace(/\{O\}/g, cap(o)).replace(/\{o\}/g, o)
+      .replace(/\{X\}/g, cap(xs)).replace(/\{x\}/g, key === 'gen' || key === 'pos' ? xs : xs.charAt(0).toLowerCase() === xs.charAt(0) ? xs : xs)
+      .replace(/\{A\}/g, n.A).replace(/\{B\}/g, n.B);
+    out.push(cap(t)); if (key !== 'ort') k++;
+  });
+  return out.join(' ');
+}
+function ablLearn(used, up) {
+  const W = S.x.abl = S.x.abl || {};
+  used.forEach(id => { W[id] = clamp((W[id] || 1) * (up ? 1.35 : 0.7), 0.15, 8); }); save();
+}
+function speakCmd(t) { if (!S.settings.speakMain || !t) return; try { speak(t); } catch (e) {} }
+function cmdHide() { const b = $('#cmdBar'); if (b) b.className = ''; }
+function cmdLines() {
+  const it = ROUND.items.filter(x => x.x), out = [];
+  let k = 0; const steps = it.filter(x => !/^wo\??$/i.test(x.t)).length;
+  it.forEach(x => {
+    if (/^wo\??$/i.test(x.t)) { out.push(['Wo', x.x]); return; }
+    const pre = steps < 2 ? (x.t || 'Los') : k === 0 ? 'Zuerst' : k === steps - 1 ? 'Zum Schluss' : (k % 2 ? 'Dann' : 'Danach');
+    out.push([pre + (steps >= 2 && x.t && !/^(befehl|rad \d+)$/i.test(x.t) ? ' · ' + x.t : ''), x.x]); k++;
+  });
+  return out;
+}
+function cmdShow(partial) {
+  const b = $('#cmdBar'); if (!b || !cmdOn() || !ROUND.items.length) return;
+  const vis = visibleIdx(), multi = vis.length > 1;
+  b.style.setProperty('--cmdL', multi ? Math.round(Math.min(innerWidth * 0.2, 260)) + 'px' : '14px');
+  const fin = !partial && (!multi || vis.every(i => ROUND.idxs.includes(i)) || LASTW === vis[vis.length - 1]);
+  if (fin && ROUND.items.length > 1) {
+    const used = [], txt = ablText(used);
+    b.innerHTML = '<div class="cbH">Euer Ablauf</div>' + `<div class="cbD">${esc(txt)}</div>`
+      + `<div class="cbS">${cmdLines().map(([t, x]) => `<span><b>${esc(t)}</b> ${esc(x)}</span>`).join('<i>→</i>')}</div>`
+      + (used.length ? '<div class="cbB"><button data-cb="up">👍 Passt so</button><button data-cb="re">↻ Anders sagen</button></div>' : '')
+      + '<div class="cbF">Bleibt stehen, bis ihr wieder dreht · antippen = ausblenden</div>';
+    b.className = 'fin on';
+    b.onclick = e => { const c = e.target.closest('[data-cb]'); if (!c) return cmdHide();
+      if (c.dataset.cb === 'up') { ablLearn(used, true); toast('👍 Gemerkt – so beschreibe ich es öfter', 2500); c.disabled = true; }
+      else { ablLearn(used, false); cmdShow(); } };
+    speakCmd(txt);
+  } else {
+    const last = ROUND.items[ROUND.items.length - 1], prev = ROUND.items.slice(0, -1).map(x => x.x).filter(Boolean);
+    b.innerHTML = (prev.length ? `<div class="cbPrev">${esc(prev.join(' → '))} →</div>` : '')
+      + (last.t ? `<div class="cbT">${esc(last.t)}</div>` : '') + `<div class="cbX">${esc(last.x)}</div>`;
+    b.className = 'on'; b.onclick = null;
+  }
 }
 /* Einfache Ansicht: der große DREHEN-Knopf nimmt danach automatisch das nächste Rad */
 let LASTW = 0;
@@ -1641,7 +1839,8 @@ function showResult(w, i, depth, fieldOverride) {
     nx.innerHTML = label;
     // Folge automatisch starten (Countdown auf dem Button)
     const hold = !!w.hold;   // z. B. Wahrheit oder Pflicht: groß stehen lassen, bis angetippt wird
-    let left = hold ? 0 : +S.settings.autoNext || 0, autoT = 0;
+    let left = hold ? 0 : f.kstep ? 1 : +S.settings.autoNext || 0, autoT = 0;
+    if (f.kt) ktShow(f);
     const startCountdown = () => {
       if (!(target && left > 0)) return;
       const upd = () => { nx.innerHTML = label + '<br><small>(' + left + ')</small>'; };
@@ -3651,7 +3850,7 @@ function themeWheels(t) {
   return t.wheels.map((tw, k) => ({title:tw.title, ...(tw.hold ? {hold:true} : {}), fields:tw.fields.map((x, j) => Object.assign({text:thText(x),
     next:typeof x === 'object' && x.to != null ? x.to : (typeof x === 'object' && x.end) || k >= t.wheels.length - 1 ? -1 : k + 1,
     weight:typeof x === 'object' && x.w ? x.w : 1},
-    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train', 'qid'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
+    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train', 'qid', 'kstep', 'kt', 'kmode'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
     toy:tw.stufe ? {lvl:STUFE_TOY[Math.min(4, j + 1)], sec:30, pat:j >= 2 ? 'steigernd' : 'welle', dev:''} : undefined}))}));
 }
 // alle möglichen Abläufe eines Themas (für Liste und Test)
@@ -3662,6 +3861,7 @@ function themePaths(t) {
 }
 // Räder-Satz auf die ersten Räder legen (Folge-Verweise zeigen auf die Position im Satz)
 function applyWheelSet(name, wheels, rad, kind = 'Thema', hint = '') {
+  roundReset(name);
   if (!S.snapshot) S.snapshot = {active:S.active, wheels:strip(S.wheels)};   // für ↩ VORHER
   const used = wheels.slice(0, MAX_WHEELS).map((tw, k) => {
     const old = S.wheels[k];
@@ -4062,7 +4262,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110308;
+const APP_BUILD = 2026110309;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4282,7 +4482,7 @@ function closeSetup() { closePanel(); render(); }
 
 /* ---------- Startbildschirm mit Ersteinrichtung (Namen → Stufe → passende Räder) ---------- */
 let wizOn = false, wizStep = 0;
-function openHome() { closePanel(); $('#menu').classList.remove('show'); $('#lib').classList.remove('show'); renderHome(); $('#home').classList.add('show'); }
+function openHome() { cmdHide(); closePanel(); $('#menu').classList.remove('show'); $('#lib').classList.remove('show'); renderHome(); $('#home').classList.add('show'); }
 function closeHome() { $('#home').classList.remove('show'); }
 function renderHome() {
   const H = $('#home'), n = NM();
@@ -4323,9 +4523,11 @@ function renderHome() {
     <div class="hLab">Stufe für heute</div>${stufeButtons()}
     <button class="hbtn hGo" data-h="close">Zum Rad ▸</button>
     <span style="color:rgba(255,255,255,.55);font-size:15px">💋 ${S.x.stats.kisses} erledigt · 🔥 ${S.x.stats.hot} · 🧊 ${S.x.stats.cold}</span>
-    ${teaserCard}${vCard}${hlCard()}
+    ${teaserCard}${vCard}${laterCard()}${hlCard()}
     <details class="hMore"><summary>Mehr Spiele & Extras <span class="arr">▾</span></summary>
     <div class="hGrid">
+      <button class="tile" data-h="kt"><span class="ti">⏱</span><b>Kommando-Training</b><small>Befehl aus mehreren Rädern, mit Timer</small></button>
+      <button class="tile" data-h="sk"><span class="ti">⛓</span><b>Sklaven-Training</b><small>Gehorsam, Arsch-Phase, Arsch → Maul, Spermaspiele</small></button>
       <button class="tile" data-h="bdsm" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}><span class="ti">⛓</span><b>BDSM – Hart & schmutzig</b><small>Nur Heavy Duty</small></button>
       <button class="tile" data-h="quiz"><span class="ti">💞</span><b>Uns kennenlernen</b><small>Vorlieben – Tabus bleiben geheim</small></button>
       <button class="tile" data-h="lib"><span class="ti">📚</span><b>Vorlagen</b><small>Fertige Spiele</small></button>
@@ -4360,6 +4562,9 @@ $('#home').addEventListener('click', e => {
     case 'night': closeHome(); gStart(); break;
     case 'extrem': if (stufeCap() >= 4) closeHome(); xtStart(); break;
     case 'bdsm': if (stufeCap() >= 4) closeHome(); bdStart(); break;
+    case 'kt': { const k = KT(); if (k.mode === 'sk') k.mode = 'cmd'; ktOpen(); break; }
+    case 'sk': skOpen(); break;
+    case 'later': S.x.later = (S.x.later || []).filter((_, j) => j !== +d.v); save(); kissFx(); renderHome(); break;
     case 'typ': typOpen(); break;
     case 'typtest': S.settings.named = true; S.x.setup = true; wizOn = false; wizStep = 0; save(); typOpen('a'); break;
     case 'quiz': closeHome(); openQuiz('a'); break;
@@ -4393,6 +4598,8 @@ function renderMenu() {
       <button class="mb" data-m="night">🌙 Heute Nacht<small>Geführter Abend in 6 Phasen</small></button>
       <button class="mb" data-m="wop">🎲 Wahrheit oder Pflicht<small>Fragen und Aufgaben passend zur Stufe</small></button>
       <button class="mb" data-m="typ">🎯 Typ-Modus: ${typOn() ? 'an' : 'aus'}<small>Typ-Test, wer dreht, was gelernt wurde</small></button>
+      <button class="mb" data-m="kt">⏱ Kommando-Training<small>Spielzeug wählen, Härte und Schmutzigkeit einstellen, Befehl mit Timer</small></button>
+      <button class="mb" data-m="sk">⛓ Sklaven-Training<small>Gehorsam üben, fast nur Arsch mit Lochwechsel, Arsch → Maul, zwei Spermaspiele</small></button>
       <button class="mb" data-m="bdsm" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}>⛓ BDSM – Hart & schmutzig<small>Dominanz, Fesseln, Schmerz, Benutzen, Dreckig</small></button>
       <button class="mb" data-m="lib">📚 Vorlagen<small>Fertige und eigene Spiele</small></button>
       <button class="mb" data-m="mode">${isSlot() ? '🎡 Glücksrad' : '🎰 Slotmaschine'}<small>${isSlot() ? 'Ein Rad nach dem anderen drehen' : 'Alle Räder auf einmal ziehen'}</small></button>
@@ -4433,6 +4640,8 @@ $('#menu').addEventListener('click', e => {
     case 'timer': close(); openTimer(); break;
     case 'extrem': close(); xtStart(); break;
     case 'bdsm': if (stufeCap() >= 4) close(); bdStart(); break;
+    case 'kt': { const k = KT(); if (k.mode === 'sk') k.mode = 'cmd'; ktOpen(); break; }
+    case 'sk': skOpen(); break;
     case 'typ': typOpen(); break;
     case 'edge': close(); edgeOpen(); break;
     case 'wish': close(); wishOpen(); break;
@@ -4749,7 +4958,12 @@ function resultButtons(w, f, i, target, done) {
   $('#rGift').onclick = () => giftOpen(f.text || resultLine(w, f, i));
   const real = w && w.fields && w.fields[i], n = NM(), who = TYP().turn;
   $('#rDone').classList.toggle('on', !!real && !target);
-  $('#rdQ').textContent = `Wie wurde es für ${who === 'a' ? n.A : n.B} erfüllt?`;
+  const side = S.settings.simple !== false;   // Einfache Ansicht: Knöpfe seitlich, groß
+  if (side && $('#rDone').parentNode !== $('#rBtns')) $('#rBtns').prepend($('#rDone'));
+  if (!side && $('#rDone').parentNode !== $('#rText')) $('#rText').appendChild($('#rDone'));
+  $('#rdQ').textContent = side ? 'Erledigt?' : `Wie wurde es für ${who === 'a' ? n.A : n.B} erfüllt?`;
+  const L = {2:side ? '✔ Ja' : '✔ Erfüllt', 0:side ? '✘ Nein' : '✘ Nicht erfüllt'};
+  document.querySelectorAll('#rDone [data-done]').forEach(b => { if (L[b.dataset.done]) b.textContent = L[b.dataset.done]; });
   $('#rDone').onclick = e => { const b = e.target.closest('[data-done]'); if (!b) return;
     if ($('#rDone').dataset.lock) return; $('#rDone').dataset.lock = 1;
     b.classList.add('on'); doneMark(w, f, i, +b.dataset.done); setTimeout(() => { delete $('#rDone').dataset.lock; done(null); }, 900); };
@@ -4757,8 +4971,12 @@ function resultButtons(w, f, i, target, done) {
 // Erfüllt? ✔ = Herz + lernt dazu · ½ / ✘ = die nächsten Runden gehen eher in Richtung dessen, für den es nicht erfüllt wurde
 function doneMark(w, f, i, v) {
   const st = S.x.stats; st.full = st.full || 0; st.part = st.part || 0; st.no = st.no || 0;
-  if (v === 2) { st.full++; kissFx(); st.kisses++; xtDone(f); heartReward(); typLearn(f, 0.3); }
-  else { v === 1 ? st.part++ : st.no++; typFavor(v === 1 ? 1 : 2, f); }
+  if (v === 3) {   // Nächstes Mal: merken, kommt auf dem Startbildschirm
+    const t = String(f.kcmd || f.text || resultLine(w, f, i)).replace(/\n/g, ' · ');
+    (S.x.later = S.x.later || []).unshift({text:t, at:Date.now()}); S.x.later = S.x.later.slice(0, 30);
+    toast('⏭ Gemerkt fürs nächste Mal', 2500); save(); return; }
+  if (v === 2) { st.full++; kissFx(); st.kisses++; xtDone(f); ktDone(f, true); heartReward(); typLearn(f, 0.3); }
+  else { v === 1 ? st.part++ : st.no++; ktDone(f, false); typFavor(v === 1 ? 1 : 2, f); }
   save();
 }
 function typFavor(nRounds, f) {
@@ -4775,7 +4993,7 @@ async function resultVoice(w, f, i) {
   }
   if (S.settings.speakMain) speak(resultLine(w, f, i) + (RES.line && S.settings.lines ? '. ' + RES.line : ''));
 }
-function resultCleanup() { $('#result').classList.remove('reveal'); if (RES.audio) { RES.audio.pause(); RES.audio = null; } }
+function resultCleanup() { ktStop(); $('#result').classList.remove('reveal'); if (RES.audio) { RES.audio.pause(); RES.audio = null; } }
 function smack() {
   const a = ac(); if (!a || !S.settings.sound) return;
   const len = 0.12, buf = a.createBuffer(1, Math.floor(a.sampleRate * len), a.sampleRate), d = buf.getChannelData(0);
@@ -5063,6 +5281,246 @@ function xtDown(f) {
   save();
 }
 
+/* ---------- Kommando-Training ----------
+   Vorher: Spielzeug und Werkzeug wählen, Härte und Schmutzigkeit (1–5) einstellen.
+   Mehrere Räder setzen eine Befehlszeile zusammen: Wohin → Womit → Wie → Extra → Wie lange, dann läuft der Timer.
+   Ablauf „Arsch → Maul → Fotze“: drei Stationen mit Timer, dazwischen Kondom wechseln oder abwaschen.
+   Training: 3× „Ja“ = Stufe hoch (länger), „Nein“ = Stufe zurück. Tabus aus dem Fragebogen fliegen raus. */
+const KT_TOYS = [['dildo', 'Dildo'], ['vib', 'Vibrator'], ['wand', 'Massagestab'], ['plug', 'Plug'], ['kugeln', 'Analkugeln'], ['maschine', 'Fickmaschine']];
+const KT_WERK = [['fessel', 'Fesseln'], ['augen', 'Augenbinde'], ['knebel', 'Knebel'], ['paddel', 'Paddel / Gerte'], ['klemmen', 'Nippelklemmen'], ['leine', 'Halsband & Leine'], ['spreiz', 'Spreizstange'], ['wachs', 'Wachs']];
+const KT = () => { const k = S.x.kt = S.x.kt || {}; k.lv = k.lv || 1; k.n = k.n || 0; k.h = k.h || 3; k.d = k.d || 3; k.tools = k.tools || ['dildo', 'vib', 'fessel', 'augen']; k.mode = k.mode || 'cmd'; k.dur = k.dur || 60; return k; };
+const ktSec = s => Math.round(s * (1 + 0.2 * (KT().lv - 1)) / 5) * 5;
+const ktHas = t => KT().tools.includes(t);
+function ktHoles() {
+  return [['maul', 'INS MAUL', ['vor.oral_sie']], ['fotze', 'IN DIE FOTZE', []], ['arsch', 'IN DEN ARSCH', ['fin.arsch']]].filter(h => !h[2].some(isTabu));
+}
+function ktWith(h) {
+  const o = [['MIT DEM SCHWANZ', 1], ['MIT DEN FINGERN', 1]];
+  if (h !== 'maul') o.push(['MIT DER ZUNGE', 1]);
+  if (ktHas('dildo')) o.push(['MIT DEM DILDO', 1]);
+  if (ktHas('vib') && h !== 'maul') o.push(['MIT DEM VIBRATOR', 1]);
+  if (ktHas('wand') && h === 'fotze') o.push(['MASSAGESTAB AN DIE KLIT', 1]);
+  if (ktHas('plug') && h === 'arsch' && !isTabu('toy.plug')) o.push(['PLUG REIN – UND DRIN LASSEN', 1]);
+  if (ktHas('kugeln') && h === 'arsch') o.push(['ANALKUGELN', 1]);
+  if (ktHas('maschine') && h !== 'maul') o.push(['DIE FICKMASCHINE', 1]);
+  return o;
+}
+const KT_HOW = [null, ['ganz langsam', 'zärtlich und tief', 'nur die Spitze'], ['gleichmäßig im Takt', 'genüsslich tief', 'langsam rein, schnell raus'],
+  ['hart', 'schnell und fest', 'tief und kräftig'], ['richtig hart', 'ohne Pause', 'bis zum Anschlag'], ['rücksichtslos', 'so hart es geht', 'ohne Gnade, bis sie zittert']];
+const KT_DIRT = [null, ['dabei küssen', 'in die Augen schauen'], ['Dirty Talk dabei', 'sie sagt, wie geil es ist'], ['mit viel Spucke', 'sie bettelt um mehr'],
+  ['spuck ihr in den Mund', 'beschimpf sie dabei', 'sie sabbert alles voll'], ['nenn sie deine Schlampe', 'sie leckt danach alles sauber', 'alles einsauen – Laken egal']];
+const KT_TOOLTXT = {fessel:'gefesselt', augen:'mit Augenbinde', knebel:'geknebelt', paddel:'vorher 5 mit dem Paddel', klemmen:'Klemmen an die Nippel', leine:'an der Leine', spreiz:'mit Spreizstange', wachs:'Wachs auf die Titten'};
+function ktWheels() {
+  const k = KT(), h = clamp(k.h, 1, stufeCap() >= 4 ? 5 : 3), d = clamp(k.d, 1, stufeCap() >= 4 ? 5 : 3), F = x => x.filter(t => textOk(t[0] || t));
+  const durs = [0.5, 1, 1.5, 2].map(m => ktSec(k.dur * m));
+  const howF = [...KT_HOW[h], ...(h > 1 ? KT_HOW[h - 1].slice(0, 1) : [])];
+  const dirtF = [...KT_DIRT[d], ...(d > 1 ? KT_DIRT[d - 1].slice(0, 1) : [])].filter(textOk);
+  const toolF = k.tools.filter(t => KT_TOOLTXT[t] && !(t === 'knebel' && false)).map(t => KT_TOOLTXT[t]).filter(textOk);
+  if (k.mode === 'atm') {
+    const W = [{title:'Womit?', fields:F([['MIT DEM SCHWANZ', 1]].concat(ktHas('dildo') ? [['MIT DEM DILDO', 1]] : [], ktHas('strap') ? [] : [])).map(([t]) => ({t, kstep:1}))},
+      {title:'Wie?', fields:howF.map(t => ({t, kstep:1}))},
+      {title:'Wie lange je Loch?', fields:durs.map(sec => ({t:sec + ' Sekunden je Loch', kt:sec, kmode:'atm'}))}];
+    if (W[0].fields.length < 2) W[0].fields.push({t:'MIT DEM SCHWANZ – FREIE WAHL', kstep:1});
+    return W;
+  }
+  const holes = ktHoles(), W = [{title:'Wohin?', fields:[]}];
+  holes.forEach(([id, t]) => { W[0].fields.push({t, kstep:1, to:W.length}); W.push({title:'Womit? · ' + t.replace(/^IN (DIE|DEN|S) |^INS /, ''), fields:ktWith(id).filter(x => textOk(x[0])).map(([x]) => ({t:x, kstep:1, to:99}))}); });
+  const wi = W.length; W.push({title:'Wie?', fields:howF.map(t => ({t, kstep:1, to:wi + 1}))});
+  W.push({title:'Extra', fields:[...dirtF, ...toolF].slice(0, 12).map(t => ({t, kstep:1, to:wi + 2}))});
+  if (W[wi + 1].fields.length < 2) W[wi + 1].fields.push({t:'ohne Extra', kstep:1, to:wi + 2});
+  W.push({title:'Wie lange?', fields:durs.map(sec => ({t:sec + ' Sekunden', kt:sec, kmode:'cmd'}))});
+  W.forEach(w => w.fields.forEach(f => { if (f.to === 99) f.to = wi; }));
+  return W.filter(w => w.fields.length);
+}
+THEMES.push({name:'Kommando-Training', icon:'⏱', rad:true, kommando:true, stufe:3,
+  get wheels() { return ktWheels(); }, get hint() { return `Trainingsstufe ${KT().lv}/6 · Safeword gilt immer`; }});
+/* ---------- Sklaven-Training: Haltung, Aufgabe, Strenge, Dauer · Gehorsam steigt mit jedem Ja ---------- */
+const SK_RANK = {herr:['Novizin', 'Dienerin', 'Gehorsame', 'Lustsklavin', 'Fickstück', 'sein Eigentum'], herrin:['Novize', 'Diener', 'Gehorsamer', 'Lustsklave', 'Fickstück', 'ihr Eigentum']};
+const skSub = () => KT().role === 'herrin' ? 'Sklave' : 'Sklavin';
+const skRank = () => SK_RANK[KT().role === 'herrin' ? 'herrin' : 'herr'][clamp(KT().lv, 1, 6) - 1];
+function skPos() {
+  const hd = stufeCap() >= 4 && KT().h >= 4, o = [
+    ['KNIEN: Knie breit, Hände auf die Oberschenkel, Blick nach unten', 1], ['WARTEN: Gesicht zur Wand, Hände auf den Rücken', 1],
+    ['INSPEKTION: Stehen, Beine breit, Hände hinter den Kopf', 1], ['PRÄSENTIEREN: Auf alle Viere, Arsch hoch, Beine auseinander', 3],
+    ['BAUCHLAGE: Arme nach vorn, Beine gespreizt, nicht bewegen', 2], ['DANKEN: Stirn auf den Boden, Hände nach vorn', 1]];
+  if (hd && !isTabu('vor.oral_sie')) o.push(['MAUL AUF: Knien, Zunge raus, Hände auf dem Rücken', 4]);
+  if (hd) o.push(['SPREIZEN: Auf den Rücken, Beine selbst weit auseinander halten', 4]);
+  return o.filter(x => x[1] <= Math.max(2, KT().h + 1) && textOk(x[0])).map(x => x[0]);
+}
+function skTasks() {
+  const k = KT(), d = clamp(k.d, 1, stufeCap() >= 4 ? 5 : 3), him = k.role === 'herrin', A = [];
+  const add = (t, lv, tabu) => { if (lv <= d + 1 && !(tabu || []).some(isTabu) && textOk(t)) A.push(t); };
+  add('Bedank dich laut für jeden Befehl', 1); add('Bitte höflich darum, dienen zu dürfen', 1);
+  add(him ? 'Küss ihre Füße, langsam, einen nach dem anderen' : 'Küss seine Füße, langsam, einen nach dem anderen', 1);
+  add(him ? 'Leck sie, bis sie „genug“ sagt' : 'Lutsch seinen Schwanz ohne Hände', 2, him ? ['vor.oral_er'] : ['vor.oral_sie']);
+  add('Fass dich selbst an, aber komm nicht', 2);
+  add(him ? 'Wichs dich vor ihr, bis kurz davor, dann stopp' : 'Zeig deine Fotze und spreiz sie selbst weit auf', 3);
+  add('Bettel laut um Erlaubnis zu kommen', 3);
+  if (ktHas('dildo')) add('Lutsch den Dildo tief, als wär er echt', 3, ['vor.oral_sie']);
+  if (ktHas('plug')) add('Plug rein und die ganze Runde drin lassen', 3, ['fin.arsch', 'toy.plug']);
+  if (ktHas('leine')) add('An der Leine auf allen Vieren durchs Zimmer', 3);
+  if (ktHas('klemmen')) add('Klemmen an die Nippel, kein Laut', 4);
+  add(him ? 'Sag laut: Ich bin dein Fickstück' : 'Sag laut: Ich bin deine Fickschlampe', 4);
+  add('Maul auf, Spucke schlucken, danke sagen', 4, ['vor.oral_sie']);
+  add(him ? 'Leck ihr den Arsch sauber' : 'Leck seinen Schwanz nach jedem Loch sauber', 5, him ? ['fin.arsch'] : ['vor.oral_sie']);
+  add('Ohne Erlaubnis kein Wort, nur nicken', 2);
+  return A;
+}
+const SK_STRICT = [null, ['Mit sanfter Stimme', 'Mit Lob für jede Sekunde'], ['Ruhig, aber bestimmt', 'Jeder Fehler wird gezählt'],
+  ['Streng, ohne Lob', 'Fehler = sofort von vorn'], ['Hart, jeder Fehler kostet einen Schlag', 'Mit Haarzug und strenger Stimme'],
+  ['Gnadenlos, kein Mitleid', 'Wie Eigentum behandelt']];
+const SK_PUN = () => { const p = ['2 Minuten in der Ecke stehen, Hände auf dem Kopf', 'Heute kein Kommen', 'Die Aufgabe noch einmal, doppelt so lang', '10× laut „Ich gehorche“ sagen'];
+  if (ktHas('paddel')) p.push('5 Schläge mit dem Paddel auf den Arsch – mitzählen');
+  if (ktHas('klemmen')) p.push('1 Minute Klemmen an die Nippel');
+  if (ktHas('fessel')) p.push('Die nächste Runde gefesselt');
+  if (ktHas('knebel')) p.push('Die nächste Runde geknebelt');
+  return p.filter(textOk); };
+const SK_SP = {
+  maul:[['Im Maul behalten und zeigen', []], ['Im Maul hin und her sprudeln lassen', []], ['Gurgeln, dann zeigen', []], ['Schlucken, Maul auf und Danke sagen', []],
+    ['Ins Glas tropfen lassen, dann wieder austrinken', []], ['Mit Sperma im Maul weiterlutschen', ['vor.oral_sie']], ['Auf der Zunge zeigen und langsam runterschlucken', []]],
+  gesicht:[['Im Gesicht verreiben', []], ['Mit dem Finger aus dem Gesicht in den Mund', ['fin.mund']], ['Mit dem Löffel aus dem Gesicht füttern', ['fin.mund']],
+    ['Sperma im Gesicht lassen und so weiterlutschen', ['vor.oral_sie']], ['Auf die Zunge schieben, zeigen, schlucken', ['fin.mund']]],
+  mix:[['Schwanz sauber lecken', ['vor.oral_sie']], ['Auf den Titten verreiben', ['fin.brueste']], ['Vom Bauch ablecken', ['fin.mund']],
+    ['Im Maul behalten, dann ins Gesicht laufen lassen', ['fin.mund', 'fin.gesicht']], ['Die letzten Tropfen rauslutschen', ['vor.oral_sie']], ['Mit Sperma im Maul Danke sagen', ['fin.mund']]]};
+const spList = k => SK_SP[k].filter(([t, tb]) => !tb.some(isTabu) && textOk(t)).map(x => x[0]);
+function skHoles() {
+  const o = [];
+  if (!isTabu('fin.arsch')) o.push({id:'arsch', l:'ARSCH', w:6});
+  o.push({id:'fotze', l:'FOTZE', w:2});
+  if (!isTabu('vor.oral_sie')) o.push({id:'maul', l:'MAUL', w:2});
+  return o;
+}
+function skWheels() {
+  const k = KT(), h = clamp(k.h, 1, stufeCap() >= 4 ? 5 : 3), durs = [0.5, 1, 1.5, 2].map(m => ktSec(k.dur * m));
+  const toolF = k.tools.filter(t => KT_TOOLTXT[t]).map(t => KT_TOOLTXT[t]).filter(textOk);
+  const W = [{title:'Haltung', fields:skPos().map(t => ({t, kstep:1}))},
+    {title:'Aufgabe', fields:skTasks().slice(-12).map(t => ({t, kstep:1}))},
+    {title:'Wie streng?', fields:[...SK_STRICT[h], ...toolF.slice(0, 4)].map(t => ({t, kstep:1}))},
+    {title:'Wie lange?', fields:durs.map(sec => ({t:sec + ' Sekunden halten', kt:sec, kmode:'sk', end:true}))}];
+  // Fick-Phase: das Rad sucht das erste Loch, danach wechselt der Timer + Rad selbst · fast nur Arsch, aber alle Löcher kommen dran
+  const holes = skHoles(), seg = ktSec(k.dur);
+  W.push({title:'Ficken: welches Loch?', fields:holes.map(x => ({t:x.l, w:x.w, kt:seg, kmode:'skf', end:true}))});
+  // Finale: Arsch → Maul, dann 2 Spermaspiele
+  const atm = stufeCap() >= 4 && !isTabu('fin.arsch') && !isTabu('vor.oral_sie');
+  const fi = W.length, sp1m = fi + 1, sp1g = fi + 2, sp2 = fi + 3;
+  const fin = [];
+  if (atm && !isTabu('fin.mund')) fin.push({t:'ARSCH → MAUL\ndann ins Maul spritzen', kt:seg, kmode:'atm2', to:sp1m});
+  if (atm && !isTabu('fin.gesicht')) fin.push({t:'ARSCH → MAUL\ndann ins Gesicht spritzen', kt:seg, kmode:'atm2', to:sp1g});
+  if (!fin.length) { if (!isTabu('fin.mund')) fin.push({t:'Ins Maul spritzen', to:sp1m}); if (!isTabu('fin.gesicht')) fin.push({t:'Ins Gesicht spritzen', to:sp1g}); }
+  if (fin.length === 1) fin.push(Object.assign({}, fin[0], {t:fin[0].t + '\nund betteln lassen'}));
+  if (fin.length) {
+    W.push({title:'Finale', fields:fin});
+    const m = spList('maul'), g = spList('gesicht'), x = spList('mix');
+    W.push({title:'Spermaspiel 1 · Maul', fields:(m.length >= 2 ? m : [...m, ...x]).map(t => ({t, to:sp2}))});
+    W.push({title:'Spermaspiel 1 · Gesicht', fields:(g.length >= 2 ? g : [...g, ...x]).map(t => ({t, to:sp2}))});
+    W.push({title:'Spermaspiel 2', fields:(x.length >= 2 ? x : [...x, ...g.slice(-2), ...m.slice(-2)]).map(t => ({t, end:true}))});
+  }
+  return W.filter(w => w.fields.length >= 2).length === W.length ? W : W.map(w => w.fields.length >= 2 ? w : Object.assign(w, {fields:[...w.fields, ...w.fields]}));
+}
+THEMES.push({name:'Sklaven-Training', icon:'⛓', rad:true, sklave:true, stufe:3,
+  get wheels() { return skWheels(); }, get hint() { return `${skSub()}: ${skRank()} (Stufe ${KT().lv}/6) · Safeword gilt immer`; }});
+function skOpen() { const k = KT(); k.mode = 'sk'; save(); ktOpen(); }
+let KTT = null;   // laufender Timer
+function ktStop() { if (KTT) { clearInterval(KTT.iv); KTT = null; } const el = $('#rKt'); if (el) { el.className = ''; el.innerHTML = ''; } }
+function ktShow(f) {
+  const cmd = LASTRUN.slice(0, -1).join('\n'), sec = +f.kt || 60;
+  let steps;
+  if (f.kmode === 'atm') {
+    steps = [{l:'IN DEN ARSCH', s:sec}, {l:'Kondom wechseln oder abwaschen', s:20, pause:true}, {l:'INS MAUL', s:sec}, {l:'IN DIE FOTZE', s:sec}];
+    if (isTabu('fin.arsch')) steps = steps.slice(2); if (isTabu('vor.oral_sie')) steps = steps.filter(x => x.l !== 'INS MAUL');
+    $('#rTxt').textContent = 'ARSCH → MAUL → FOTZE\n' + cmd;
+  } else if (f.kmode === 'skf') {
+    const H = skHoles(), first = H.find(x => x.l === String(f.text).trim()) || H[0], n = Math.min(4 + KT().lv, 10);
+    const pickH = () => { let r = Math.random() * H.reduce((a, x) => a + x.w, 0); for (const x of H) if ((r -= x.w) <= 0) return x; return H[0]; };
+    const seq = [first]; for (let j = 1; j < n; j++) seq.push(pickH());
+    H.forEach(x => { if (!seq.includes(x)) { const cand = seq.map((y, j) => j).filter(j => j > 0 && seq.filter(z => z === seq[j]).length > 1); if (cand.length) seq[pick(cand)] = x; } });
+    steps = [];
+    seq.forEach((x, j) => {
+      if (j > 0) { steps.push({l:'Das Rad wählt …', s:2, rad:H.map(y => y.l), to:x.l}); if (seq[j - 1].id === 'arsch' && x.id !== 'arsch') steps.push({l:'Abwischen / Kondom wechseln', s:15, pause:true}); }
+      steps.push({l:x.id === 'arsch' ? 'IN DEN ARSCH' : x.id === 'maul' ? 'INS MAUL' : 'IN DIE FOTZE', s:sec});
+    });
+    $('#rTxt').textContent = steps[0].l;
+  } else if (f.kmode === 'atm2') {
+    steps = [{l:'IN DEN ARSCH', s:sec}, {l:'Kondom ab / abwischen', s:20, pause:true}, {l:'INS MAUL', s:Math.round(sec / 2)}];
+    $('#rTxt').textContent = String(f.text);
+  } else if (f.kmode === 'sk') {
+    steps = [{l:'Haltung einnehmen', s:5, pause:true}, {l:'Halten und gehorchen', s:sec}];
+    $('#rTxt').textContent = skSub().toUpperCase() + ', GEHORCHE:\n' + cmd;
+  } else { steps = [{l:'Los!', s:sec}]; $('#rTxt').textContent = cmd; }
+  f.kcmd = $('#rTxt').textContent;
+  { const L = $('#rTxt').textContent.length; $('#rTxt').style.fontSize = L > 110 ? 'min(5.2vh,3.6vw)' : L > 60 ? 'min(6.5vh,4.5vw)' : 'min(9vh,6vw)'; }
+  let k = 0, left = steps[0].s; const el = $('#rKt'); el.className = 'on';
+  const mm = x => Math.floor(x / 60) + ':' + String(x % 60).padStart(2, '0');
+  let flk = 0;
+  const draw = () => { clearInterval(flk);
+    if (steps[k].rad) { const R = steps[k].rad; let q = 0; el.innerHTML = '<small>Das Rad wählt das nächste Loch</small>🎡 ' + R[0];
+      flk = setInterval(() => { if (!KTT || !steps[k] || !steps[k].rad) return clearInterval(flk); const st = steps[k], fin = ++q >= 14; el.innerHTML = '<small>Das Rad wählt das nächste Loch</small>🎡 ' + (fin ? st.to : R[q % R.length]); beep(fin, fin ? 0.2 : 0.02, 700 + 100 * (q % 4)); if (fin) clearInterval(flk); }, 110); return; }
+    el.innerHTML = `<small>${esc(steps[k].l)}${steps.length > 1 ? ` · ${k + 1}/${steps.length}` : ''}</small>⏱ ${mm(left)}`; };
+  ktStop(); el.className = 'on'; draw();
+  KTT = {iv:setInterval(() => {
+    left--; if (left <= 3 && left > 0) beep(false, 0.08, 1400);
+    if (left > 0) { draw(); return; }
+    beep(true, 0.35, 900); if (navigator.vibrate) try { navigator.vibrate(300); } catch (e) {}
+    k++;
+    if (k >= steps.length) { clearInterval(KTT.iv); KTT = null; el.className = 'on end'; el.innerHTML = '<small>Zeit um</small>✔ Geschafft?'; speak('Zeit um'); return; }
+    left = steps[k].s; speak(steps[k].l); draw();
+    if (f.kmode === 'skf' && !steps[k].rad && !steps[k].pause) $('#rTxt').textContent = steps[k].l;
+  }, 1000)};
+}
+function ktDone(f, ok) {
+  if (!f || !f.kt) return;
+  const k = KT();
+  if (f.kmode === 'sk') {
+    k.gp = (k.gp || 0) + (ok ? 1 : 0);
+    if (!ok) { const p = pick(SK_PUN()); setTimeout(() => { toast('⛓ Strafe: ' + p, 7000); speak('Strafe. ' + p); }, 300); }
+  }
+  if (ok) { k.n++; if (k.n >= 3 && k.lv < 6) { k.lv++; k.n = 0; toast(f.kmode === 'sk' ? `⛓ Aufgestiegen: ${skSub()} ist jetzt „${skRank()}“ (${k.lv}/6)` : `⏱ Training: Stufe ${k.lv}/6 – ab jetzt länger`, 4500); } else if (k.lv < 6) toast(`⏱ Training: ${k.n}/3 bis Stufe ${k.lv + 1}`, 2500); }
+  else if (k.lv > 1) { k.lv--; k.n = 0; toast(`⏱ Training: zurück auf Stufe ${k.lv}/6`, 3000); }
+  save();
+}
+function ktOpen() {
+  const k = KT(), cap = stufeCap(), X = $('#kt'), mx = cap >= 4 ? 5 : 3;
+  const chip = ([id, n]) => `<button class="ktT ${ktHas(id) ? 'on' : ''}" data-kt="tool" data-id="${id}">${esc(n)}</button>`;
+  const atmOk = !isTabu('fin.arsch') && !isTabu('vor.oral_sie') && cap >= 4;
+  X.innerHTML = `<button class="ovx" data-kt="x">✕</button><div class="ovin">
+    <h2 class="hTitle" style="font-size:46px">${k.mode === 'sk' ? '⛓ Sklaven-Training' : '⏱ Kommando-Training'}</h2>
+    <p class="hMotto">${k.mode === 'sk' ? 'Erst Gehorsam üben, dann wird gefickt (fast nur Arsch, Lochwechsel nach Timer und Rad), zum Schluss Arsch → Maul und zwei Spermaspiele.' : 'Die Räder setzen einen Befehl zusammen, dann läuft die Zeit. Mit jedem „Ja“ wird es ein bisschen mehr.'}</p>
+    ${k.mode === 'sk' ? `<div class="hLab">Wer gehorcht?</div><div class="ktGrid">
+      <button class="ktT ${k.role !== 'herrin' ? 'on' : ''}" data-kt="role" data-id="herr">Er ist der Herr, sie die Sklavin</button>
+      <button class="ktT ${k.role === 'herrin' ? 'on' : ''}" data-kt="role" data-id="herrin">Sie ist die Herrin, er der Sklave</button></div>
+      <p class="tip">${esc(skSub())} ist gerade: <b>${esc(skRank())}</b> (Stufe ${k.lv}/6). Bei „Nein“ gibt es eine Strafe vom Rad.</p>` : ''}
+    <div class="hLab">Spielzeug</div><div class="ktGrid">${KT_TOYS.map(chip).join('')}</div>
+    <div class="hLab">Werkzeug</div><div class="ktGrid">${KT_WERK.map(chip).join('')}</div>
+    <div class="hLab">Einstellen</div>
+    <div class="ktSl"><b>Härte</b><input type="range" id="ktH" min="1" max="${mx}" value="${Math.min(k.h, mx)}"><output id="ktHo">${Math.min(k.h, mx)}</output></div>
+    <div class="ktSl"><b>Schmutzigkeit</b><input type="range" id="ktD" min="1" max="${mx}" value="${Math.min(k.d, mx)}"><output id="ktDo">${Math.min(k.d, mx)}</output></div>
+    <div class="ktSl"><b>Grundzeit</b><input type="range" id="ktS" min="15" max="180" step="15" value="${k.dur}"><output id="ktSo">${k.dur}s</output></div>
+    ${cap < 4 ? '<p class="tip">Härte und Schmutzigkeit 4–5 gibt es, wenn beide im Fragebogen Heavy Duty erlauben.</p>' : ''}
+    <div class="hLab">Ablauf</div><div class="ktGrid">
+      <button class="ktT ${k.mode === 'cmd' ? 'on' : ''}" data-kt="mode" data-id="cmd">🎡 Befehlszeile aus mehreren Rädern</button>
+      <button class="ktT ${k.mode === 'atm' ? 'on' : ''}" data-kt="mode" data-id="atm" ${atmOk ? '' : 'disabled style="opacity:.4"'}>🍑 Arsch → Maul → Fotze</button>
+      <button class="ktT ${k.mode === 'sk' ? 'on' : ''}" data-kt="mode" data-id="sk" ${cap >= 3 ? '' : 'disabled style="opacity:.4"'}>⛓ Sklaven-Training</button></div>
+    ${k.mode === 'sk' && !atmOk ? '<p class="tip">Arsch → Maul im Finale kommt nur, wenn beide Heavy Duty erlauben und Anal und Blasen nicht auf Tabu stehen. Sonst endet es direkt mit dem Abspritzen und den Spermaspielen.</p>' : ''}
+    ${k.mode === 'atm' ? '<p class="tip">Zwischen Arsch und Maul kommt automatisch eine Pause: Kondom wechseln oder abwaschen. Vom Arsch direkt in Mund oder Muschi kann Infektionen auslösen.</p>' : ''}
+    <p class="tip">Trainingsstufe <b>${k.lv}/6</b> (${k.n}/3 bis zur nächsten). Die Zeiten werden pro Stufe 20 % länger.</p>
+    <button class="hbtn hGo" data-kt="go">▶ Los geht's</button></div>`;
+  ['H', 'D', 'S'].forEach(c => { const i = $('#kt' + c); i.oninput = () => { $('#kt' + c + 'o').textContent = i.value + (c === 'S' ? 's' : ''); }; });
+  $('#menu').classList.remove('show'); closeHome(); X.classList.add('show');
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('#kt button'); if (!b) return; const k = KT(), d = b.dataset;
+  const keep = () => { k.h = +$('#ktH').value; k.d = +$('#ktD').value; k.dur = +$('#ktS').value; };
+  if (d.kt === 'x') { $('#kt').classList.remove('show'); return; }
+  if (d.kt === 'tool') { keep(); k.tools = ktHas(d.id) ? k.tools.filter(x => x !== d.id) : [...k.tools, d.id]; save(); ktOpen(); return; }
+  if (d.kt === 'mode') { keep(); k.mode = d.id; save(); ktOpen(); return; }
+  if (d.kt === 'role') { keep(); k.role = d.id; save(); ktOpen(); return; }
+  if (d.kt === 'go') { keep(); save(); $('#kt').classList.remove('show');
+    const sk = k.mode === 'sk', W = sk ? skWheels() : ktWheels();
+    if (W.length < 2 || W[0].fields.length < 2) { toast('Zu viel steht auf Tabu – wählt mehr Spielzeug oder einen anderen Ablauf.', 5000); return; }
+    if (k.h >= 4 && baseStufe() < 4) setStufe(4, true);
+    loadTheme(THEMES.findIndex(x => sk ? x.sklave : x.kommando)); setTimeout(() => doSpin(0), 450); }
+});
+
 /* ---------- Geführter Abend „Heute Nacht“ ---------- */
 const PHASES = [
   {name:'Ankommen', icon:'🕯', d:'Wo soll es heute passieren?', cats:['ort'], lv:[1, 2], n:1},
@@ -5349,6 +5807,10 @@ function hlAdd(w, f, i) {
   if (ex) { ex.n++; ex.at = Date.now(); } else H.unshift({text:t, n:1, at:Date.now()});
   H.sort((a, b) => b.n - a.n || b.at - a.at); S.x.hl = H.slice(0, 30);
 }
+function laterCard() {
+  const L = S.x.later || []; if (!L.length) return '';
+  return `<div class="ovcard"><h4>⏭ Fürs nächste Mal (${L.length})</h4>${L.slice(0, 10).map((x, j) => `<p>${esc(x.text)} <button class="pill" data-h="later" data-v="${j}">✔ erledigt</button></p>`).join('')}</div>`;
+}
 function hlCard() {
   const H = (S.x.hl || []).slice(0, 6); if (!H.length) return '';
   return `<div class="ovcard"><h4>🔥 Eure Highlights</h4>${H.map(x => `<p>${esc(x.text)} ${x.n > 1 ? `<b style="color:var(--acc2)">×${x.n}</b>` : ''}</p>`).join('')}
@@ -5509,6 +5971,7 @@ function whoUi() {
 $('#bWho').onclick = () => { if (busy) return; const T = TYP(); T.turn = other(T.turn); save(); whoUi(); if (typOn()) { applyStufe(); typToast(); } else toast(`👤 Jetzt dreht ${T.turn === 'a' ? NM().A : NM().B}`, 1800); };
 /* ---------- Zurück-Pfeil: von überall ins Hauptmenü ---------- */
 function goMenu() {
+  cmdHide();
   if ($('#result').classList.contains('show')) $('#rClose').click();
   if ($('#timerView').classList.contains('show')) $('#tClose').click();
   $('#quiz').classList.remove('show');
@@ -5516,6 +5979,7 @@ function goMenu() {
   if ($('#mimp').classList.contains('show')) closeMediaDlg(false);
   $('#upd').classList.remove('show');
   edgeStop(); TT = null; qeHide();
+  ktStop();
   document.querySelectorAll('.ov.show').forEach(o => o.classList.remove('show'));
   openMenu();
 }
