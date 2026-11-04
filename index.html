@@ -383,6 +383,8 @@
   #vgEd .b.on{background:#2e5a1c;border-color:#9fe39f}
   .vgc{transition:transform .15s}
   .qeSt summary{cursor:pointer;font:700 14px system-ui;color:#e9c77a;margin:6px 0}.qeSt textarea{min-height:90px}
+  .impBar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 14px;background:#1f160c;border:1px solid #8a6a36;border-radius:12px;margin:4px 14px}
+  .impBar b{color:#ffe08a;margin-right:6px}.impBar .tip{flex-basis:100%;color:#d8c39a;font-size:14px}
   .vgc .st{position:absolute;top:6px;right:6px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.7);border:2px solid #8a7a5a;color:#d8c8a0;font:800 19px/1 system-ui;display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:2}
   .vgc .st.on{border-color:#ffd24a;color:#ffd24a;box-shadow:0 0 10px rgba(255,210,74,.6)}
   .vgc .tg{position:absolute;left:6px;right:6px;bottom:30px;font:700 11px system-ui;color:#ffe08a;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2867,7 +2869,7 @@ async function vgAdd(files, quiet) {
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   importAdd(out.filter(g => list.some(f => f.name === g.media.name)));
   save();
-  if (!quiet) { GAL.tab = 'vid'; vgRender(); toast(`${n} gespeichert und in den Import-Ordner gelegt – mit „🧭 Einsortieren“ ordnest du sie Video für Video ein`, 5000); }
+  if (!quiet) { GAL.tab = 'vid'; vgRender(); impBar(n, all.length); }
   return out;
 }
 // Medien ab einem Feld einsetzen (Rad: dieses und folgende Felder; Joker/Timer: nur das erste)
@@ -2927,6 +2929,21 @@ const galTags = mid => { const g = S.gal.find(x => x.media.id === mid); return g
 const tagLabel = id => { const it = itemById(id); return it ? it.l : id; };
 /* ---------- Import-Ordner: alles Neue landet zuerst hier, das Einsortier-Tool ordnet es ein ---------- */
 const IMPORT = 'Import';
+/* Nach jedem Import: Leiste mit „＋ Weitere“ – so gehen viele Videos auch, wenn das Auswahlfenster nur eins nimmt */
+const IMP = {sum:0};
+function impBar(n, picked) {
+  IMP.sum += n; const row = $('#vgSaveRow'); row.style.display = 'block';
+  const one = picked === 1 && window.AndroidApp;
+  row.innerHTML = `<div class="impBar"><b>✔ ${n} neu gespeichert${IMP.sum > n ? ` · zusammen ${IMP.sum}` : ''} · ${importList().length} im Import-Ordner</b>
+    <button class="b pri" data-imp="gal">＋ Weitere aus Galerie</button><button class="b" data-imp="doc">＋ Weitere aus Dateien-App</button>
+    <button class="b pri" data-imp="sort">🧭 Jetzt einsortieren</button><button class="b" data-imp="x">✕</button>
+    ${one ? '<div class="tip">Nur eins ausgewählt? In der Galerie einfach mehrere Videos antippen (Häkchen), dann „Fertig“/„Hinzufügen“. In der Dateien-App das erste Video lange drücken, dann weitere antippen. Oder hier mit „＋ Weitere“ eins nach dem anderen dazunehmen.</div>' : ''}</div>`;
+  row.onclick = e => { const b = e.target.closest('[data-imp]'); if (!b) return; const a = b.dataset.imp;
+    if (a === 'gal') { $('#vgIn').value = ''; $('#vgIn').click(); }
+    else if (a === 'doc') { $('#vgInDoc').value = ''; $('#vgInDoc').click(); }
+    else if (a === 'sort') { row.innerHTML = ''; IMP.sum = 0; soOpen(false); }
+    else { row.innerHTML = ''; IMP.sum = 0; } };
+}
 function importAdd(gs) {
   if (!gs || !gs.length) return; vcatAdd(IMPORT);
   gs.forEach(g => { if (!S.vlib.some(x => x.cat === IMPORT && x.media.id === g.media.id)) S.vlib.push({cat:IMPORT, media:{...g.media}}); });
@@ -4521,7 +4538,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110312;
+const APP_BUILD = 2026110313;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
