@@ -26,7 +26,7 @@
 -->
 <style>
   :root{
-    --bg:#050505; --rail:132px;
+    --bg:#050505; --rail:150px;
     --cream:#ecdfc2; --red:#6a1016; --bronze:#a8844e; --metal1:#3c3c40; --metal2:#141416;
   }
   *{box-sizing:border-box}
@@ -496,7 +496,7 @@
   body.sk #cmdBar.on:not(.fin){top:14vh;bottom:14vh;display:flex;flex-direction:column;justify-content:center;background:rgba(8,4,5,.88)}
   body.sk #cmdBar .cbX{font-size:clamp(34px,6.5vw,96px)}
   body.sk #cmdBar .cbPrev{font-size:clamp(15px,2vw,24px);margin-bottom:2vh}
-  @media (max-width:700px){body.sk #cmdBar.on:not(.fin){top:124px;bottom:10px}body.sk #cmdBar .cbX{font-size:30px}}
+  @media (max-width:700px){body.sk #cmdBar.on:not(.fin){top:124px;bottom:10px}}
   #cmdBar.fin{justify-content:flex-start}
   #cmdBar.fin>:first-child{margin-top:auto}#cmdBar.fin>:last-child{margin-bottom:auto}
   @media (max-width:700px){#cmdBar{left:10px!important;right:calc(var(--rail) + 8px);padding:10px 12px}
@@ -663,7 +663,7 @@
   body.simple #bWho{display:block}
   #portrait{display:none}
   /* Ergebnis in der einfachen Ansicht: nur die Anweisung, groß; Erledigt-Knöpfe seitlich */
-  body.simple #rPre,body.simple #rLine{display:none}
+  body.simple #rPre,body.simple #rLine,body.sk #rPre,body.sk #rLine,body.sk .rdS{display:none}
   body.simple #rTxt{font-size:min(17vh,10vw);line-height:1.04}
   body.simple #result.hold #rTxt{font-size:min(13vh,7.4vw)}
   #rBtns #rDone{position:static;opacity:1!important;animation:none!important;transform:none;display:none;width:100%;margin:0}
@@ -687,15 +687,22 @@
   @media (max-width:520px){.ktSl{grid-template-columns:1fr 50px}.ktSl b{grid-column:1/-1}}
   /* ---------- Einfache Ansicht 2.0: große Knöpfe, ein DREHEN für alles ---------- */
   body.simple #bHome{display:none}
-  body.simple .wspin{display:none}
-  body.simple #wbtns .hist{display:none}
-  body.simple #bSpin{display:block!important}
+  .wspin{display:none!important}
+  #wbtns .hist{display:none}
+  #bSpin{display:block!important}
+  #rail .spin{width:136px;height:136px;font-size:21px}
+  #spinNext.on{display:block!important}
+  /* ☰ MENÜ in der Ecke unten rechts, in beiden Ansichten */
+  #bMenu{display:block!important;position:fixed;right:calc((var(--rail) - 132px)/2);bottom:14px;width:132px;min-height:58px;z-index:31;font-size:17px;border-radius:16px}
+  body.simple:not(.setupOpen) #gear{display:none}
+  body:not(.simple) #gear{right:calc(var(--rail) + 8px);bottom:14px}
+  #bUpd{bottom:84px}
   body.simple{--rail:150px}
   body.simple #rail{gap:16px}
   body.simple #rail .mbtn{width:132px;min-height:62px;font-size:17px;border-radius:16px}
   body.simple #rail .spin{width:136px;height:136px;font-size:21px}
   body.simple #stufeChip{width:132px}
-  @media (max-width:520px){body.simple{--rail:128px} body.simple #rail .mbtn,body.simple #stufeChip{width:116px;font-size:15px} body.simple #rail .spin{width:116px;height:116px;font-size:19px}}
+  @media (max-width:520px){body.simple{--rail:128px} body.simple #rail .mbtn,body.simple #stufeChip{width:116px;font-size:15px} #rail .spin{width:116px!important;height:116px!important;font-size:19px} #bMenu{width:116px;right:calc((var(--rail) - 116px)/2)}}
   #spinNext{display:none;max-width:130px;margin-top:-8px;font-size:14px;font-weight:700;color:#e9c77a;text-align:center;line-height:1.2}
   body.simple #spinNext.on{display:block}
   .hGrid.big{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
@@ -1326,7 +1333,7 @@ function visibleIdx() { return S.wheels.map((w, i) => w.enabled ? i : -1).filter
 const TOP_K = 1.23, H_K = 2.25;
 function fitR(cw, ch) { return Math.min(cw / 2.04, ch / H_K); }
 function gridLayout(n, W, H, btnH = 0) {
-  if (n > 1 && S.settings.simple !== false && !isSlot()) return focusLayout(n, W, H);
+  if (n > 1 && !isSlot()) return focusLayout(n, W, H);
   const bh = n > 1 ? btnH : btnH * 0.62;   // Platz unter dem Rad: Dreh-Button (ab 2 Rädern) + Ergebnisleiste
   let best = null;
   for (let cols = 1; cols <= n; cols++) {
@@ -1354,7 +1361,7 @@ function focusLayout(n, W, H) {
 function bigRect(W, H) { const R = fitR(W, H); return {cx:W / 2, cy:(H - H_K * R) / 2 + TOP_K * R, R}; }
 
 function sizeCanvas(cv) {
-  const r = cv.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, 2);
+  const r = {width:cv.clientWidth, height:cv.clientHeight}, d = Math.min(window.devicePixelRatio || 1, 2);   // clientWidth: unabhängig vom Verkleinern im Sklaven-Training
   const w = Math.max(1, Math.round(r.width * d)), h = Math.max(1, Math.round(r.height * d));
   if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
   return {W:w, H:h, d};
@@ -1408,7 +1415,7 @@ function render(now = performance.now()) {
 /* Dreh-Button je Rad: ab 2 Rädern direkt unter dem Rad, bei 1 Rad rechts in der Leiste */
 function placeSpinButtons(vis, rects, d) {
   const box = $('#wbtns'), multi = vis.length > 1;
-  $('#bSpin').style.display = multi ? 'none' : '';
+  $('#bSpin').style.display = '';
   box.style.visibility = focus ? 'hidden' : 'visible';
   const key = multi + '#' + vis.map(i => i + ':' + (S.wheels[i].history || []).join('¦')).join('|');
   if (box.dataset.key !== key) {
@@ -1528,10 +1535,11 @@ async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
 /* Einfache Ansicht: Ergebnis bleibt bis zum nächsten Drehen groß stehen;
    ist die Runde durch, steht nur noch der ganze Ablauf als Befehl da */
 const ROUND = {items:[], idxs:[]};
-const cmdOn = () => S.settings.simple !== false && !isSlot() && S.settings.cmdBar !== false;
+const cmdOn = () => !isSlot() && S.settings.cmdBar !== false;
 function roundAdd(idx, w, txt, depth) {
   const v = visibleIdx();
   if (depth === 0 && (ROUND.idxs.includes(idx) || idx === v[0])) { ROUND.items = []; ROUND.idxs = []; }
+  if (depth === 0) ROUND.chain = ROUND.items.length;
   const f = w.fields.find(x => String(x.text || '').replace(/\n/g, ' ') === txt) || {};
   ROUND.items.push({t:String(w.title || '').trim(), x:String(txt || '').trim(), q:f.qid || '', kt:!!(f.kt || f.kstep)}); ROUND.idxs.push(idx);
 }
@@ -1632,16 +1640,20 @@ function cmdShow(partial) {
       else { ablLearn(used, false); cmdShow(); } };
     speakCmd(txt);
   } else {
-    const last = ROUND.items[ROUND.items.length - 1], prev = ROUND.items.slice(0, -1).map(x => x.x).filter(Boolean);
+    const sk = document.body.classList.contains('sk'), c0 = sk ? Math.min(ROUND.chain || 0, ROUND.items.length - 1) : ROUND.items.length - 1;
+    const cur = ROUND.items.slice(c0), prev = ROUND.items.slice(0, c0).map(x => x.x).filter(Boolean), last = cur[cur.length - 1];
     b.innerHTML = (prev.length ? `<div class="cbPrev">${esc(prev.join(' → '))} →</div>` : '')
-      + (last.t ? `<div class="cbT">${esc(last.t)}</div>` : '') + `<div class="cbX">${esc(last.x)}</div>`;
+      + (cur.length === 1 && last.t ? `<div class="cbT">${esc(last.t)}</div>` : '') + `<div class="cbX">${cur.map(x => esc(x.x)).join('<br>')}</div>`;
     b.className = 'on'; b.onclick = null; wBack(true);
+    if (sk) requestAnimationFrame(() => { const x = b.querySelector('.cbX'); if (!x) return;
+      let fs = Math.min(innerHeight * 0.12, innerWidth * 0.08); x.style.fontSize = fs + 'px';
+      while (fs > 16 && (b.scrollHeight > b.clientHeight + 2 || x.scrollWidth > x.clientWidth + 2)) { fs *= 0.92; x.style.fontSize = fs + 'px'; } });
   }
 }
 /* Einfache Ansicht: der große DREHEN-Knopf nimmt danach automatisch das nächste Rad */
 let LASTW = 0;
 function advanceWheel() {
-  if (S.settings.simple === false || isSlot()) return;
+  if (isSlot()) return;
   const v = visibleIdx(); if (v.length < 2) return;
   const k = v.indexOf(LASTW); if (k < 0) return;
   S.active = v[(k + 1) % v.length]; save(); render(); updateRail();
@@ -4277,7 +4289,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110310;
+const APP_BUILD = 2026110311;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4973,7 +4985,7 @@ function resultButtons(w, f, i, target, done) {
   $('#rGift').onclick = () => giftOpen(f.text || resultLine(w, f, i));
   const real = w && w.fields && w.fields[i], n = NM(), who = TYP().turn;
   $('#rDone').classList.toggle('on', !!real && !target);
-  const side = S.settings.simple !== false;   // Einfache Ansicht: Knöpfe seitlich, groß
+  const side = S.settings.simple !== false || document.body.classList.contains('sk');   // Einfache Ansicht: Knöpfe seitlich, groß
   if (side && $('#rDone').parentNode !== $('#rBtns')) $('#rBtns').prepend($('#rDone'));
   if (!side && $('#rDone').parentNode !== $('#rText')) $('#rText').appendChild($('#rDone'));
   $('#rdQ').textContent = side ? 'Erledigt?' : `Wie wurde es für ${who === 'a' ? n.A : n.B} erfüllt?`;
