@@ -4565,7 +4565,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110315;
+const APP_BUILD = 2026110316;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -5233,7 +5233,7 @@ const ACT_LINES = [
   {rx:/klaps|spank|schlag|hintern/i, tabu:['art.klaps', 'art.spank'], 3:['Ein Klaps für jede Frechheit.'], 4:['Der Arsch wird heute rot.', 'Zähl laut mit – und bedank dich.']},
   {rx:/leck|zunge/i, tabu:['vor.oral_er'], 3:['Leck sie, bis sie zittert.'], 4:['Leck sie, bis sie um Gnade bettelt.']},
 ];
-const isTabu = id => quizHasData() && quizScore(id).state === 'tabu';
+const isTabu = id => KT().hardcore ? false : (quizHasData() && quizScore(id).state === 'tabu');
 const fill = s => { const n = NM(); return s.replace(/\{A\}/g, n.A).replace(/\{B\}/g, n.B); };
 const pick = a => a[Math.floor(Math.random() * a.length)];
 function kopfkino(f, w, L) {
@@ -5290,7 +5290,15 @@ function doneMark(w, f, i, v) {
     (S.x.later = S.x.later || []).unshift({text:t, at:Date.now()}); S.x.later = S.x.later.slice(0, 30);
     toast('⏭ Gemerkt fürs nächste Mal', 2500); save(); return; }
   if (v === 2) { st.full++; kissFx(); st.kisses++; xtDone(f); ktDone(f, true); heartReward(); typLearn(f, 0.3); }
-  else { v === 1 ? st.part++ : st.no++; ktDone(f, false); typFavor(v === 1 ? 1 : 2, f); }
+  else {
+    v === 1 ? st.part++ : st.no++;
+    if (v === 0 && KT().hardcore) {
+      toast('⛓ Strafe: Spermatraining!', 3000);
+      setTimeout(() => { const idx = THEMES.findIndex(t => t.name === 'Spermatraining'); if (idx >= 0) applyWheelSet(THEMES[idx].name, THEMES[idx].wheels, true); }, 1200);
+      save(); return;
+    }
+    ktDone(f, false); typFavor(v === 1 ? 1 : 2, f);
+  }
   save();
 }
 function typFavor(nRounds, f) {
@@ -5602,17 +5610,18 @@ function xtDown(f) {
    Training: 3× „Ja“ = Stufe hoch (länger), „Nein“ = Stufe zurück. Tabus aus dem Fragebogen fliegen raus. */
 const KT_TOYS = [['dildo', 'Dildo'], ['vib', 'Vibrator'], ['wand', 'Massagestab'], ['plug', 'Plug'], ['kugeln', 'Analkugeln'], ['maschine', 'Fickmaschine']];
 const KT_WERK = [['fessel', 'Fesseln'], ['augen', 'Augenbinde'], ['knebel', 'Knebel'], ['paddel', 'Paddel / Gerte'], ['klemmen', 'Nippelklemmen'], ['leine', 'Halsband & Leine'], ['spreiz', 'Spreizstange'], ['wachs', 'Wachs']];
-const KT = () => { const k = S.x.kt = S.x.kt || {}; k.lv = k.lv || 1; k.n = k.n || 0; k.h = k.h || 3; k.d = k.d || 3; k.tools = k.tools || ['dildo', 'vib', 'fessel', 'augen']; k.mode = k.mode || 'cmd'; k.dur = k.dur || 60; return k; };
+const KT = () => { const k = S.x.kt = S.x.kt || {}; k.lv = k.lv || 1; k.n = k.n || 0; k.h = k.h || 3; k.d = k.d || 3; k.tools = k.tools || ['dildo', 'vib', 'fessel', 'augen']; k.mode = k.mode || 'cmd'; k.dur = k.dur || 60; k.hardcore = k.hardcore || false; return k; };
 const ktSec = s => Math.round(s * (1 + 0.2 * (KT().lv - 1)) / 5) * 5;
 const ktHas = t => KT().tools.includes(t);
 /* ---------- Inventory: Spielzeug & Utensilien ---------- */
 const INV_CATS = [
-  {cat:'Anal', icon:'🍑', items:[['analhaken', 'Analhaken'], ['analplug', 'Analplug'], ['anal-dildo', 'Anal-Dildo'], ['glasdildo', 'Glasdildo'], ['glasplatte', 'Glasplatte'], ['analkugeln', 'Analkugeln'], ['vibanaplug', 'Vibrations-Analplug']]},
+  {cat:'Anal', icon:'🍑', items:[['analhaken', 'Analhaken'], ['analplug', 'Analplug'], ['anal-dildo', 'Anal-Dildo'], ['glasdildo', 'Glasdildo'], ['glasplatte', 'Glasplatte'], ['analkugeln', 'Analkugeln'], ['vibanaplug', 'Vibrations-Analplug'], ['analspreizer', 'Analspreizer']]},
   {cat:'Dildos & Vibratoren', icon:'🍆', items:[['dildo', 'Dildo'], ['glasdildo2', 'Glas-Dildo (2)'], ['vibrator', 'Vibrator'], ['massagestab', 'Massagestab'], ['maschine', 'Fickmaschine']]},
   {cat:'Fesseln', icon:'⛓', items:[['handschellen', 'Handschellen'], ['fessel', 'Fesseln'], ['spreiz', 'Spreizstange'], ['halsband', 'Halsband & Leine']]},
-  {cat:'Mund & Augen', icon:'👁', items:[['augen', 'Augenbinde'], ['knebel', 'Knebel'], ['mundspreizer', 'Mundspreizer']]},
+  {cat:'Mund & Augen', icon:'👁', items:[['augen', 'Augenbinde'], ['knebel', 'Knebel'], ['mundspreizer', 'Mundspreizer'], ['vaginalspreizer', 'Vaginalspreizer']]},
   {cat:'Schlagen', icon:'👋', items:[['paddel', 'Paddel / Gerte'], ['klemmen', 'Nippelklemmen']]},
-  {cat:'Sperma-Utensilien', icon:'💧', items:[['glas', 'Glas'], ['loefel', 'Löffel'], ['form', 'Form zum Einfrieren'], ['spritze', 'Spritze/Pipette']]},
+  {cat:'Sperma-Utensilien', icon:'💧', items:[['glas', 'Glas'], ['loefel', 'Löffel'], ['schuessel', 'Schüssel'], ['form', 'Form zum Einfrieren'], ['spritze', 'Spritze/Pipette']]},
+  {cat:'BDSM-Spreizer', icon:'📌', items:[['mundspreizer2', 'Mundspreizer (2)'], ['analspreizer2', 'Analspreizer (2)'], ['vaginalspreizer2', 'Vaginalspreizer (2)'], ['arsch-tape', 'Tape für Arschbacken (Arschloch spreizen)']]},
   {cat:'Sonstiges', icon:'🎁', items:[['wachs', 'Wachs'], ['oelgel', 'Öl / Gleitgel'], ['sonstiges', 'Sonstiges']]},
 ];
 const INV = () => { const i = S.x.inv = S.x.inv || {}; return i; };
@@ -6004,6 +6013,9 @@ function ktOpen() {
     <div class="ktSl"><b>Schmutzigkeit</b><input type="range" id="ktD" min="1" max="${mx}" value="${Math.min(k.d, mx)}"><output id="ktDo">${Math.min(k.d, mx)}</output></div>
     <div class="ktSl"><b>Grundzeit</b><input type="range" id="ktS" min="15" max="180" step="15" value="${k.dur}"><output id="ktSo">${k.dur}s</output></div>
     ${cap < 4 ? '<p class="tip">Härte und Schmutzigkeit 4–5 gibt es, wenn beide im Fragebogen Heavy Duty erlauben.</p>' : ''}
+    <div class="hLab">Modus</div><div class="ktGrid">
+      <button class="ktT ${!k.hardcore ? 'on' : ''}" data-kt="hcmode" data-id="normal">🎯 Normal · alle Tabus respektiert</button>
+      <button class="ktT ${k.hardcore ? 'on' : ''}" data-kt="hcmode" data-id="hardcore">⛓ Hardcore · keine Tabus, willenlos · Ablehnung = Strafe</button></div>
     <div class="hLab">Ablauf</div><div class="ktGrid">
       <button class="ktT ${k.mode === 'cmd' ? 'on' : ''}" data-kt="mode" data-id="cmd">🎡 Befehlszeile aus mehreren Rädern</button>
       <button class="ktT ${k.mode === 'atm' ? 'on' : ''}" data-kt="mode" data-id="atm" ${atmOk ? '' : 'disabled style="opacity:.4"'}>🍑 Arsch → Maul → Fotze</button>
@@ -6023,6 +6035,7 @@ document.addEventListener('click', e => {
   if (d.kt === 'mode') { keep(); k.mode = d.id; save(); ktOpen(); return; }
   if (d.kt === 'role') { keep(); k.role = d.id; save(); ktOpen(); return; }
   if (d.kt === 'var') { keep(); k.var = d.id; save(); ktOpen(); return; }
+  if (d.kt === 'hcmode') { keep(); k.hardcore = d.id === 'hardcore'; save(); ktOpen(); return; }
   if (d.kt === 'go') { keep(); save(); $('#kt').classList.remove('show');
     const sk = k.mode === 'sk', vr = k.var || 'gehorsam', W = sk ? (vr === 'anal' ? anWheels() : vr === 'sperma' ? spWheels() : skWheels()) : ktWheels();
     if (W.length < 2 || W[0].fields.length < 2) { toast('Zu viel steht auf Tabu – wählt mehr Spielzeug oder einen anderen Ablauf.', 5000); return; }
