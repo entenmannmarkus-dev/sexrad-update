@@ -1608,7 +1608,7 @@ function ablPick(key, lv, used) {
 }
 function ablText(used) {
   const it = ROUND.items.filter(x => x.x), lv = ablStyle(), n = NM(), out = [];
-  if (/Sklaven/.test(S.x.setName || '')) {
+  if (/^Sklaven-Training$/.test(S.x.setName || '')) {
     const g = re => (it.find(x => re.test(x.t)) || {}).x || '', low = t => t.replace(/^[A-ZÄÖÜ ]+: /, m => m.charAt(0) + m.slice(1, -2).toLowerCase() + ': ');
     const sp = it.filter(x => /^Spermaspiel/.test(x.t)).map(x => x.x), parts = [];
     if (g(/^Haltung/)) parts.push(`${skSub()}, ${g(/^Aufgabe/) ? 'erst die Haltung ' + low(g(/^Haltung/)) + ', dann: ' + g(/^Aufgabe/) : low(g(/^Haltung/))}${g(/streng/) ? ' – ' + g(/streng/) : ''}${g(/lange/) ? ', ' + g(/lange/) : ''}.`);
@@ -1616,6 +1616,12 @@ function ablText(used) {
     if (g(/^Finale/)) { const fz = g(/^Finale/); parts.push(/ARSCH → MAUL/.test(fz) ? `Zum Schluss erst in den Arsch, nach dem Abwischen ins Maul, ${fz.replace(/^ARSCH → MAUL\s*/, '')}.` : `Zum Schluss: ${fz.replace(/\n/g, ', ')}.`); }
     if (sp.length) parts.push(sp.length > 1 ? `Danach zwei Spermaspiele: 1. ${sp[0]}. 2. ${sp[1]}.` : `Danach ein Spermaspiel: ${sp[0]}.`);
     if (parts.length) return parts.join(' ');
+  }
+  if (/^Sklaven-Training · /.test(S.x.setName || '')) {   // Anal-/Sperma-Sklavin: je Unterkategorie ein klarer Satz
+    const out = [];
+    it.forEach(x => { if (/lange/i.test(x.t) && out.length) out[out.length - 1] = out[out.length - 1].replace(/\.$/, '') + `, ${x.x}.`;
+      else out.push(`${x.t.replace(/\?$/, '')}: ${x.x.replace(/[.!]$/, '')}.`); });
+    return `${skSub()}, hör zu. ` + out.join(' ') + ' ' + pick(FMT_END[5]);
   }
   if (it.some(x => x.kt)) {   // Kommando: Befehl als ein Satz
     const t = it.map(x => /[a-zäöüß]/.test(x.x) ? x.x : x.x.toLowerCase()).join(', ').replace(/(\d+) Sekunden$/, '$1 Sekunden lang');
@@ -1898,6 +1904,8 @@ function showResult(w, i, depth, fieldOverride) {
     let left = hold ? 0 : f.kstep ? 1 : +S.settings.autoNext || 0, autoT = 0;
     if (f.kt) ktShow(f);
     else if (f.steps) stepsShow(f);
+    else if (f.desc) { const t = fmtTask(f.desc); f = Object.assign({}, f, {kcmd:t}); $('#rTxt').textContent = (f.text ? f.text.toUpperCase() + '\n' : '') + t;
+      const L = $('#rTxt').textContent.length; $('#rTxt').style.fontSize = L > 140 ? 'min(5vh,3.4vw)' : L > 70 ? 'min(6.5vh,4.5vw)' : ''; if (document.body.classList.contains('sk')) requestAnimationFrame(skFit); }
     { const g = f.media && galTags(f.media.id), el = $('#rVid'); el.textContent = g ? '🎬 ' + (g.desc || soDesc(g.tags)) : ''; el.classList.toggle('on', !!g); }
     const startCountdown = () => {
       if (!(target && left > 0)) return;
@@ -2163,6 +2171,7 @@ function renderPanel() {
           ? `<span>${f.media.type === 'video' ? '🎬' : '🖼'} ${esc(f.media.name || 'Medium')}${f.media.type === 'video' && f.media.end > f.media.start ? ` (${(+f.media.start).toFixed(1)}–${(+f.media.end).toFixed(1)} s)` : ''}</span>
              <button class="medbtn" data-fa="trim" data-f="${i}">${f.media.type === 'video' ? '🎬 Vorschau · Start/Stopp' : '🖼 Ansehen / ändern'}</button><button data-fa="unmedia" data-f="${i}">🗑</button>`
           : `<button class="medbtn" data-fa="media" data-f="${i}">🎬 Video / Foto importieren</button>`}</div>
+        <label style="margin:4px 0 0;display:block;width:100%">📝 Aufgabenbeschreibung (Stichworte, wird in Sätze gefasst)<textarea data-f="${i}" data-fp="desc" rows="2" style="width:100%;display:block">${esc(f.desc || '')}</textarea></label>
         <label style="margin:4px 0 0;display:block;width:100%">${f.media ? 'Sonst' : 'Oder'} 🎲 zufällig aus Ordner<select data-f="${i}" data-fp="vcat" style="width:100%;display:block">${vcatOpts(f.vcat)}</select></label>
         ${toyRow(`data-f="${i}"`, f.toy)}
       </div></div>`).join('');
@@ -2357,6 +2366,7 @@ function initPanelEvents() {
       else if (k === 'text') f.text = el.value;
       else if (k === 'weight') f.weight = clamp(+el.value || 0, 0, 100);
       else if (k === 'vcat') { if (el.value) f.vcat = el.value; else delete f.vcat; }
+      else if (k === 'desc') { if (el.value.trim()) f.desc = el.value; else delete f.desc; }
       else if (k === 'next') { const v = el.value; f.next = v[0] === 'w' ? +v.slice(1) : -1; f.card = v[0] === 'c' ? v.slice(1) : null; }
       save(); return;
     }
@@ -4126,7 +4136,7 @@ function themeWheels(t) {
   return t.wheels.map((tw, k) => ({title:tw.title, ...(tw.hold ? {hold:true} : {}), fields:tw.fields.map((x, j) => Object.assign({text:thText(x),
     next:typeof x === 'object' && x.to != null ? x.to : (typeof x === 'object' && x.end) || k >= t.wheels.length - 1 ? -1 : k + 1,
     weight:typeof x === 'object' && x.w ? x.w : 1},
-    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train', 'qid', 'kstep', 'kt', 'kmode', 'steps'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
+    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train', 'qid', 'kstep', 'kt', 'kmode', 'steps', 'desc'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
     toy:tw.stufe ? {lvl:STUFE_TOY[Math.min(4, j + 1)], sec:30, pat:j >= 2 ? 'steigernd' : 'welle', dev:''} : undefined}))}));
 }
 // alle möglichen Abläufe eines Themas (für Liste und Test)
@@ -4538,7 +4548,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110313;
+const APP_BUILD = 2026110314;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -5004,6 +5014,9 @@ function quickEdit(wi, fi, px, py) {
     Q.innerHTML = `<h5>✏ Feld ${fi + 1} · ${esc(w.title || 'Rad ' + (wi + 1))}</h5>
       <textarea id="qeText" placeholder="Was soll passieren?">${esc(f.text)}</textarea>
       <div class="qeRow">Wie oft? <select id="qeW">${oftOpts(f.weight)}</select> Danach weiter mit: <select id="qeN" style="flex:1;min-width:120px">${nextOptsQ(f, wi)}</select></div>
+      <details class="qeSt" ${f.desc ? 'open' : ''}><summary>📝 Aufgabenbeschreibung (wird beim Drehen in Sätze gefasst)</summary>
+        <textarea id="qeDesc" placeholder="Stichworte reichen, z. B.&#10;tief blasen 2 min, dann doggy in den arsch, danach ins maul spritzen und schlucken">${esc(f.desc || '')}</textarea>
+        <div class="qeRow"><small id="qeDescPv" style="color:#d8c39a">${f.desc ? esc(fmtTask(f.desc)) : ''}</small></div></details>
       <details class="qeSt" ${f.steps ? 'open' : ''}><summary>📋 Vorgehensweise (Schritt für Schritt)</summary>
         <textarea id="qeSteps" placeholder="Eine Zeile pro Schritt. Mit Zeit: Schritt | Sekunden&#10;z. B.&#10;Auf die Knie | 20&#10;Blasen ohne Hände | 60&#10;Sperma im Mund zeigen">${esc(f.steps || '')}</textarea></details>
       <div class="qeRow">🎲 Video aus Ordner <select id="qeV" style="flex:1;min-width:120px">${vcatOpts(f.vcat)}</select></div>
@@ -5018,6 +5031,7 @@ function quickEdit(wi, fi, px, py) {
   Q.style.left = clamp(px - W / 2, 10, innerWidth - W - 10) + 'px'; Q.style.top = clamp(py - H / 2, 10, innerHeight - H - 10) + 'px';
   Q.oninput = e => {
     if (e.target.id === 'qeText') { f.text = e.target.value; save(); return; }
+    if (e.target.id === 'qeDesc') { f.desc = e.target.value.trim() ? e.target.value : undefined; save(); const pv = $('#qeDescPv'); if (pv) pv.textContent = f.desc ? 'So klingt es: ' + fmtTask(f.desc) : ''; return; }
     if (e.target.id === 'qeSteps') { f.steps = e.target.value.trim() ? e.target.value : undefined; save(); return; }
     if (e.target.id === 'qeV') { f.vcat = e.target.value || undefined; save(); return; }
     if (e.target.id === 'qeW') { f.weight = clamp(+e.target.value || 0, 0, 100); save(); return; }
@@ -5700,7 +5714,7 @@ function skWheels() {
   }
   return W.filter(w => w.fields.length >= 2).length === W.length ? W : W.map(w => w.fields.length >= 2 ? w : Object.assign(w, {fields:[...w.fields, ...w.fields]}));
 }
-THEMES.push({name:'Sklaven-Training', icon:'⛓', rad:true, sklave:true, stufe:3,
+THEMES.push({name:'Sklaven-Training', icon:'⛓', rad:true, sklave:'gehorsam', stufe:3,
   get wheels() { return skWheels(); }, get hint() { return `${skSub()}: ${skRank()} (Stufe ${KT().lv}/6) · Safeword gilt immer`; }});
 // Aufgabe so groß wie möglich, aber ganz lesbar (Platz für Timer lassen)
 function skFit() {
@@ -5711,6 +5725,77 @@ function skFit() {
   while (fs > 16 && (t.scrollHeight > maxH || t.scrollWidth > maxW)) { fs *= 0.92; t.style.fontSize = fs + 'px'; }
 }
 addEventListener('resize', () => { if ($('#result').classList.contains('show')) skFit(); });
+/* ---------- Aufgabenbeschreibung: Stichworte → gute Sätze (je nach Stufe im passenden Ton) ---------- */
+const FMT_NUM = {1:'einmal', 2:'zweimal', 3:'dreimal', 4:'viermal', 5:'fünfmal', 6:'sechsmal', 10:'zehnmal'};
+const FMT_END = [null, ['Lasst euch Zeit.', 'Ganz zärtlich.'], ['Genießt es.', 'Schön langsam steigern.'], ['Keine Pause dazwischen.', 'Und zwar richtig.'],
+  ['Ohne Gnade.', 'Hart und dreckig, bis nichts mehr geht.'], ['Gehorche, ohne zu fragen.', 'Danach bedankt sich die Sklavin.']];
+function fmtTask(desc) {
+  const n = NM(), lv = /Sklaven|BDSM/.test(S.x.setName || '') ? 5 : clamp(curStufe() || 2, 1, 4);
+  let parts = String(desc || '').replace(/\s*(->|→|\+|;)\s*/g, '\n').replace(/\s*,?\s+(dann|danach|anschließend)\s+/gi, '\n')
+    .split(/\n|,\s*(?=[a-zäöüß])|\.\s+/).map(x => x.trim().replace(/[.!]+$/, '')).filter(Boolean);
+  if (!parts.length) return '';
+  parts = parts.map(x => x
+    .replace(/\b(\d+)\s*(min|minute|minuten|m)\b\.?/gi, (_, d) => `${d} ${+d === 1 ? 'Minute' : 'Minuten'} lang`)
+    .replace(/\b(\d+)\s*(s|sek|sec|sekunden)\b\.?/gi, (_, d) => `${d} Sekunden lang`)
+    .replace(/\b(\d+)\s*[x×]\b/gi, (_, d) => FMT_NUM[d] || d + '-mal')
+    .replace(/\{A\}|\ber\b(?=\s)/g, m => m === '{A}' ? n.A : m).replace(/\{B\}/g, n.B));
+  const NOUN = /\b(arsch|maul|mund|fotze|muschi|schwanz|titten|brüste|gesicht|sperma|zunge|doggy|missionar|reiterin|löffelchen|dildo|plug|vibrator|öl|finger|hand|hände|knie|knien|bett|sofa|dusche|ladung|eier|po|bauch|glas|halsband|leine|augenbinde|fesseln|klit|nippel|spucke|kondom|gleitgel|tisch|boden|spiegel|haare|füße|hals)\b/g;
+  const isVerb = w => /(en|ern|eln)$/.test(w) && !/^(knien|fesseln|titten|brüste|eier|hände|haare|füße|nippel)$/i.test(w);
+  parts = parts.map(x => {
+    let t = x.replace(NOUN, m => m.charAt(0).toUpperCase() + m.slice(1));
+    const d = t.match(/^(.*?)\s+(\d+ (?:Minuten?|Sekunden) lang|\w+mal)$/); if (d && isVerb(d[1].split(' ').pop())) t = d[2] + ' ' + d[1];   // „tief blasen 2 Minuten lang“ → „2 Minuten lang tief blasen“
+    const last = t.split(' ').pop();
+    if (!isVerb(last.toLowerCase())) {
+      if (/\b(in den|in die|ins) (Arsch|Fotze|Muschi|Po)$/.test(t)) t += ' ficken';
+      else if (/\b(ins|in den|auf die|auf den|auf die) (Maul|Mund|Gesicht|Titten|Brüste|Bauch|Zunge|Po)$/.test(t)) t += ' spritzen';
+    }
+    return t; });
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const out = parts.length === 1 ? [cap(parts[0]) + '.'] : parts.map((x, i) => {
+    const pre = i === 0 ? 'Zuerst' : i === parts.length - 1 ? 'Zum Schluss' : (i % 2 ? 'Dann' : 'Danach');
+    return `${pre} ${x}.`; });
+  return out.join(' ') + ' ' + pick(FMT_END[lv]);
+}
+/* ---------- Sklavinnen-Modi mit Unterkategorien: Anal-Sklavin und Sperma-Sklavin ---------- */
+const okT = (t, tb) => !(tb || []).some(isTabu) && textOk(t);
+const fl = (L, extra) => L.filter(([t, tb, need]) => okT(t, tb) && (need === undefined || need)).map(([t]) => Object.assign({t}, extra || {}));
+function anWheels() {
+  const k = KT(), h = clamp(k.h, 1, stufeCap() >= 4 ? 5 : 3), hd = stufeCap() >= 4 && h >= 4, durs = [0.5, 1, 1.5, 2].map(m => ktSec(k.dur * m)), S1 = {kstep:1};
+  const W = [
+    {title:'Vorbereitung', fields:fl([['Viel Gleitgel – ein Finger ganz langsam rein'], ['Arsch mit beiden Händen spreizen und zeigen'], ['Zunge am Arsch zum Aufwärmen', ['bdsm.rimming', 'vor.oral_er']],
+      ['Kleinen Plug rein und 2 Minuten tragen', ['toy.plug'], ktHas('plug')], ['Auf alle Viere, Arsch hoch, warten'], ['Erst ein Finger, dann zwei – sie atmet tief']], S1)},
+    {title:'Dehnen', fields:fl([['Ein Finger, ganz langsam rein und raus'], ['Zwei Finger im Takt'], ['Plug rein und raus', ['toy.plug'], ktHas('plug')], ['Dildo tief in den Arsch', [], ktHas('dildo')],
+      ['Analkugeln, eine nach der anderen', [], ktHas('kugeln')], ['Drei Finger – so weit es geht', [], h >= 4], ['Größeren Plug rein', ['toy.anal_gross'], h >= 3 && ktHas('plug')]], S1)},
+    {title:'Stellung', fields:fl([['Doggy – Arsch hoch, Kopf runter'], ['Bauchlage, Kissen unter die Hüfte'], ['Auf dem Rücken, Beine an die Brust'], ['Sie reitet rückwärts auf dem Schwanz'],
+      ['Löffelchen, ganz eng'], ['Stehend über die Tischkante gebeugt']], S1)},
+    {title:'Ficken', fields:fl([['Nur die Spitze, ganz langsam', [], h <= 3], ['Langsam ganz rein und halten'], ['Gleichmäßig tief im Takt'], ['Hart und schnell', [], h >= 3],
+      ['Ganz raus und wieder rein – immer wieder', [], h >= 3], ['Bis zum Anschlag, ohne Pause', ['bdsm.anal_hart'], h >= 4], ['Arsch richtig durchficken, sie hält still', ['bdsm.anal_hart'], hd]], S1)},
+    {title:'Wie lange?', fields:durs.map(sec => ({t:sec + ' Sekunden im Arsch', kt:sec, kmode:'cmd', end:true}))},
+    {title:'Extra', fields:fl([['Klaps auf den Arsch bei jedem zehnten Stoß', ['art.klaps']], ['Sie zählt jeden Stoß laut mit'], ['Sie bettelt um mehr'], ['Spucke auf den Arsch'],
+      ['Vibrator an der Klit dabei', [], ktHas('vib')], ['Halsband dran und an der Leine ziehen', [], ktHas('leine')], ['Augenbinde – sie weiß nicht, was kommt', [], ktHas('augen')]], S1)},
+    {title:'Finale', fields:fl([['In den Arsch spritzen und drin lassen'], ['In den Arsch spritzen, dann rauslaufen lassen und zeigen', ['bdsm.creampie']], ['Rausziehen und auf den Arsch spritzen'],
+      ['Plug rein – das Sperma bleibt drin', ['toy.plug'], ktHas('plug')], ['Arsch → Maul: abwischen oder Kondom ab, dann ins Maul spritzen', ['vor.oral_sie', 'fin.mund'], hd]], {end:true})}];
+  return W.filter(w => w.fields.length >= 2);
+}
+function spWheels() {
+  const k = KT(), h = clamp(k.h, 1, stufeCap() >= 4 ? 5 : 3), durs = [0.5, 1, 1.5, 2].map(m => ktSec(k.dur * m)), S1 = {kstep:1};
+  const all = [...spList('maul'), ...spList('gesicht'), ...spList('mix')], half = Math.ceil(all.length / 2);
+  const W = [
+    {title:'Betteln', fields:fl([['Auf Knien um Sperma betteln'], ['Laut sagen: Bitte gib mir deine Ladung'], ['Maul auf, Zunge raus und warten', ['fin.mund']], ['Hände auf den Rücken, Blick nach oben'],
+      ['Sagen, wohin sie es haben will']], S1)},
+    {title:'Melken', fields:fl([['Mit der Hand melken, ganz langsam'], ['Mit dem Maul melken', ['vor.oral_sie']], ['Zwischen den Titten melken', ['fin.brueste']], ['Er wichst, sie schaut zu und bettelt'],
+      ['Deepthroat, bis er kommt', ['vor.deep'], h >= 4], ['Kurz vorm Kommen aufhören und wieder anfangen']], S1)},
+    {title:'Wie lange melken?', fields:durs.map(sec => ({t:sec + ' Sekunden melken', kt:sec, kmode:'cmd', end:true}))},
+    {title:'Wohin?', fields:fl([['Ins Maul – noch nicht schlucken', ['fin.mund']], ['Auf die Zunge', ['fin.mund']], ['Ins Gesicht', ['fin.gesicht']], ['Auf die Titten', ['fin.brueste']],
+      ['Ins Glas, sie hält es fest', ['fin.mund']], ['In den Arsch, dann rausdrücken', ['fin.arsch']]], S1)},
+    {title:'Spermaspiel 1', fields:all.slice(0, half).map(t => ({t, kstep:1}))},
+    {title:'Spermaspiel 2', fields:all.slice(half).map(t => ({t, kstep:1}))},
+    {title:'Zum Schluss', fields:fl([['Schlucken, Maul auf und Danke sagen', ['fin.mund']], ['Schwanz sauber lecken', ['vor.oral_sie']], ['Alles im Gesicht lassen, 5 Minuten', ['fin.gesicht']],
+      ['Mit Sperma im Maul küssen', ['fin.mund']], ['Den Rest einfrieren für die nächste Session', ['fin.mund']]], {end:true}).map(f => /einfrieren/.test(f.t) ? Object.assign(f, {set:'frozen'}) : f)}];
+  return W.filter(w => w.fields.length >= 2);
+}
+THEMES.push({name:'Sklaven-Training · Anal-Sklavin', icon:'🍑', rad:true, sklave:'anal', stufe:3, get wheels() { return anWheels(); }, hint:'Viel Gleitgel · langsam steigern · Safeword gilt immer'});
+THEMES.push({name:'Sklaven-Training · Sperma-Sklavin', icon:'💦', rad:true, sklave:'sperma', stufe:3, get wheels() { return spWheels(); }, hint:'Tabus fliegen raus · Safeword gilt immer'});
 function skOpen() { const k = KT(); k.mode = 'sk'; save(); ktOpen(); }
 let KTT = null;   // laufender Timer
 function ktStop() { if (KTT) { clearInterval(KTT.iv); KTT = null; } const el = $('#rKt'); if (el) { el.className = ''; el.innerHTML = ''; } }
@@ -5791,7 +5876,11 @@ function ktOpen() {
     ${k.mode === 'sk' ? `<div class="hLab">Wer gehorcht?</div><div class="ktGrid">
       <button class="ktT ${k.role !== 'herrin' ? 'on' : ''}" data-kt="role" data-id="herr">Er ist der Herr, sie die Sklavin</button>
       <button class="ktT ${k.role === 'herrin' ? 'on' : ''}" data-kt="role" data-id="herrin">Sie ist die Herrin, er der Sklave</button></div>
-      <p class="tip">${esc(skSub())} ist gerade: <b>${esc(skRank())}</b> (Stufe ${k.lv}/6). Bei „Nein“ gibt es eine Strafe vom Rad.</p>` : ''}
+      <p class="tip">${esc(skSub())} ist gerade: <b>${esc(skRank())}</b> (Stufe ${k.lv}/6). Bei „Nein“ gibt es eine Strafe vom Rad.</p>
+      <div class="hLab">Welche Sklavin?</div><div class="ktGrid">
+      <button class="ktT ${(k.var || 'gehorsam') === 'gehorsam' ? 'on' : ''}" data-kt="var" data-id="gehorsam">⛓ Gehorsam · Arsch-Phase · 2 Spermaspiele</button>
+      <button class="ktT ${k.var === 'anal' ? 'on' : ''}" data-kt="var" data-id="anal" ${isTabu('fin.arsch') ? 'disabled style="opacity:.4"' : ''}>🍑 Anal-Sklavin<br><small>Vorbereitung · Dehnen · Stellung · Ficken · Dauer · Extra · Finale</small></button>
+      <button class="ktT ${k.var === 'sperma' ? 'on' : ''}" data-kt="var" data-id="sperma" ${isTabu('fin.mund') && isTabu('fin.gesicht') ? 'disabled style="opacity:.4"' : ''}>💦 Sperma-Sklavin<br><small>Betteln · Melken · Dauer · Wohin · 2 Spermaspiele · Zum Schluss</small></button></div>` : ''}
     <div class="hLab">Spielzeug</div><div class="ktGrid">${KT_TOYS.map(chip).join('')}</div>
     <div class="hLab">Werkzeug</div><div class="ktGrid">${KT_WERK.map(chip).join('')}</div>
     <div class="hLab">Einstellen</div>
@@ -5817,11 +5906,12 @@ document.addEventListener('click', e => {
   if (d.kt === 'tool') { keep(); k.tools = ktHas(d.id) ? k.tools.filter(x => x !== d.id) : [...k.tools, d.id]; save(); ktOpen(); return; }
   if (d.kt === 'mode') { keep(); k.mode = d.id; save(); ktOpen(); return; }
   if (d.kt === 'role') { keep(); k.role = d.id; save(); ktOpen(); return; }
+  if (d.kt === 'var') { keep(); k.var = d.id; save(); ktOpen(); return; }
   if (d.kt === 'go') { keep(); save(); $('#kt').classList.remove('show');
-    const sk = k.mode === 'sk', W = sk ? skWheels() : ktWheels();
+    const sk = k.mode === 'sk', vr = k.var || 'gehorsam', W = sk ? (vr === 'anal' ? anWheels() : vr === 'sperma' ? spWheels() : skWheels()) : ktWheels();
     if (W.length < 2 || W[0].fields.length < 2) { toast('Zu viel steht auf Tabu – wählt mehr Spielzeug oder einen anderen Ablauf.', 5000); return; }
     if (k.h >= 4 && baseStufe() < 4) setStufe(4, true);
-    loadTheme(THEMES.findIndex(x => sk ? x.sklave : x.kommando)); setTimeout(() => doSpin(0), 450); }
+    loadTheme(THEMES.findIndex(x => sk ? x.sklave === vr : x.kommando)); setTimeout(() => doSpin(0), 450); }
 });
 
 /* ---------- Geführter Abend „Heute Nacht“ ---------- */
