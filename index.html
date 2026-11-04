@@ -600,6 +600,7 @@
   .tyA{padding:24px 16px;border-radius:18px;border:2px solid rgba(255,255,255,.15);color:#fff;font:600 22px/1.2 var(--disp);min-height:96px}
   .tyA.l1{background:linear-gradient(150deg,#f29ab4,#7a2a44)}.tyA.l2{background:linear-gradient(150deg,#b3263f,#3d0408)}
   .tyA.l3{background:linear-gradient(150deg,#ff2a2a,#2a0002)}.tyA.l4{background:linear-gradient(150deg,#1a1a1c,#000);border-color:#5a0008;color:#ff3344}
+  .tyA.l5{grid-column:1/-1;background:repeating-linear-gradient(135deg,#120004 0 14px,#2a0008 14px 28px);border-color:#ff1030;color:#ff4d5e;box-shadow:0 0 18px rgba(255,20,50,.45)}
   /* Ergebnis aufgeräumt: nur das Ergebnis, darunter „erfüllt?“ */
   #result.nomedia{background:radial-gradient(ellipse at 50% 45%,var(--bgA),#000 80%)}
   #rDone{display:none;margin-top:3.5vh;pointer-events:auto;opacity:0;animation:wIn .6s ease-out 1.2s forwards;text-transform:none;letter-spacing:0;text-shadow:none;font-family:system-ui}
@@ -3290,7 +3291,61 @@ const QUIZ = [
   {id:'fin', name:'Abschluss', wheel:-1, timer:true, items:[
     ['muschi','In die Muschi','in die Muschi'], ['arsch','In den Po (anal)','in den Arsch'], ['mund','In den Mund','in den Mund'],
     ['gesicht','Ins Gesicht','ins Gesicht'], ['brueste','Auf die Brüste','auf die Brüste'], ['bauch_f','Auf den Bauch','auf den Bauch'], ['po','Auf den Po','auf den Po']]},
+  {id:'bdsm', name:'BDSM – hart & dreckig', wheel:-1, items:[
+    ['halsband','Halsband und Leine','Halsband & Leine – er führt sie an der Leine'],
+    ['knien','Knien und warten','Auf die Knie – Hände auf die Oberschenkel, Blick nach unten, warten'],
+    ['betteln','Betteln lassen','Sie muss darum betteln – vorher passiert nichts'],
+    ['anrede','Feste Anrede (Herr / Herrin)','Ab jetzt nur noch „Herr“ – jeder Fehler gibt eine Strafe'],
+    ['benutzen','Benutzt werden („Use me“)','Sie ist heute nur zum Benutzen da – Fotze, Maul, Arsch'],
+    ['beschimpfen','Beschimpfen (Schlampe, Fotze, Hure)','Beschimpf sie richtig dreckig, während du sie fickst'],
+    ['fuesse_lecken','Füße oder Stiefel lecken','Auf allen Vieren – Füße lecken'],
+    ['dienen','Bedienen (Sklavin-Spiel)','Sie bedient ihn nackt – jeder Fehler gibt Strafe'],
+    ['pet','Pet-Play (auf allen Vieren)','Auf allen Vieren durchs Zimmer krabbeln – an der Leine'],
+    ['femdom','Sie bestimmt hart (Femdom)','Sie bestimmt – er gehorcht ohne Widerrede'],
+    ['spreiz','Spreizstange','Spreizstange – Beine weit auseinander, ausgeliefert'],
+    ['knebel','Knebel (Ballknebel)','Ballknebel rein – Stoppzeichen ohne Worte ausmachen'],
+    ['seil','Seil-Bondage (Shibari)','Mit dem Seil verschnüren – Brust und Arme'],
+    ['hogtie','Hogtie (Hände an die Füße)','Hände an die Füße gefesselt – komplett ausgeliefert'],
+    ['stuhl','An einen Stuhl gefesselt','An den Stuhl gefesselt – er macht, was er will'],
+    ['blind_fessel','Augenbinde und gefesselt','Augenbinde und Hände gefesselt – sie weiß nicht, was kommt'],
+    ['handschellen','Handschellen','Handschellen hinter dem Rücken'],
+    ['paddel','Paddel, Gerte oder Flogger','Zehn mit dem Paddel – sie zählt laut mit'],
+    ['guertel','Mit dem Gürtel','Mit dem Gürtel auf den Arsch – bis er rot ist'],
+    ['klemmen','Nippelklemmen','Nippelklemmen dran – beim Ficken daran ziehen'],
+    ['wachs','Heißes Wachs (Massagekerze)','Wachs auf Titten und Bauch tropfen lassen'],
+    ['kratzen','Kratzen und hart beißen','Kratz und beiß sie – Spuren erlaubt'],
+    ['muschi_klaps','Klapse auf die Muschi','Klapse auf die Fotze – dann lecken'],
+    ['wange','Leichter Klaps auf die Wange','Leichter Klaps auf die Wange – dann tief küssen'],
+    ['hals','Hand am Hals (nur halten, nicht drücken)','Hand am Hals halten, während du sie fickst – nicht zudrücken'],
+    ['haare_hart','Fest an den Haaren führen','An den Haaren packen und dahin führen, wo du sie willst'],
+    ['maulfick','Maulfick / Gesichtsfick','Kopf festhalten und ihr Maul ficken'],
+    ['gagging','Würgen beim Blasen (Gagging)','So tief, bis sie würgt – Sabber erlaubt'],
+    ['rimming','Arsch lecken (Rimming)','Arsch lecken – richtig tief'],
+    ['anal_hart','Harter Analsex','Hart in den Arsch ficken – er hält die Hüften fest'],
+    ['doppelt','Doppelt gefüllt (Dildo + Schwanz)','Dildo in die Fotze, Schwanz in den Arsch'],
+    ['maschine','Fickmaschine','Fickmaschine – Stufe für Stufe schneller'],
+    ['pegging','Pegging (sie nimmt ihn mit Strap-on)','Strap-on um – sie fickt ihn'],
+    ['rannehmen','Hart rannehmen bis zum Zittern','Ohne Pause hart ficken, bis sie zittert'],
+    ['freeuse','Jederzeit nehmen (Free Use, vorher abgesprochen)','Heute Abend darf er sie jederzeit nehmen – egal wo, egal wann'],
+    ['spucken','Spucken (in den Mund, auf den Körper)','Spuck ihr ins Maul – sie schluckt'],
+    ['sabbern','Sabbern und viel Spucke beim Blasen','Blasen mit ganz viel Spucke – alles vollsabbern'],
+    ['squirt','Squirting','Bring sie zum Spritzen – Laken egal'],
+    ['sperma_verreib','Sperma verreiben und ablecken','Sperma auf ihr verreiben – sie leckt es ab'],
+    ['creampie','Drin kommen und rauslaufen lassen','Drin abspritzen – rauslaufen lassen und zeigen'],
+    ['oel','Ölschlacht','Alles mit Öl einsauen – je glitschiger, desto besser'],
+    ['natursekt','Natursekt (nur in der Dusche)','In der Dusche: Natursekt'],
+    ['dirty_hart','Richtig dreckiges Gerede','Sag ihr genau, was du gleich mit ihr machst – je dreckiger, desto besser'],
+    ['filmen','Dabei filmen (nur für euch)','Handy an – filmt euch beim Ficken'],
+    ['orgverbot','Orgasmusverbot','Sie darf nicht kommen – bis er es erlaubt'],
+    ['forced','Orgasmen ohne Pause (Massagestab)','Massagestab dran, bis sie dreimal gekommen ist – keine Pause'],
+    ['ruin','Ruinierter Orgasmus','Kurz vor dem Kommen aufhören – ruiniert'],
+    ['keusch','Keuschheit bis zur nächsten Session','Er darf bis zur nächsten Session nicht kommen'],
+    ['danke','Mitzählen und bedanken','Nach jedem Schlag: „Danke, Herr“']]},
 ];
+/* BDSM-Katalog: Gruppe, Stufe 5 = „Extra hart & dreckig“ (im Stufen-System Heavy Duty), opt = nur wenn beide ausdrücklich ja sagen */
+const BD_GROUPS = {dom:'Dominanz', fes:'Fesseln', sch:'Schmerz & Schläge', fick:'Benutzen', dreck:'Dreckig', kon:'Kontrolle'};
+const BD = {'halsband':{g:'dom', x:4}, 'knien':{g:'dom', x:3}, 'betteln':{g:'dom', x:3}, 'anrede':{g:'dom', x:4}, 'benutzen':{g:'dom', x:5}, 'beschimpfen':{g:'dom', x:5}, 'fuesse_lecken':{g:'dom', x:4}, 'dienen':{g:'dom', x:4}, 'pet':{g:'dom', x:4}, 'femdom':{g:'dom', x:4}, 'spreiz':{g:'fes', x:4}, 'knebel':{g:'fes', x:4}, 'seil':{g:'fes', x:4}, 'hogtie':{g:'fes', x:5}, 'stuhl':{g:'fes', x:4}, 'blind_fessel':{g:'fes', x:3}, 'handschellen':{g:'fes', x:3}, 'paddel':{g:'sch', x:4}, 'guertel':{g:'sch', x:5}, 'klemmen':{g:'sch', x:4}, 'wachs':{g:'sch', x:4}, 'kratzen':{g:'sch', x:4}, 'muschi_klaps':{g:'sch', x:5}, 'wange':{g:'sch', x:5, opt:1}, 'hals':{g:'sch', x:5, opt:1}, 'haare_hart':{g:'sch', x:4}, 'maulfick':{g:'fick', x:5}, 'gagging':{g:'fick', x:5}, 'rimming':{g:'fick', x:4}, 'anal_hart':{g:'fick', x:5}, 'doppelt':{g:'fick', x:5}, 'maschine':{g:'fick', x:5}, 'pegging':{g:'fick', x:5}, 'rannehmen':{g:'fick', x:4}, 'freeuse':{g:'fick', x:5}, 'spucken':{g:'dreck', x:5}, 'sabbern':{g:'dreck', x:4}, 'squirt':{g:'dreck', x:4}, 'sperma_verreib':{g:'dreck', x:5}, 'creampie':{g:'dreck', x:4}, 'oel':{g:'dreck', x:3}, 'natursekt':{g:'dreck', x:5, opt:1}, 'dirty_hart':{g:'dreck', x:4}, 'filmen':{g:'dreck', x:4}, 'orgverbot':{g:'kon', x:4}, 'forced':{g:'kon', x:5}, 'ruin':{g:'kon', x:5}, 'keusch':{g:'kon', x:5}, 'danke':{g:'kon', x:4}};
+const bdOf = id => /^bdsm\./.test(id || '') ? BD[id.slice(5)] : null;
 const QLABEL = ['', 'tabu', 'eher nicht', 'vielleicht', 'gerne', 'unbedingt'];
 // Intensitäts-Stufen: 1 Soft · 2 Middle · 3 Hard · 4 Heavy Duty
 const STUFEN = ['', 'Soft', 'Middle', 'Hard', 'Heavy Duty'];
@@ -3306,6 +3361,7 @@ const QLVL = {
   'art.haare':3, 'art.befehle':3, 'art.beissen':3, 'art.foto':3, 'art.spank':4, 'art.fessel_fest':4, 'art.unterw':4,
   'toy.vib':2, 'toy.ring':2, 'toy.toy_er':2, 'toy.wand':2, 'toy.lush':3, 'toy.plug':3, 'toy.stoss':3, 'toy.anal_gross':4,
   'fin.bauch_f':1, 'fin.po':1, 'fin.muschi':1, 'fin.brueste':2, 'fin.mund':2, 'fin.gesicht':3, 'fin.arsch':4,
+  'bdsm.halsband':4, 'bdsm.knien':3, 'bdsm.betteln':3, 'bdsm.anrede':4, 'bdsm.benutzen':4, 'bdsm.beschimpfen':4, 'bdsm.fuesse_lecken':4, 'bdsm.dienen':4, 'bdsm.pet':4, 'bdsm.femdom':4, 'bdsm.spreiz':4, 'bdsm.knebel':4, 'bdsm.seil':4, 'bdsm.hogtie':4, 'bdsm.stuhl':4, 'bdsm.blind_fessel':3, 'bdsm.handschellen':3, 'bdsm.paddel':4, 'bdsm.guertel':4, 'bdsm.klemmen':4, 'bdsm.wachs':4, 'bdsm.kratzen':4, 'bdsm.muschi_klaps':4, 'bdsm.wange':4, 'bdsm.hals':4, 'bdsm.haare_hart':4, 'bdsm.maulfick':4, 'bdsm.gagging':4, 'bdsm.rimming':4, 'bdsm.anal_hart':4, 'bdsm.doppelt':4, 'bdsm.maschine':4, 'bdsm.pegging':4, 'bdsm.rannehmen':4, 'bdsm.freeuse':4, 'bdsm.spucken':4, 'bdsm.sabbern':4, 'bdsm.squirt':4, 'bdsm.sperma_verreib':4, 'bdsm.creampie':4, 'bdsm.oel':3, 'bdsm.natursekt':4, 'bdsm.dirty_hart':4, 'bdsm.filmen':4, 'bdsm.orgverbot':4, 'bdsm.forced':4, 'bdsm.ruin':4, 'bdsm.keusch':4, 'bdsm.danke':4,
 };
 // Stufe eines Punkts: eigene Einordnung > Katalog > Middle
 const itemLvl = id => (QS().lvlOv || {})[id] || QLVL[id] || 2;
@@ -3595,7 +3651,7 @@ function themeWheels(t) {
   return t.wheels.map((tw, k) => ({title:tw.title, ...(tw.hold ? {hold:true} : {}), fields:tw.fields.map((x, j) => Object.assign({text:thText(x),
     next:typeof x === 'object' && x.to != null ? x.to : (typeof x === 'object' && x.end) || k >= t.wheels.length - 1 ? -1 : k + 1,
     weight:typeof x === 'object' && x.w ? x.w : 1},
-    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
+    typeof x === 'object' ? Object.fromEntries(['need', 'set', 'clear', 'train', 'qid'].filter(q => x[q]).map(q => [q, x[q]]).concat(x.cat ? [['vcat', x.cat]] : [])) : {}, {
     toy:tw.stufe ? {lvl:STUFE_TOY[Math.min(4, j + 1)], sec:30, pat:j >= 2 ? 'steigernd' : 'welle', dev:''} : undefined}))}));
 }
 // alle möglichen Abläufe eines Themas (für Liste und Test)
@@ -4006,7 +4062,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110307;
+const APP_BUILD = 2026110308;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4270,6 +4326,7 @@ function renderHome() {
     ${teaserCard}${vCard}${hlCard()}
     <details class="hMore"><summary>Mehr Spiele & Extras <span class="arr">▾</span></summary>
     <div class="hGrid">
+      <button class="tile" data-h="bdsm" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}><span class="ti">⛓</span><b>BDSM – Hart & schmutzig</b><small>Nur Heavy Duty</small></button>
       <button class="tile" data-h="quiz"><span class="ti">💞</span><b>Uns kennenlernen</b><small>Vorlieben – Tabus bleiben geheim</small></button>
       <button class="tile" data-h="lib"><span class="ti">📚</span><b>Vorlagen</b><small>Fertige Spiele</small></button>
       <button class="tile" data-h="extrem" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}><span class="ti">⛓</span><b>Extrem-Training</b><small>Nur Heavy Duty</small></button>
@@ -4302,6 +4359,7 @@ $('#home').addEventListener('click', e => {
     case 'quick': closeHome(); setTimeout(() => isSlot() ? slotSpin() : doSpin(S.active), 250); break;
     case 'night': closeHome(); gStart(); break;
     case 'extrem': if (stufeCap() >= 4) closeHome(); xtStart(); break;
+    case 'bdsm': if (stufeCap() >= 4) closeHome(); bdStart(); break;
     case 'typ': typOpen(); break;
     case 'typtest': S.settings.named = true; S.x.setup = true; wizOn = false; wizStep = 0; save(); typOpen('a'); break;
     case 'quiz': closeHome(); openQuiz('a'); break;
@@ -4335,6 +4393,7 @@ function renderMenu() {
       <button class="mb" data-m="night">🌙 Heute Nacht<small>Geführter Abend in 6 Phasen</small></button>
       <button class="mb" data-m="wop">🎲 Wahrheit oder Pflicht<small>Fragen und Aufgaben passend zur Stufe</small></button>
       <button class="mb" data-m="typ">🎯 Typ-Modus: ${typOn() ? 'an' : 'aus'}<small>Typ-Test, wer dreht, was gelernt wurde</small></button>
+      <button class="mb" data-m="bdsm" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}>⛓ BDSM – Hart & schmutzig<small>Dominanz, Fesseln, Schmerz, Benutzen, Dreckig</small></button>
       <button class="mb" data-m="lib">📚 Vorlagen<small>Fertige und eigene Spiele</small></button>
       <button class="mb" data-m="mode">${isSlot() ? '🎡 Glücksrad' : '🎰 Slotmaschine'}<small>${isSlot() ? 'Ein Rad nach dem anderen drehen' : 'Alle Räder auf einmal ziehen'}</small></button>
       <button class="mb" data-m="home">🏠 Startbildschirm<small>${open ? open + ' offene Gutscheine' : 'Was habt ihr heute vor?'}</small></button></div>
@@ -4373,6 +4432,7 @@ $('#menu').addEventListener('click', e => {
     case 'wop': { close(); loadTheme(THEMES.findIndex(t => t.wop)); setTimeout(() => doSpin(0), 400); break; }
     case 'timer': close(); openTimer(); break;
     case 'extrem': close(); xtStart(); break;
+    case 'bdsm': if (stufeCap() >= 4) close(); bdStart(); break;
     case 'typ': typOpen(); break;
     case 'edge': close(); edgeOpen(); break;
     case 'wish': close(); wishOpen(); break;
@@ -4887,6 +4947,7 @@ const TABU_RX = [
   [['fin.arsch', 'toy.plug', 'toy.anal_gross'], /arsch|anal/i], [['fin.gesicht'], /gesicht/i], [['fin.mund'], /ins maul|wichse dir|sperma/i],
   [['vor.deep'], /deepthroat|so tief/i], [['art.klaps', 'art.spank'], /klaps/i], [['art.fessel', 'art.fessel_fest'], /festbind|festgebunden/i],
   [['vor.oral_sie'], /blasen|schwanz so tief|ins maul/i], [['vor.oral_er'], /leck mich/i], [['art.unterw'], /fickstück|bettel/i], [['art.augen'], /augen verb/i],
+  [['bdsm.knebel'], /knebel/i], [['bdsm.spucken'], /spuck/i], [['bdsm.natursekt'], /natursekt/i], [['bdsm.hals'], /am hals/i], [['bdsm.wange'], /wange/i],
 ];
 const textOk = s => !TABU_RX.some(([ids, rx]) => rx.test(s) && ids.some(isTabu));
 function wopWheels(L) {
@@ -4951,6 +5012,33 @@ function xtWheels() {
 }
 THEMES.push({name:'Extrem-Training', icon:'⛓', rad:true, extrem:true, stufe:4,
   get wheels() { return xtWheels().W; }, get hint() { return 'Safeword gilt immer · Stoppzeichen ohne Worte ausmachen · ' + xtWheels().hint; }});
+/* ---------- BDSM-Modus „Hart & schmutzig“ (nur Heavy Duty) ----------
+   Vier Räder hintereinander: Dominanz/Kontrolle → Fesseln & Schmerz → Benutzen → Dreckig.
+   Tabus und „eher nicht“ fliegen raus, heikle Punkte (opt) kommen nur, wenn beide mindestens „vielleicht“ sagen. */
+function bdAllowed(id) {
+  const bd = bdOf(id); if (!bd) return true;
+  if (quizHasData()) { const r = quizScore(id); if (r.state === 'tabu' || r.state === 'low') return false; }
+  if (bd.opt) return eff(id, 'a') >= 3 && eff(id, 'b') >= 3;
+  return true;
+}
+function bdWheels() {
+  const c = QUIZ.find(q => q.id === 'bdsm'), qd = quizHasData();
+  const its = quizItems(c).filter(it => bdAllowed(it.id) && textOk(it.l));
+  const set = [['Wer bestimmt?', ['dom', 'kon']], ['Fesseln & Schmerz', ['fes', 'sch']], ['Benutzen', ['fick']], ['Dreckig', ['dreck']]];
+  const W = set.map(([title, gs]) => ({title, fields:its.filter(it => gs.includes(BD[it.id.slice(5)].g)).map(it => {
+    const r = qd ? quizScore(it.id) : null, x = BD[it.id.slice(5)].x;
+    return {t:it.l, qid:it.id, w:r && r.weight ? r.weight + (x === 5 ? 1 : 0) : (x === 5 ? 2 : 1)};
+  }).sort((a, b) => b.w - a.w).slice(0, 12)})).filter(w => w.fields.length >= 2);
+  return W;
+}
+THEMES.push({name:'BDSM – Hart & schmutzig', icon:'⛓', rad:true, bdsm:true, stufe:4,
+  get wheels() { return bdWheels(); }, hint:'Safeword gilt immer · Stoppzeichen ohne Worte ausmachen · Tabus fliegen raus'});
+function bdStart() {
+  if (stufeCap() < 4) { toast('BDSM gibt es nur, wenn beide im Fragebogen Heavy Duty erlauben.', 5000); return false; }
+  if (baseStufe() < 4) setStufe(4, true);
+  if (bdWheels().length < 2) { toast('Zu viel davon steht bei euch auf Tabu – füllt im Fragebogen den Teil „BDSM“ aus.', 5500); return false; }
+  loadTheme(THEMES.findIndex(x => x.bdsm)); setTimeout(() => doSpin(0), 450); return true;
+}
 function xtStart() {
   const cap = stufeCap();
   if (cap < 4) { toast('Extrem gibt es nur, wenn beide im Fragebogen Heavy Duty erlauben.', 5000); return false; }
@@ -5316,38 +5404,67 @@ const TYPES = {
     {n:'Der sanfte Stupser', m:'Ganz sanft rein – und jede Sekunde genießen'},
     {n:'Der Taktgeber', m:'Schön im Takt – rein, raus, nicht zu sanft, nicht zu hart'},
     {n:'Der Zustoßer', m:'Wenn er zustößt, wackelt das ganze Bett'},
-    {n:'Der Hemmungslose', m:'Danach springt alles nur so rum – und alles ist eingesaut'}],
+    {n:'Der Hemmungslose', m:'Danach springt alles nur so rum – und alles ist eingesaut'},
+    {n:'Der Dreckskerl', m:'Extra hart und dreckig – er nimmt sie, bis alles tropft'}],
   w:[null,
     {n:'Die Zärtliche', m:'Streicheln, küssen, ganz nah sein'},
     {n:'Die Genießerin', m:'Schön im Takt – und gern ein bisschen mehr'},
     {n:'Die Fordernde', m:'Nimm mich richtig ran'},
-    {n:'Die Hemmungslose', m:'Je härter und dreckiger, desto besser'}],
+    {n:'Die Hemmungslose', m:'Je härter und dreckiger, desto besser'},
+    {n:'Die Unersättliche', m:'Extra hart und dreckig – benutz mich, bis nichts mehr geht'}],
 };
+// Typ-Test: jede Frage misst eine Neigung (d). Antwort 5 = „extra hart & dreckig“.
+const TYPD = {hart:'Hart', tempo:'Tempo', wort:'Dreckiges Reden', dom:'Dominanz', dreck:'Sauerei', fes:'Fesseln', sch:'Schmerz', anal:'Anal', maul:'Maul & Kehle'};
 const TYPQ = {
-  m:[['Wie stößt du am liebsten zu?', ['Sanft stupsen', 'Normal, schön im Takt', 'Hart zustoßen', 'So hart, dass alles wackelt und spritzt']],
-     ['Welches Tempo?', ['Ganz langsam', 'Gleichmäßig', 'Schnell und fest', 'Bis nichts mehr geht']],
-     ['Wie redest du dabei?', ['Zärtlich flüstern', 'Ein paar freche Sätze', 'Klare Ansagen', 'Richtig dreckig']],
-     ['Wer führt?', ['Sie führt', 'Abwechselnd', 'Ich bestimme', 'Sie gehört komplett mir']],
-     ['Wie soll es enden?', ['Kuscheln', 'In ihr kommen', 'Auf ihr', 'Überall verteilt – alles dreckig']],
-     ['Extras?', ['Lieber nichts', 'Mal ein Spielzeug', 'Fesseln, Klapse', 'Alles, was geht']]],
-  w:[['Wie soll er zustoßen?', ['Ganz sanft', 'Normal, schön im Takt', 'Hart', 'So hart, dass ich nur noch zittere']],
-     ['Welches Tempo?', ['Ganz langsam', 'Gleichmäßig', 'Schnell und fest', 'Ohne Pause, bis nichts mehr geht']],
-     ['Wie soll er mit dir reden?', ['Zärtlich', 'Ein bisschen frech', 'Bestimmend', 'Richtig dreckig']],
-     ['Wer führt?', ['Ich führe', 'Abwechselnd', 'Er bestimmt', 'Ich will benutzt werden']],
-     ['Wie soll es enden?', ['Kuscheln', 'In mir', 'Auf mir', 'Überall – je dreckiger, desto besser']],
-     ['Extras?', ['Lieber nichts', 'Mal ein Spielzeug', 'Fesseln, Klapse', 'Alles, was geht']]],
+  m:[['Wie stößt du am liebsten zu?', 'hart', ['Sanft stupsen', 'Normal, schön im Takt', 'Hart zustoßen', 'So hart, dass alles wackelt und spritzt', 'Rücksichtslos – ich nehme sie, wie ich will']],
+     ['Welches Tempo?', 'tempo', ['Ganz langsam', 'Gleichmäßig', 'Schnell und fest', 'Bis nichts mehr geht', 'Ohne Pause, Runde um Runde']],
+     ['Wie redest du dabei?', 'wort', ['Zärtlich flüstern', 'Ein paar freche Sätze', 'Klare Ansagen', 'Richtig dreckig', 'Ich beschimpfe sie, so dreckig es geht']],
+     ['Wer führt?', 'dom', ['Sie führt', 'Abwechselnd', 'Ich bestimme', 'Sie gehört komplett mir', 'Halsband, Leine, sie gehorcht']],
+     ['Wie soll es enden?', 'dreck', ['Kuscheln', 'In ihr kommen', 'Auf ihr', 'Überall verteilt – alles dreckig', 'Ins Maul, aufs Gesicht – und sie schluckt']],
+     ['Fesseln?', 'fes', ['Lieber nicht', 'Mal die Hände festhalten', 'Handschellen, Augenbinde', 'Festbinden, Spreizstange', 'Komplett verschnürt und geknebelt']],
+     ['Schläge und Schmerz?', 'sch', ['Gar nicht', 'Mal ein Klaps', 'Kräftig auf den Arsch', 'Paddel, Gerte, Klammern', 'Gürtel, Wachs – bis Spuren bleiben']],
+     ['Anal?', 'anal', ['Nein', 'Mal mit dem Finger', 'Plug oder langsam', 'Arschfick', 'Hart in den Arsch – und doppelt']],
+     ['Wie tief soll sie dich nehmen?', 'maul', ['Nur küssen und lecken', 'Normal blasen', 'Tief', 'Bis zum Anschlag', 'Ich ficke ihr Maul, bis sie würgt']],
+     ['Wie viel Sauerei?', 'dreck', ['Sauber bleiben', 'Ein bisschen nass', 'Viel Spucke und Öl', 'Squirt und Sperma überall', 'Spucken, sabbern, alles einsauen']]],
+  w:[['Wie soll er zustoßen?', 'hart', ['Ganz sanft', 'Normal, schön im Takt', 'Hart', 'So hart, dass ich nur noch zittere', 'Rücksichtslos – nimm mich einfach']],
+     ['Welches Tempo?', 'tempo', ['Ganz langsam', 'Gleichmäßig', 'Schnell und fest', 'Ohne Pause, bis nichts mehr geht', 'Runde um Runde, bis ich nicht mehr kann']],
+     ['Wie soll er mit dir reden?', 'wort', ['Zärtlich', 'Ein bisschen frech', 'Bestimmend', 'Richtig dreckig', 'Beschimpf mich – Schlampe, Fotze, alles']],
+     ['Wer führt?', 'dom', ['Ich führe', 'Abwechselnd', 'Er bestimmt', 'Ich will benutzt werden', 'Halsband, Leine – ich gehorche']],
+     ['Wie soll es enden?', 'dreck', ['Kuscheln', 'In mir', 'Auf mir', 'Überall – je dreckiger, desto besser', 'Ins Maul, ins Gesicht – und ich schlucke']],
+     ['Fesseln?', 'fes', ['Lieber nicht', 'Mal die Hände festhalten', 'Handschellen, Augenbinde', 'Festbinden, Spreizstange', 'Komplett verschnürt und geknebelt']],
+     ['Schläge und Schmerz?', 'sch', ['Gar nicht', 'Mal ein Klaps', 'Kräftig auf den Arsch', 'Paddel, Gerte, Klammern', 'Gürtel, Wachs – bis Spuren bleiben']],
+     ['Anal?', 'anal', ['Nein', 'Mal mit dem Finger', 'Plug oder langsam', 'Arschfick', 'Hart in den Arsch – und doppelt']],
+     ['Wie tief nimmst du ihn?', 'maul', ['Nur küssen und lecken', 'Normal blasen', 'Tief', 'Bis zum Anschlag', 'Er fickt mein Maul, bis ich würge']],
+     ['Wie viel Sauerei?', 'dreck', ['Sauber bleiben', 'Ein bisschen nass', 'Viel Spucke und Öl', 'Squirt und Sperma überall', 'Spucken, sabbern, alles einsauen']]],
 };
+/* Typ-Algorithmus: Mittelwert der Antworten, harte Fragen (hart, dom, dreck) zählen doppelt.
+   „Extra hart & dreckig“ (5) nur, wenn mindestens die Hälfte der Antworten auf 5 steht – sonst höchstens Typ 4.
+   Ein einzelner Ausreißer nach oben hebt den Typ nicht: höchstens 1,5 über dem Median. Dazu ein Neigungsprofil je Thema. */
+function typEval(g, ans) {
+  const Q = TYPQ[g], wt = d => ['hart', 'dom', 'dreck'].includes(d) ? 2 : 1;
+  let sum = 0, wsum = 0; const prof = {};
+  ans.forEach((v, i) => { if (!v || !Q[i]) return; const d = Q[i][1]; sum += v * wt(d); wsum += wt(d); (prof[d] = prof[d] || []).push(v); });
+  if (!wsum) return {t:2, prof:{}};
+  let t = sum / wsum;
+  const vals = ans.filter(Boolean).sort((a, b) => a - b), med = vals[Math.floor(vals.length / 2)];
+  t = Math.min(t, med + 1.5);
+  if (vals.filter(v => v === 5).length < vals.length / 2) t = Math.min(t, 4.4);
+  Object.keys(prof).forEach(d => prof[d] = prof[d].reduce((a, b) => a + b, 0) / prof[d].length);
+  return {t:clamp(t, 1, 5), prof};
+}
 const TYP = () => { const T = S.x.typ = S.x.typ || {}; T.turn = T.turn || 'a'; if (T.auto == null) T.auto = true;
   ['a', 'b'].forEach(k => { T[k] = T[k] || {t:2, done:false, g:k === 'a' ? 'm' : 'w', ans:[]}; });
   T.learn = T.learn || {a:{}, b:{}}; T.hist = T.hist || []; return T; };
 const typOn = () => !!(S.x.typ && S.x.typ.on);
-const typLvl = who => clamp(Math.round(TYP()[who].t), 1, 4);
+const typLvl = who => clamp(Math.round(TYP()[who].t), 1, 5);
 const typInfo = who => TYPES[TYP()[who].g][typLvl(who)];
 const other = who => who === 'a' ? 'b' : 'a';
 // Stufe eines Feldes: aus dem Fragebogen, sonst grob am Text erkannt
 function lvlOf(f) {
+  const bd = bdOf(f.qid); if (bd) return bd.x;
   if (f.qid && QLVL[f.qid]) return itemLvl(f.qid);
   const t = String(f.text || '');
+  if (/beschimpf|gürtel|maulfick|würgt|spuck|natursekt|hogtie|ruiniert|rücksichtslos|doppelt/i.test(t)) return 5;
   if (/sperma|spritz|schluck|arsch|anal|deepthroat|maul|fessel|knebel|fotze|benutz|dreckig|gesicht|bondage|würg|plug|dehner|gefesselt/i.test(t)) return 4;
   if (/hart|doggy|klaps|befehl|tief|blas|leck|fick|stehend|tisch|reiter|schwanz|halsband|augenbinde/i.test(t)) return 3;
   if (/küss|kuss|kuschel|massage|streichel|zärtlich|langsam|sanft|kerze|bad|dusche|nacken|feder|flüster/i.test(t)) return 1;
@@ -5359,10 +5476,13 @@ function typFactor(f) {
   const T = TYP(), s = T.favorN > 0 && T.favor ? T.favor : T.turn, o = other(s), L = lvlOf(f);
   if (f.qid && quizHasData() && isTabu(f.qid)) return 0;
   if (!textOk(f.text || '')) return 0;
+  if (!bdAllowed(f.qid)) return 0;
   if (L > Math.min(typLvl(s), typLvl(o)) + 1) return 0;   // nie mehr als eine Stufe über dem sanfteren der beiden Typen
   const fit = d => Math.exp(-(d * d) / 1.2);
   let k = 0.12 + fit(L - T[s].t) + 0.3 * fit(L - T[o].t);
   if (f.qid) { const e = eff(f.qid, s); if (e) k *= 0.6 + e / 5; }
+  const bd = bdOf(f.qid), pr = bd && T[s].prof ? T[s].prof[{fes:'fes', sch:'sch', dom:'dom', dreck:'dreck', fick:'hart', kon:'dom'}[bd.g]] : 0;
+  if (pr) k *= 0.5 + pr / 5;   // Neigungsprofil aus dem Typ-Test
   const l = (T.learn[s] || {})[typKey(f)] || 0;
   return k * Math.pow(2, clamp(l, -2.5, 2.5));
 }
@@ -5371,8 +5491,8 @@ function typLearn(f, v) {
   if (!typOn() || !f) return;
   const T = TYP(), s = T.turn, key = typKey(f), L = lvlOf(f);
   T.learn[s][key] = clamp((T.learn[s][key] || 0) + v, -3, 3);
-  if (v > 0.5) T[s].t = clamp(T[s].t + 0.08 * (L - T[s].t), 1, 4);
-  if (v < -0.5 && L >= T[s].t) T[s].t = clamp(T[s].t - 0.06, 1, 4);
+  if (v > 0.5) T[s].t = clamp(T[s].t + 0.08 * (L - T[s].t), 1, 5);
+  if (v < -0.5 && L >= T[s].t) T[s].t = clamp(T[s].t - 0.06, 1, 5);
   T.hist.unshift({w:s, k:key, txt:String(f.text || '').replace(/\n/g, ' ').slice(0, 80), v, L, at:Date.now()}); T.hist = T.hist.slice(0, 300);
   save();
 }
@@ -5413,9 +5533,9 @@ function typOpen(who) {
 function typRender() {
   const T = TYP(), n = NM(), nm = k => k === 'a' ? n.A : n.B, X = $('#typ');
   if (TT) {
-    const q = TYPQ[T[TT.who].g][TT.k];
+    const Q = TYPQ[T[TT.who].g], q = [Q[TT.k][0], Q[TT.k][2]];
     X.innerHTML = `<button class="ovx" data-ty="x">✕</button><div class="ovin" style="text-align:center">
-      <div class="hLab">Typ-Test · ${esc(nm(TT.who))} · Frage ${TT.k + 1} von ${TYPQ.m.length}</div>
+      <div class="hLab">Typ-Test · ${esc(nm(TT.who))} · Frage ${TT.k + 1} von ${Q.length} · ${esc(TYPD[Q[TT.k][1]])}</div>
       <p class="tip" style="margin:0 0 8px">Der andere schaut weg. Antworte ehrlich – es zählt nur für dich.</p>
       <h2 class="hTitle" style="font-size:min(9vh,48px)">${esc(q[0])}</h2>
       <div class="typAns">${q[1].map((a, i) => `<button class="tyA l${i + 1}" data-ta="${i + 1}">${esc(a)}</button>`).join('')}</div>
@@ -5423,14 +5543,15 @@ function typRender() {
     return;
   }
   const card = k => { const P = T[k], I = typInfo(k), top = Object.entries(T.learn[k] || {}).filter(e => e[1] > 0).sort((x, y) => y[1] - x[1]).slice(0, 4);
-    const pct = Math.round((P.t - 1) / 3 * 100);
+    const pct = Math.round((P.t - 1) / 4 * 100), pf = Object.entries(P.prof || {}).filter(e => e[1] >= 3).sort((x, y) => y[1] - x[1]).slice(0, 4);
     return `<div class="ovcard typCard"><div class="hLab" style="margin:0">${esc(nm(k))} ${P.g === 'm' ? '♂' : '♀'}</div>
       <h4 style="font-size:28px">${esc(I.n)}</h4><p style="font-style:italic;color:var(--acc2)">„${esc(I.m)}“</p>
       <div class="typBar"><i style="width:${pct}%"></i></div><p style="font-size:12px">sanft ◀ ${P.t.toFixed(1)} ▶ hart · ${P.done ? 'Test gemacht' : '<b>Test noch offen</b>'}</p>
+      ${pf.length ? `<p><b>Neigungen:</b> ${pf.map(e => esc(TYPD[e[0]]) + (e[1] >= 4.5 ? ' 🔥🔥' : e[1] >= 3.5 ? ' 🔥' : '')).join(' · ')}</p>` : ''}
       ${top.length ? `<p><b>Kommt bei ${esc(nm(k))} gut an:</b> ${top.map(e => esc((T.hist.find(h => h.k === e[0]) || {txt:e[0]}).txt)).join(' · ')}</p>` : ''}
       <div class="hRow"><button class="hbtn" data-ty="test" data-w="${k}">${P.done ? '↻ Test wiederholen' : '▶ Typ-Test machen'}</button>
         <button class="pill" data-ty="g" data-w="${k}">${P.g === 'm' ? '♂ → ♀' : '♀ → ♂'}</button></div>
-      <div class="hRow">${[1, 2, 3, 4].map(L => `<button class="pill ${typLvl(k) === L ? 'on' : ''}" data-ty="set" data-w="${k}" data-l="${L}">${esc(TYPES[P.g][L].n)}</button>`).join('')}</div></div>`; };
+      <div class="hRow">${[1, 2, 3, 4, 5].map(L => `<button class="pill ${typLvl(k) === L ? 'on' : ''}" data-ty="set" data-w="${k}" data-l="${L}">${esc(TYPES[P.g][L].n)}</button>`).join('')}</div></div>`; };
   X.innerHTML = `<button class="ovx" data-ty="x">✕</button><div class="ovin">
     <h2 class="hTitle" style="font-size:46px">🎯 Typ-Modus</h2>
     <p class="hMotto">Keine feste Stufe: Wer dreht, bekommt eher seine Vorlieben – und mit jedem 🔥, 🧊 und 💋 passt es besser.</p>
@@ -5445,7 +5566,7 @@ function typRender() {
 $('#typ').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return; const d = b.dataset, T = TYP();
   if (d.ta) { TT.ans[TT.k] = +d.ta; TT.k++;
-    if (TT.k >= TYPQ.m.length) { const P = T[TT.who]; P.ans = TT.ans.slice(); P.t = TT.ans.reduce((a, c) => a + c, 0) / TT.ans.length; P.done = true;
+    if (TT.k >= TYPQ[T[TT.who].g].length) { const P = T[TT.who]; P.ans = TT.ans.slice(); const ev = typEval(P.g, P.ans); P.t = ev.t; P.prof = ev.prof; P.done = true;
       const who = TT.who; TT = null; save(); applyStufe(); toast(`🎯 ${who === 'a' ? NM().A : NM().B}: ${typInfo(who).n}`, 3500);
       if (!T[other(who)].done) { TT = {who:other(who), k:0, ans:[]}; } }
     typRender(); return; }
