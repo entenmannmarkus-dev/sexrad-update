@@ -2288,11 +2288,16 @@ function renderPanel() {
       <button class="b pri" data-act="genLoad">▶ Laden</button> <button class="b" data-act="genSave">💾 Als Ablauf speichern</button> <button class="b" data-act="genEdit">🛠 Im Baukasten anpassen</button></div>` : ''}
   </details>
 
-  <details ${op('themen')} data-sec="themen"><summary>🎯 Themen-Räder</summary>
-    <div class="hint">Lädt fertige Räder zu einem Thema. Im Rad-Modus laufen sie nacheinander (Stellung → Technik → Heftigkeit), im Slot-Modus alle auf einmal. „↩ VORHER“ holt deine alten Räder zurück.</div>
-    ${THEMES.map((t, i) => `<button class="b" data-act="theme" data-t="${i}" style="margin:4px 6px 0 0">${t.icon} ${esc(t.name)}</button>`).join('')}</details>
+  <details ${op('themen')} data-sec=”themen”><summary>🎯 Themen-Räder</summary>
+    <div class=”hint”>Lädt fertige Räder zu einem Thema. Im Rad-Modus laufen sie nacheinander (Stellung → Technik → Heftigkeit), im Slot-Modus alle auf einmal. „↩ VORHER” holt deine alten Räder zurück.</div>
+    ${THEMES.map((t, i) => `<button class=”b” data-act=”theme” data-t=”${i}” style=”margin:4px 6px 0 0”>${t.icon} ${esc(t.name)}</button>`).join('')}</details>
 
-  <details ${op('quiz')} data-sec="quiz"><summary>💞 Vorlieben-Fragebogen</summary>
+  <details ${op('inv')} data-sec=”inv”><summary>🎁 Spielzeug & Utensilien</summary>
+    <div class=”hint”>Markiert, was ihr hergerichtet habt. Diese Auswahl wird bei den Trainings berücksichtigt – Praktiken ohne das Spielzeug fallen weg.</div>
+    ${invQuestionnaire().map(q => `<details style=”margin-top:6px”><summary>${q.title}</summary>${q.fields.map(f =>
+      `<label class=”chk” style=”margin:4px 0”><input type=”checkbox” data-inv=”${esc(f.cat)}” data-id=”${esc(f.id)}” ${f.check ? 'checked' : ''}> ${esc(f.t)}</label>`).join('')}</details>`).join('')}</details>
+
+  <details ${op('quiz')} data-sec=”quiz”><summary>💞 Vorlieben-Fragebogen</summary>
     <div class="hint">Beide bewerten getrennt von 1 (tabu) bis 5 (unbedingt). Daraus berechnet die App, was ihr beide mögt, lässt Tabus weg und trägt es mit passender Häufigkeit in die Räder ein.</div>
     <button class="b pri" data-act="openQuiz">💞 Fragebogen öffnen</button></details>
 
@@ -2438,6 +2443,18 @@ function initPanelEvents() {
       if (el.checked) S.active = i;
       else if (S.active === i) S.active = visibleIdx()[0];
       save(); renderPanel(); render(); updateRail(); return;
+    }
+    if (el.dataset.inv != null) {
+      const cat = el.dataset.inv, id = el.dataset.id;
+      invSetup();
+      const inv = INV();
+      if (!inv[cat]) inv[cat] = [];
+      if (el.checked) {
+        if (!inv[cat].includes(id)) inv[cat].push(id);
+      } else {
+        inv[cat] = inv[cat].filter(x => x !== id);
+      }
+      save(); return;
     }
     if (el.dataset.wp === 'title') renderPanel();
   });
@@ -4548,7 +4565,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110314;
+const APP_BUILD = 2026110315;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -5588,6 +5605,105 @@ const KT_WERK = [['fessel', 'Fesseln'], ['augen', 'Augenbinde'], ['knebel', 'Kne
 const KT = () => { const k = S.x.kt = S.x.kt || {}; k.lv = k.lv || 1; k.n = k.n || 0; k.h = k.h || 3; k.d = k.d || 3; k.tools = k.tools || ['dildo', 'vib', 'fessel', 'augen']; k.mode = k.mode || 'cmd'; k.dur = k.dur || 60; return k; };
 const ktSec = s => Math.round(s * (1 + 0.2 * (KT().lv - 1)) / 5) * 5;
 const ktHas = t => KT().tools.includes(t);
+/* ---------- Inventory: Spielzeug & Utensilien ---------- */
+const INV_CATS = [
+  {cat:'Anal', icon:'🍑', items:[['analhaken', 'Analhaken'], ['analplug', 'Analplug'], ['anal-dildo', 'Anal-Dildo'], ['glasdildo', 'Glasdildo'], ['glasplatte', 'Glasplatte'], ['analkugeln', 'Analkugeln'], ['vibanaplug', 'Vibrations-Analplug']]},
+  {cat:'Dildos & Vibratoren', icon:'🍆', items:[['dildo', 'Dildo'], ['glasdildo2', 'Glas-Dildo (2)'], ['vibrator', 'Vibrator'], ['massagestab', 'Massagestab'], ['maschine', 'Fickmaschine']]},
+  {cat:'Fesseln', icon:'⛓', items:[['handschellen', 'Handschellen'], ['fessel', 'Fesseln'], ['spreiz', 'Spreizstange'], ['halsband', 'Halsband & Leine']]},
+  {cat:'Mund & Augen', icon:'👁', items:[['augen', 'Augenbinde'], ['knebel', 'Knebel'], ['mundspreizer', 'Mundspreizer']]},
+  {cat:'Schlagen', icon:'👋', items:[['paddel', 'Paddel / Gerte'], ['klemmen', 'Nippelklemmen']]},
+  {cat:'Sperma-Utensilien', icon:'💧', items:[['glas', 'Glas'], ['loefel', 'Löffel'], ['form', 'Form zum Einfrieren'], ['spritze', 'Spritze/Pipette']]},
+  {cat:'Sonstiges', icon:'🎁', items:[['wachs', 'Wachs'], ['oelgel', 'Öl / Gleitgel'], ['sonstiges', 'Sonstiges']]},
+];
+const INV = () => { const i = S.x.inv = S.x.inv || {}; return i; };
+const invHas = (cat, id) => INV()[cat] && INV()[cat].includes(id);
+function invQuestionnaire() {
+  const i = INV();
+  return INV_CATS.map(({cat, icon, items}) => ({
+    title:`${icon} ${cat}`,
+    fields: items.map(([id, label]) => ({t:label, id, cat, check:invHas(cat, id)}))
+  }));
+}
+function invSetup() {
+  const i = INV();
+  INV_CATS.forEach(({cat}) => { if (!i[cat]) i[cat] = []; });
+  return i;
+}
+/* ----Spermatraining: 14 Varianten, Melken bis Einfrieren ---- */
+function spermaWheels() {
+  const k = KT(), h = clamp(k.h, 1, stufeCap() >= 4 ? 5 : 3), durs = [0.5, 1, 1.5, 2].map(m => ktSec(k.dur * m)), S1 = {kstep:1};
+  const W = [
+    {title:'Vorbereitung', fields:fl([['Auf den Knien bereit, Maul offen'], ['Auf Knien an der Kante, er steht']], S1)},
+    {title:'Spielart', fields:fl([
+      ['Abmelken ohne Maul, sie gibt sich selbst einen Cumshot'],
+      ['Kniet vor ihm, Sperma im offenen Mund, behält es bis er sagt was'],
+      ['Bläst ihn, Sperma in den Mund, offener Mund und zeigen'],
+      ['Gurgeln'],
+      ['Aus dem Mund ins Glas laufen lassen'],
+      ['Aus dem Mund in ihre Handfläche, dann wieder in ihren Mund'],
+      ['Mund zu Glas, dann wieder vom Glas in ihren Mund'],
+      ['Langsam ihren Körper runter, er löffelt auf und füttert'],
+      ['Maschine abpumpen, mit Löffel an ihren Mund bringen', [], invHas('Sperma-Utensilien', 'maschine')],
+      ['Sperma von ihrem Körper mit Fingernägeln abwischen, in ihren Mund tropfen'],
+      ['Gefrorenes Sperma in ihren Mund, dabei blasen, im Glas sammeln und nochmal ablecken'],
+      ['Sperma aus ihrer Fotze in ihre Hand, Fingernägel ablecken'],
+      ['Alles ablecken nach dem Fertig'],
+      ['Ins Maul spritzen, in Form einfrieren für die nächste Session']
+    ], S1)},
+    {title:'Wie lange?', fields:durs.map(sec => ({t:sec + ' Sekunden', kt:sec, kmode:'cmd', end:true}))}
+  ];
+  return W;
+}
+/* ---- Anal-Training: vorbereitung, Dehnen, Stellung, Ficken, Finale ---- */
+function analWheels() {
+  const k = KT(), h = clamp(k.h, 1, stufeCap() >= 4 ? 5 : 3), durs = [0.5, 1, 1.5, 2].map(m => ktSec(k.dur * m)), S1 = {kstep:1};
+  const W = [
+    {title:'Vorbereitung', fields:fl([['Viel Gleitgel, ein Finger ganz langsam rein'], ['Arsch mit beiden Händen spreizen, zeigen'], ['Zunge am Arsch zum Aufwärmen'], ['Analhaken einführen', [], invHas('Anal', 'analhaken')],
+      ['Kleinen Plug rein und 2 Minuten halten', [], invHas('Anal', 'analplug')], ['Auf alle Viere, Arsch hoch, warten']], S1)},
+    {title:'Dehnen', fields:fl([['Ein Finger langsam rein und raus'], ['Zwei Finger im Takt'], ['Analdildo tief rein', [], invHas('Anal', 'anal-dildo')],
+      ['Glasdildo langsam rein', [], invHas('Anal', 'glasdildo')], ['Analkugeln eine nach der anderen', [], invHas('Anal', 'analkugeln')],
+      ['Drei Finger – so weit es geht'], ['Größerer Plug rein und raus', [], invHas('Anal', 'analplug')], ['Vibrations-Plug pulsierend', [], invHas('Anal', 'vibanaplug')]], S1)},
+    {title:'Stellung', fields:fl([['Doggy – Arsch hoch, Kopf runter'], ['Bauchlage, Kissen unter die Hüfte'], ['Auf dem Rücken, Beine an die Brust'], ['Sie reitet rückwärts auf dem Schwanz'],
+      ['Löffelchen, ganz eng'], ['Stehend über der Tischkante']], S1)},
+    {title:'Ficken', fields:fl([['Nur die Spitze, sehr langsam'], ['Langsam ganz rein und halten'], ['Gleichmäßig tief im Takt'], ['Hart und schnell'],
+      ['Ganz raus und wieder rein'], ['Bis zum Anschlag, ohne Pause'], ['Richtig durchficken, sehr hart']], S1)},
+    {title:'Wie lange?', fields:durs.map(sec => ({t:sec + ' Sekunden im Arsch', kt:sec, kmode:'cmd', end:true}))}
+  ];
+  return W.filter(w => w.fields.length >= 2);
+}
+/* ---- Fessel-Training: Vorbereitung, Stellung, Bewegung, Festigkeit, Dauer ---- */
+function fesselWheels() {
+  const k = KT(), h = clamp(k.h, 1, stufeCap() >= 4 ? 5 : 3), durs = [0.5, 1, 1.5, 2].map(m => ktSec(k.dur * m)), S1 = {kstep:1};
+  const W = [
+    {title:'Vorbereitung', fields:fl([['Sicherheit besprechen – Handzeichen für Notfall'], ['Fesseln locker anprobieren'], ['Blutfluss checken – zwei Finger passen darunter'], ['Safeword vereinbaren']], S1)},
+    {title:'Fesselart', fields:fl([['Handschellen vorne', [], invHas('Fesseln', 'handschellen')], ['Handschellen hinten', [], invHas('Fesseln', 'handschellen')], ['Hand- und Fußfesseln', [], invHas('Fesseln', 'fessel')],
+      ['Mit Spreizstange', [], invHas('Fesseln', 'spreiz')], ['An das Bettgestell gefesselt'], ['Knie breit, Hände auf dem Rücken']], S1)},
+    {title:'Dabei', fields:fl([['Augenbinde drauf', [], invHas('Mund & Augen', 'augen')], ['Knebel oder Mundspreizer', [], invHas('Mund & Augen', 'knebel')], ['An der Leine ziehen', [], invHas('Fesseln', 'halsband')],
+      ['Nur beobachten lassen'], ['Berührungen überall – sie kann nicht entkommen'], ['Sie leckt dich, du wichst danach ab']], S1)},
+    {title:'Heftigkeit', fields:fl([['Sanft, nur um den Control zu haben'], ['Mit leichten Schlägen', [], h >= 3 && invHas('Schlagen', 'paddel')],
+      ['Hart, sie zittert', [], h >= 4], ['Rücksichtslos, gnadenlos', [], h >= 5]], S1)},
+    {title:'Wie lange?', fields:durs.map(sec => ({t:sec + ' Sekunden gefesselt', kt:sec, kmode:'cmd', end:true}))}
+  ];
+  return W.filter(w => w.fields.length >= 2);
+}
+/* ---- Deepthroat-Triathlon: 3 Runden, immer tiefer, mit Zeiten ---- */
+function deepthroatWheels() {
+  const k = KT(), h = clamp(k.h, 1, stufeCap() >= 4 ? 5 : 3), durs = [0.5, 1, 1.5, 2].map(m => ktSec(k.dur * m)), S1 = {kstep:1};
+  const W = [
+    {title:'Runde 1: Einklimatisieren', fields:fl([['Mit den Lippen arbeiten, nur eine Hand'], ['Zunge umkreise den Schwanz'], ['Die hinteren 2/3 des Schwanzes im Mund'],
+      ['Atme durch die Nase – ganz langsam hinten rein']], S1)},
+    {title:'Runde 2: Tiefer', fields:fl([['Schwanz tiefer im Rachen, ganz langsam'], ['Mit den Händen helfen, den Schaft zu ficken'], ['Tränen sind ok – das ist heiß'],
+      ['Sie lässt ihn tiefer rein ohne zu würgen']], S1)},
+    {title:'Runde 3: Alles geben', fields:fl([['Ganzer Schwanz im Hals, sie atmet aus'], ['Hin und her, sie wichst dabei auch von außen mit Speichel'],
+      ['Er kommt im Mund – sie zeigt es vor dem Schlucken'], ['Danach Schwanz sauber lecken']], S1)},
+    {title:'Wie lange je Runde?', fields:durs.map(sec => ({t:sec + ' Sekunden je Runde', kt:sec, kmode:'cmd', end:true}))}
+  ];
+  return W.filter(w => w.fields.length >= 2);
+}
+THEMES.push({name:'Spermatraining', icon:'💧', rad:true, stufe:3, get wheels() { return spermaWheels(); }, hint:'Alle Spermaspiele und Varianten'});
+THEMES.push({name:'Anal-Training', icon:'🍑', rad:true, stufe:3, get wheels() { return analWheels(); }, hint:'Anal-Vorbereitung bis Ficken'});
+THEMES.push({name:'Fessel-Training', icon:'⛓', rad:true, stufe:3, get wheels() { return fesselWheels(); }, hint:'Bondage sicher und heiß'});
+THEMES.push({name:'Deepthroat-Triathlon', icon:'🍆', rad:true, stufe:3, get wheels() { return deepthroatWheels(); }, hint:'3 Runden Deepthroat-Training'});
 function ktHoles() {
   return [['maul', 'INS MAUL', ['vor.oral_sie']], ['fotze', 'IN DIE FOTZE', []], ['arsch', 'IN DEN ARSCH', ['fin.arsch']]].filter(h => !h[2].some(isTabu));
 }
