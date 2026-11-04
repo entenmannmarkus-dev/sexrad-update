@@ -485,6 +485,18 @@
   #cmdBar .cbB{display:flex;gap:12px;justify-content:center;margin-top:2vh;flex-wrap:wrap}
   #cmdBar .cbB button{min-height:54px;padding:8px 22px;border-radius:14px;border:1px solid #8a6a36;background:#1a0d0f;color:#f6e7c8;font:800 18px system-ui}
   #cmdBar .cbF{margin-top:1.6vh;font:600 clamp(13px,1.5vw,17px) system-ui;color:#9c8a6c}
+  /* Sklaven-Training: beim Drehen Räder vorn, während der Aufgabe klein im Hintergrund, Aufgabe groß davor */
+  body.sk #stage{transition:transform .6s ease,opacity .6s ease,filter .6s ease}
+  body.sk.wback #stage{transform:scale(.5);opacity:.4;filter:blur(1.5px) saturate(.7)}
+  body.sk #result,body.sk #result.nomedia{background:rgba(0,0,0,.3)}
+  body.sk #result.show::after{display:none}
+  body.sk #rTxt,body.sk #rText{color:#fff8e6!important}
+  body.sk #rText{text-transform:none;color:#fff8e6;text-shadow:0 2px 0 #000,0 0 28px #000,0 0 10px #000}
+  body.sk #rTxt{background:rgba(12,5,7,.78);border:1px solid rgba(201,162,78,.5);border-radius:26px;padding:2.4vh 3.4vw;line-height:1.18}
+  body.sk #cmdBar.on:not(.fin){top:14vh;bottom:14vh;display:flex;flex-direction:column;justify-content:center;background:rgba(8,4,5,.88)}
+  body.sk #cmdBar .cbX{font-size:clamp(34px,6.5vw,96px)}
+  body.sk #cmdBar .cbPrev{font-size:clamp(15px,2vw,24px);margin-bottom:2vh}
+  @media (max-width:700px){body.sk #cmdBar.on:not(.fin){top:124px;bottom:10px}body.sk #cmdBar .cbX{font-size:30px}}
   #cmdBar.fin{justify-content:flex-start}
   #cmdBar.fin>:first-child{margin-top:auto}#cmdBar.fin>:last-child{margin-bottom:auto}
   @media (max-width:700px){#cmdBar{left:10px!important;right:calc(var(--rail) + 8px);padding:10px 12px}
@@ -1488,7 +1500,7 @@ function fieldFlags(f) {
 }   // Ergebnisse des letzten Durchlaufs (für Abläufe)
 async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   if (busy) return;
-  busy = true; ac(); setBusy(true); closePanel(); if (depth === 0) cmdHide();
+  busy = true; ac(); setBusy(true); closePanel(); if (depth === 0) cmdHide(); wBack(false);
   S.active = idx; LASTW = idx; updateRail();
   const w = S.wheels[idx], vis = visibleIdx();
   const useFocus = jockey || isSlot() || vis.length > 1 || !vis.includes(idx);
@@ -1511,7 +1523,7 @@ async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   if (useFocus) { await tween(350, (t, now) => { focus.p = 1 - t; render(now); }); focus = null; }
   render(); busy = false; setBusy(false); renderPanel(); updateRail();
   if (next) { cmdShow(true); await runNext(next, depth + 1); }   // Folge-Rad oder Speicherkarte (Kette)
-  if (depth === 0) { typAfterSpin(); advanceWheel(); cmdShow(); }
+  if (depth === 0) { typAfterSpin(); advanceWheel(); cmdShow(); if (!$('#cmdBar').className) wBack(false); }
 }
 /* Einfache Ansicht: Ergebnis bleibt bis zum nächsten Drehen groß stehen;
    ist die Runde durch, steht nur noch der ganze Ablauf als Befehl da */
@@ -1523,7 +1535,9 @@ function roundAdd(idx, w, txt, depth) {
   const f = w.fields.find(x => String(x.text || '').replace(/\n/g, ' ') === txt) || {};
   ROUND.items.push({t:String(w.title || '').trim(), x:String(txt || '').trim(), q:f.qid || '', kt:!!(f.kt || f.kstep)}); ROUND.idxs.push(idx);
 }
-function roundReset(name) { ROUND.items = []; ROUND.idxs = []; if (name != null) S.x.setName = String(name); cmdHide(); }
+function roundReset(name) { ROUND.items = []; ROUND.idxs = []; if (name != null) S.x.setName = String(name); skBody(); cmdHide(); }
+function skBody() { document.body.classList.toggle('sk', /Sklaven/.test(S.x.setName || '')); }
+const wBack = on => document.body.classList.toggle('wback', !!on);
 /* Ablauf als Beschreibung: Satzbausteine je nach Modus (Soft … Heavy Duty, BDSM, Sklaven-Training).
    Lernt mit: „Passt so“ macht die benutzten Bausteine häufiger, „Anders“ seltener. */
 const ABL_ORT = {'ort.bett':'im Bett', 'ort.sofa':'auf dem Sofa', 'ort.dusche_o':'unter der Dusche', 'ort.kueche':'in der Küche', 'ort.boden':'auf dem Boden',
@@ -1590,7 +1604,7 @@ function ablLearn(used, up) {
   used.forEach(id => { W[id] = clamp((W[id] || 1) * (up ? 1.35 : 0.7), 0.15, 8); }); save();
 }
 function speakCmd(t) { if (!S.settings.speakMain || !t) return; try { speak(t); } catch (e) {} }
-function cmdHide() { const b = $('#cmdBar'); if (b) b.className = ''; }
+function cmdHide() { const b = $('#cmdBar'); if (b) b.className = ''; if (!$('#result').classList.contains('show')) wBack(false); }
 function cmdLines() {
   const it = ROUND.items.filter(x => x.x), out = [];
   let k = 0; const steps = it.filter(x => !/^wo\??$/i.test(x.t)).length;
@@ -1612,7 +1626,7 @@ function cmdShow(partial) {
       + `<div class="cbS">${cmdLines().map(([t, x]) => `<span><b>${esc(t)}</b> ${esc(x)}</span>`).join('<i>→</i>')}</div>`
       + (used.length ? '<div class="cbB"><button data-cb="up">👍 Passt so</button><button data-cb="re">↻ Anders sagen</button></div>' : '')
       + '<div class="cbF">Bleibt stehen, bis ihr wieder dreht · antippen = ausblenden</div>';
-    b.className = 'fin on';
+    b.className = 'fin on'; wBack(true);
     b.onclick = e => { const c = e.target.closest('[data-cb]'); if (!c) return cmdHide();
       if (c.dataset.cb === 'up') { ablLearn(used, true); toast('👍 Gemerkt – so beschreibe ich es öfter', 2500); c.disabled = true; }
       else { ablLearn(used, false); cmdShow(); } };
@@ -1621,7 +1635,7 @@ function cmdShow(partial) {
     const last = ROUND.items[ROUND.items.length - 1], prev = ROUND.items.slice(0, -1).map(x => x.x).filter(Boolean);
     b.innerHTML = (prev.length ? `<div class="cbPrev">${esc(prev.join(' → '))} →</div>` : '')
       + (last.t ? `<div class="cbT">${esc(last.t)}</div>` : '') + `<div class="cbX">${esc(last.x)}</div>`;
-    b.className = 'on'; b.onclick = null;
+    b.className = 'on'; b.onclick = null; wBack(true);
   }
 }
 /* Einfache Ansicht: der große DREHEN-Knopf nimmt danach automatisch das nächste Rad */
@@ -1856,7 +1870,8 @@ function showResult(w, i, depth, fieldOverride) {
     };
     $('#result').classList.toggle('nomedia', !f.media);
     void $('#result').offsetWidth;
-    $('#result').classList.add('show');
+    $('#result').classList.add('show'); wBack(true); $('#cmdBar').className = '';
+    if (document.body.classList.contains('sk')) requestAnimationFrame(skFit);
     $('#result').classList.remove('hasvid');
     let vid = null, sqp = null;
     if (f.media && Array.isArray(f.media.parts) && f.media.parts.length > 1) {
@@ -4262,7 +4277,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110309;
+const APP_BUILD = 2026110310;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -5419,6 +5434,15 @@ function skWheels() {
 }
 THEMES.push({name:'Sklaven-Training', icon:'⛓', rad:true, sklave:true, stufe:3,
   get wheels() { return skWheels(); }, get hint() { return `${skSub()}: ${skRank()} (Stufe ${KT().lv}/6) · Safeword gilt immer`; }});
+// Aufgabe so groß wie möglich, aber ganz lesbar (Platz für Timer lassen)
+function skFit() {
+  const t = $('#rTxt'); if (!t || !document.body.classList.contains('sk') || !t.textContent) return;
+  const box = $('#rText'), maxH = innerHeight * ($('#rKt').className ? 0.6 : 0.8), maxW = box.clientWidth * 0.94;
+  let fs = Math.min(innerHeight * 0.16, innerWidth * 0.1);
+  t.style.fontSize = fs + 'px';
+  while (fs > 16 && (t.scrollHeight > maxH || t.scrollWidth > maxW)) { fs *= 0.92; t.style.fontSize = fs + 'px'; }
+}
+addEventListener('resize', () => { if ($('#result').classList.contains('show')) skFit(); });
 function skOpen() { const k = KT(); k.mode = 'sk'; save(); ktOpen(); }
 let KTT = null;   // laufender Timer
 function ktStop() { if (KTT) { clearInterval(KTT.iv); KTT = null; } const el = $('#rKt'); if (el) { el.className = ''; el.innerHTML = ''; } }
@@ -5449,6 +5473,7 @@ function ktShow(f) {
   } else { steps = [{l:'Los!', s:sec}]; $('#rTxt').textContent = cmd; }
   f.kcmd = $('#rTxt').textContent;
   { const L = $('#rTxt').textContent.length; $('#rTxt').style.fontSize = L > 110 ? 'min(5.2vh,3.6vw)' : L > 60 ? 'min(6.5vh,4.5vw)' : 'min(9vh,6vw)'; }
+  if (document.body.classList.contains('sk')) { $('#rKt').className = 'on'; requestAnimationFrame(skFit); }
   let k = 0, left = steps[0].s; const el = $('#rKt'); el.className = 'on';
   const mm = x => Math.floor(x / 60) + ':' + String(x % 60).padStart(2, '0');
   let flk = 0;
@@ -5464,7 +5489,7 @@ function ktShow(f) {
     k++;
     if (k >= steps.length) { clearInterval(KTT.iv); KTT = null; el.className = 'on end'; el.innerHTML = '<small>Zeit um</small>✔ Geschafft?'; speak('Zeit um'); return; }
     left = steps[k].s; speak(steps[k].l); draw();
-    if (f.kmode === 'skf' && !steps[k].rad && !steps[k].pause) $('#rTxt').textContent = steps[k].l;
+    if (f.kmode === 'skf' && !steps[k].rad && !steps[k].pause) { $('#rTxt').textContent = steps[k].l; skFit(); }
   }, 1000)};
 }
 function ktDone(f, ok) {
@@ -6051,7 +6076,7 @@ $('#typ').addEventListener('click', e => {
 // Start: Sperre zuerst, sonst Startbildschirm
 if (S.x.pin) lockShow('unlock');
 
-applySimple(); applyStufe(); requestAnimationFrame(ambLoop);
+applySimple(); skBody(); applyStufe(); requestAnimationFrame(ambLoop);
 if (S.settings.home !== false || !S.settings.named) openHome();
 
 /* Start */
