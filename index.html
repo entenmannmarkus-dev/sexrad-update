@@ -78,9 +78,9 @@
   #bUpd.new::after{content:'';position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#e23a3a;border:2px solid #111}
   #upd{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:70;display:none;align-items:center;justify-content:center}
   #upd.show{display:flex}
-  #updBox{width:min(520px,92vw);background:#151517;border:1px solid #c9a24e;border-radius:14px;padding:16px 18px;color:#eee}
+  #updBox{width:min(520px,92vw);max-height:90vh;max-height:90dvh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box;background:#151517;border:1px solid #c9a24e;border-radius:14px;padding:16px 18px;color:#eee}
   #updBox h3{font:700 20px Georgia,serif;color:#ffe08a;margin:0 0 8px}
-  #updBox p{margin:6px 0;line-height:1.4}
+  #updBox p{margin:6px 0;line-height:1.4;overflow-wrap:anywhere}
   #updBox .uv{color:#c9b48a;font-size:13px}
   #updNotes{white-space:pre-line;background:#0d0d0f;border:1px solid #333;border-radius:10px;padding:8px 10px;max-height:40vh;overflow:auto;display:none}
   #updBox .ub{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
@@ -4565,7 +4565,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110316;
+const APP_BUILD = 2026110801;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4580,7 +4580,8 @@ function updResult(r) {
   const msg = $('#updMsg'), notes = $('#updNotes'), go = $('#updGo');
   if (!r || r.error) {
     UPD.remote = null; go.style.display = 'none'; notes.style.display = 'none';
-    msg.textContent = 'Keine Verbindung zum Update-Speicher. Bitte Internet prüfen und nochmal versuchen.' + (r && r.error ? ' (' + r.error + ')' : '');
+    const er = r && r.error ? String(r.error) : '';
+    msg.textContent = 'Keine Verbindung zum Update-Speicher. Bitte Internet prüfen und in ein paar Minuten nochmal versuchen.' + (er ? ' (' + (er.length > 80 ? er.slice(0, 80) + ' …' : er) + ')' : '');
     return;
   }
   UPD.remote = r;
