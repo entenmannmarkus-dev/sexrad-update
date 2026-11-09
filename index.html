@@ -405,6 +405,17 @@
   .soChips button{padding:8px 11px;border-radius:11px;border:1px solid #5a3a2a;background:#1a0d0f;font:700 14px system-ui;color:#e8d8c0}
   .soChips button.on{background:linear-gradient(160deg,#8a1a22,#3a080c);border-color:var(--acc);color:#fff}
   .soChips button.sug{border-color:#ffd24a;color:#ffe08a}
+  .soSeq{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:40px;padding:8px;border:1px dashed #8a6a36;border-radius:12px;background:rgba(0,0,0,.35)}
+  .soSeq i{color:#e0464e;font-style:normal}.soSeq small{color:#9c8a6c}
+  .soS{display:inline-flex;align-items:center;gap:4px;padding:5px 6px 5px 10px;border-radius:10px;background:linear-gradient(160deg,#8a1a22,#3a080c);color:#fff;font:700 14px system-ui}
+  .soS b{color:#ffe08a}.soS button{border:0;background:rgba(0,0,0,.35);color:#fff;border-radius:7px;padding:3px 7px;font:700 12px system-ui}
+  .soAg{margin:8px 0;padding:8px 10px;border-radius:10px;background:rgba(40,90,50,.18);border:1px solid #3c6a46;font:600 13px system-ui;color:#bfe6c8}
+  .soAg div{margin:3px 0}.soAg button,.soOwn button{padding:4px 10px;border-radius:8px;border:1px solid #8a6a36;background:#1a0d0f;color:#f6e7c8;font:700 12px system-ui}
+  .soOwn{display:flex;gap:6px;margin-top:10px}.soOwn input,.soOwn select{flex:1;min-width:0;padding:7px;border-radius:9px;border:1px solid #5a3a2a;background:#120809;color:#f6e7c8}
+  .soMore{margin-top:12px}.soMore summary{cursor:pointer;font:800 13px system-ui;color:#c9a24e;letter-spacing:.06em}
+  #rVid .vaH{display:block;font-size:.8em;opacity:.8;margin-bottom:.4vh}
+  #rVid .va{display:block}#rVid .va b{display:inline-block;min-width:1.4em;color:#e0464e}
+  #rVid .bl{animation:blIn .6s ease-out both}
   #soDesc{width:100%;min-height:74px;margin-top:6px;border-radius:12px;background:#120a0b;color:#f0e2c4;border:1px solid #5a4520;padding:10px;font:500 15px/1.35 system-ui}
   .soBtns{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
   .soBtns .hbtn{flex:1;min-width:150px}
@@ -581,6 +592,25 @@
   #result.reveal #rText>*{animation:none}
   #rTxt .wd{display:inline-block;opacity:0;filter:blur(8px);transform:translateY(.25em);animation:wIn .6s ease-out forwards}
   @keyframes wIn{to{opacity:1;filter:none;transform:none}}
+  /* Aufbau von oben nach unten: Maske wandert nach unten, durchsichtig → sichtbar */
+  @property --mk{syntax:'<percentage>';inherits:false;initial-value:140%}
+  @keyframes tbIn{from{opacity:0;--mk:0%;transform:translateY(-.25em)}to{opacity:1;--mk:140%;transform:none}}
+  @keyframes blIn{from{opacity:0;filter:blur(6px)}to{opacity:1;filter:none}}
+  #result.build.show #rText>*{animation:tbIn .7s ease-out both;-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--mk) - 40%),transparent var(--mk));mask-image:linear-gradient(to bottom,#000 calc(var(--mk) - 40%),transparent var(--mk))}
+  #result.build.show #rText>#rTxt{animation:none;-webkit-mask-image:none;mask-image:none}
+  #rTxt .ln{display:block;animation:tbIn .75s ease-out both;-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--mk) - 40%),transparent var(--mk));mask-image:linear-gradient(to bottom,#000 calc(var(--mk) - 40%),transparent var(--mk))}
+  #cmdBar .bb{animation:tbIn .7s ease-out both;-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--mk) - 40%),transparent var(--mk));mask-image:linear-gradient(to bottom,#000 calc(var(--mk) - 40%),transparent var(--mk))}
+  #cmdBar .bl{animation:blIn .6s ease-out both}
+  #cmdBar .cbD.bb,#cmdBar .cbS.bb{animation:none;-webkit-mask-image:none;mask-image:none}
+  #cmdBar .cbA{margin-top:1.4vh;font:600 clamp(12px,1.3vw,15px) system-ui;color:#8fd0a0}
+  #rUnit.lgN{font:600 min(2.6vh,15px) system-ui;color:#8fd0a0;opacity:.95;margin-top:1.4vh}
+  .jkG{margin:6px 0;border:1px solid #3a2a2c;border-radius:10px;padding:4px 8px}
+  .jkG summary{cursor:pointer;font-weight:700}
+  .jkB{display:flex;gap:6px;margin:6px 0}
+  .jkB button,.hint button[data-jka]{padding:5px 12px;border-radius:9px;border:1px solid #8a6a36;background:#1a0d0f;color:#f6e7c8;font:600 13px system-ui}
+  .jkI{display:flex;align-items:center;gap:6px}.jkI .chk{flex:1;margin:3px 0}
+  html.night #rTxt .ln,html.night #cmdBar .bb,html.night #cmdBar .bl{animation:none;-webkit-mask-image:none;mask-image:none}
+  @media (prefers-reduced-motion:reduce){#rTxt .ln,#cmdBar .bb,#cmdBar .bl,#result.build.show #rText>*{animation:none!important;-webkit-mask-image:none!important;mask-image:none!important}}
   #rLine{margin-top:2.2vh;font:italic 600 min(5.4vh,3.6vw)/1.2 var(--disp);text-transform:none;color:var(--acc2);opacity:0;max-width:80%;text-align:center}
   #result.show #rText>#rLine{animation:wIn .8s ease-out 1.4s forwards}
   :root[data-stufe="4"] #rLine{font-style:normal;text-transform:uppercase;letter-spacing:.06em;color:#fff}
@@ -937,7 +967,7 @@ function newWheel(i) {
 function defaultState() {
   return {
     active:0,
-    settings:{stufe:0, stufeColors:true, amb:true, simple:true, home:true, named:false, music:false, softSnd:false, safe:true, pre:true, tense:true, night:false, reveal:true, lines:true, toyBeat:true, big:false, sound:true, spinSec:6, speakMain:false, autoNext:5, resultSec:3, mode:'rad', slotHist:[]},
+    settings:{stufe:0, stufeColors:true, amb:true, simple:true, home:true, named:false, music:false, softSnd:false, safe:true, pre:true, tense:true, night:false, reveal:true, build:true, spinAll:true, logic:true, lines:true, toyBeat:true, big:false, sound:true, spinSec:6, speakMain:false, autoNext:5, resultSec:3, mode:'rad', slotHist:[]},
     toy:{enabled:false, url:'ws://127.0.0.1:12345', master:100},
     quiz:{names:{a:'Er', b:'Sie'}, ans:{}, learn:{}, stufe:{}, stufeSel:0, lvlOv:{}, thr:2.5, map:{}, timer:true, custom:{}, session:null, fb:null, sessions:[]},   // Vorlieben-Fragebogen   // Sexspielzeug über Intiface Central
     joker:{num:'', text:'JOKER', weight:1, next:-1, card:null, media:null, seqs:[]},   // seqs = gespeicherte Abfolgen   // eigenständiges Joker-Feld
@@ -989,6 +1019,10 @@ function normalize(o) {
   s.joker = normField(Object.assign({text:'JOKER'}, o.joker || {}));
   s.joker.seqs = (Array.isArray(s.joker.seqs) ? s.joker.seqs : []).map(q => ({id:String(q.id || 'q' + uid()), name:String(q.name || 'Abfolge'),
     steps:(Array.isArray(q.steps) ? q.steps : []).map(st => ({t:String(st.t || 'w0'), n:clamp(Math.round(+st.n || 1), 1, 50)}))}));
+  { const oj = o.joker || {};   // hinterlegte Joker-Aufgaben + Auswahl
+    s.joker.tasks = (Array.isArray(oj.tasks) ? oj.tasks : []).filter(t => t && t.text).map(t => ({id:String(t.id || 'a' + uid()), text:String(t.text).slice(0, 200)}));
+    s.joker.sel = [...new Set((Array.isArray(oj.sel) ? oj.sel : []).map(String))];
+    s.joker.jm = oj.jm === 'zufall' ? 'zufall' : 'wahl'; }
   s.presets = (Array.isArray(o.presets) ? o.presets : []).map(normCard).filter(Boolean);
   s.vcats = Array.isArray(o.vcats) ? o.vcats.filter(c => c && c.name).map(c => ({name:String(c.name), subs:(Array.isArray(c.subs) ? c.subs : []).map(String)})) : null;
   s.vlib = (Array.isArray(o.vlib) ? o.vlib : []).filter(x => x && x.media && x.media.id).map(x => ({cat:String(x.cat || ''), media:x.media}));
@@ -1361,7 +1395,14 @@ function visibleIdx() { return S.wheels.map((w, i) => w.enabled ? i : -1).filter
 const TOP_K = 1.23, H_K = 2.25;
 function fitR(cw, ch) { return Math.min(cw / 2.04, ch / H_K); }
 function gridLayout(n, W, H, btnH = 0) {
-  if (n > 1 && !isSlot()) return focusLayout(n, W, H);
+  if (n > 1 && !isSlot()) {   // Fokus-Ansicht; beim gemeinsamen Drehen gleiten alle Räder in gleich große Plätze
+    const F = focusLayout(n, W, H); if (!ALLP) return F;
+    const E = eqLayout(n, W, H, btnH), p = easeIO(ALLP);
+    return F.map((a, k) => ({cx:a.cx + (E[k].cx - a.cx) * p, cy:a.cy + (E[k].cy - a.cy) * p, R:a.R + (E[k].R - a.R) * p}));
+  }
+  return eqLayout(n, W, H, btnH);
+}
+function eqLayout(n, W, H, btnH = 0) {
   const bh = n > 1 ? btnH : btnH * 0.62;   // Platz unter dem Rad: Dreh-Button (ab 2 Rädern) + Ergebnisleiste
   let best = null;
   for (let cols = 1; cols <= n; cols++) {
@@ -1428,7 +1469,7 @@ function render(now = performance.now()) {
     drawWheel(ctx, S.wheels[wi], r.cx, r.cy, r.R, {
       glow: vis.length > 1 && wi === S.active && !focus,
       alpha: focus ? 1 - 0.85 * p : 1,
-      hl: wi === S.active && editHL != null ? editHL : undefined, hlA: 0.45, title: S.wheels[wi].title});
+      hl: wi === S.active && editHL != null ? editHL : undefined, hlA: wi === S.active && editHL != null ? 0.45 : undefined, title: S.wheels[wi].title});
   });
   if (focus) {
     const k = vis.indexOf(focus.idx), from = k >= 0 ? rects[k] : {cx:big.cx, cy:big.cy, R:big.R * 0.3};
@@ -1498,9 +1539,9 @@ function pickProfile() {
   let i; do { i = Math.floor(Math.random() * SPIN_PROFILES.length); } while (i === lastProfile && SPIN_PROFILES.length > 1);
   lastProfile = i; return SPIN_PROFILES[i];
 }
-function spinAnim(w, redraw, secs) {
+function spinAnim(w, redraw, secs, forced) {
   return new Promise(res => {
-    const n = w.fields.length, seg = TAU / n, target = pickWeighted(w.fields), u = 0.12 + Math.random() * 0.76;
+    const n = w.fields.length, seg = TAU / n, target = forced != null ? forced : pickWeighted(w.fields), u = 0.12 + Math.random() * 0.76;
     const P = pickProfile(), rot0 = w.rot || 0;
     let dd = (-(target + u) * seg - rot0) % TAU; if (dd < 0) dd += TAU;
     const turns = Math.max(2, Math.round(secs * 1.15 * rnd(...P.turns)));
@@ -1535,6 +1576,7 @@ function fieldFlags(f) {
 }   // Ergebnisse des letzten Durchlaufs (für Abläufe)
 async function doSpin(idx, depth = 0, jockey = false, secs = 0) {
   if (busy) return;
+  if (depth === 0 && !jockey && spinAllOn()) return spinAll(secs);   // alle Räder drehen, dann ein Ergebnis
   busy = true; ac(); setBusy(true); closePanel(); if (depth === 0) cmdHide(); wBack(false);
   S.active = idx; LASTW = idx; updateRail();
   const w = S.wheels[idx], vis = visibleIdx();
@@ -1566,7 +1608,7 @@ const ROUND = {items:[], idxs:[]};
 const cmdOn = () => !isSlot() && S.settings.cmdBar !== false;
 function roundAdd(idx, w, txt, depth) {
   const v = visibleIdx();
-  if (depth === 0 && (ROUND.idxs.includes(idx) || idx === v[0])) { ROUND.items = []; ROUND.idxs = []; }
+  if (depth === 0 && (ROUND.all || ROUND.idxs.includes(idx) || idx === roundOrder()[0] || !v.length)) { ROUND.items = []; ROUND.idxs = []; ROUND.all = false; }
   if (depth === 0) ROUND.chain = ROUND.items.length;
   const f = w.fields.find(x => String(x.text || '').replace(/\n/g, ' ') === txt) || {};
   ROUND.items.push({t:String(w.title || '').trim(), x:String(txt || '').trim(), q:f.qid || '', kt:!!(f.kt || f.kstep)}); ROUND.idxs.push(idx);
@@ -1607,7 +1649,7 @@ function ablPick(key, lv, used) {
   used.push(key + lv + '.' + j); return arr[j];
 }
 function ablText(used) {
-  const it = ROUND.items.filter(x => x.x), lv = ablStyle(), n = NM(), out = [];
+  const it = lgRound().items, lv = ablStyle(), n = NM(), out = [];
   if (/^Sklaven-Training$/.test(S.x.setName || '')) {
     const g = re => (it.find(x => re.test(x.t)) || {}).x || '', low = t => t.replace(/^[A-ZÄÖÜ ]+: /, m => m.charAt(0) + m.slice(1, -2).toLowerCase() + ': ');
     const sp = it.filter(x => /^Spermaspiel/.test(x.t)).map(x => x.x), parts = [];
@@ -1630,6 +1672,7 @@ function ablText(used) {
   const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
   let k = 0;
   it.forEach((x, j) => {
+    if (x.syn) { out.push('Zwischendurch kurz abwischen, Kondom wechseln oder waschen.'); return; }
     const cat = (x.q || '').split('.')[0] || (/^wo\??$/i.test(x.t) ? 'ort' : /vorspiel/i.test(x.t) ? 'vor' : /stellung/i.test(x.t) ? 'pos' : /abschluss|abspritzen|finale/i.test(x.t) ? 'fin' : '');
     const key = ABL[cat] ? cat : 'gen', last = j === it.length - 1 && it.length > 1;
     const o = ABL_ORT[x.q] || ('beim Punkt „' + x.x + '“'), xs = x.x.replace(/\s+/g, ' ');
@@ -1648,7 +1691,7 @@ function ablLearn(used, up) {
 function speakCmd(t) { if (!S.settings.speakMain || !t) return; try { speak(t); } catch (e) {} }
 function cmdHide() { const b = $('#cmdBar'); if (b) b.className = ''; if (!$('#result').classList.contains('show')) wBack(false); }
 function cmdLines() {
-  const it = ROUND.items.filter(x => x.x), out = [];
+  const it = lgRound().items, out = [];
   let k = 0; const steps = it.filter(x => !/^wo\??$/i.test(x.t)).length;
   it.forEach(x => {
     if (/^wo\??$/i.test(x.t)) { out.push(['Wo', x.x]); return; }
@@ -1661,14 +1704,16 @@ function cmdShow(partial) {
   const b = $('#cmdBar'); if (!b || !cmdOn() || !ROUND.items.length) return;
   const vis = visibleIdx(), multi = vis.length > 1;
   b.style.setProperty('--cmdL', multi ? Math.round(Math.min(innerWidth * 0.2, 260)) + 'px' : '14px');
-  const fin = !partial && (!multi || vis.every(i => ROUND.idxs.includes(i)) || LASTW === vis[vis.length - 1]);
+  const ord = roundOrder();
+  const fin = !partial && (!multi || ROUND.all || vis.every(i => ROUND.idxs.includes(i)) || LASTW === ord[ord.length - 1]);
   if (fin && ROUND.items.length > 1) {
-    const used = [], txt = ablText(used);
-    b.innerHTML = '<div class="cbH">Euer Ablauf</div>' + `<div class="cbD">${esc(txt)}</div>`
+    const used = [], txt = ablText(used), lg = lgRound();
+    b.innerHTML = '<div class="cbH">Euer Ablauf</div>' + `<div class="cbD">${bldSent(txt)}</div>`
       + `<div class="cbS">${cmdLines().map(([t, x]) => `<span><b>${esc(t)}</b> ${esc(x)}</span>`).join('<i>→</i>')}</div>`
+      + (lg.notes.length ? `<div class="cbA">🧠 Ablauf-Check: ${esc(lg.notes.join(' · '))}</div>` : '')
       + (used.length ? '<div class="cbB"><button data-cb="up">👍 Passt so</button><button data-cb="re">↻ Anders sagen</button></div>' : '')
       + '<div class="cbF">Bleibt stehen, bis ihr wieder dreht · antippen = ausblenden</div>';
-    b.className = 'fin on'; wBack(true);
+    b.className = 'fin on'; wBack(true); bldStagger(b);
     b.onclick = e => { const c = e.target.closest('[data-cb]'); if (!c) return cmdHide();
       if (c.dataset.cb === 'up') { ablLearn(used, true); toast('👍 Gemerkt – so beschreibe ich es öfter', 2500); c.disabled = true; }
       else { ablLearn(used, false); cmdShow(); } };
@@ -1678,17 +1723,240 @@ function cmdShow(partial) {
     const cur = ROUND.items.slice(c0), prev = ROUND.items.slice(0, c0).map(x => x.x).filter(Boolean), last = cur[cur.length - 1];
     b.innerHTML = (prev.length ? `<div class="cbPrev">${esc(prev.join(' → '))} →</div>` : '')
       + (cur.length === 1 && last.t ? `<div class="cbT">${esc(last.t)}</div>` : '') + `<div class="cbX">${cur.map(x => esc(x.x)).join('<br>')}</div>`;
-    b.className = 'on'; b.onclick = null; wBack(true);
+    b.className = 'on'; b.onclick = null; wBack(true); bldStagger(b);
     if (sk) requestAnimationFrame(() => { const x = b.querySelector('.cbX'); if (!x) return;
       let fs = Math.min(innerHeight * 0.12, innerWidth * 0.08); x.style.fontSize = fs + 'px';
       while (fs > 16 && (b.scrollHeight > b.clientHeight + 2 || x.scrollWidth > x.clientWidth + 2)) { fs *= 0.92; x.style.fontSize = fs + 'px'; } });
   }
 }
+/* =====================================================================
+   Ablauf-Agenten: kleine Regel-Agenten in der App (ohne Internet), die jedes
+   Ergebnis einordnen und daraus einen logischen Ablauf machen.
+   1 Einordner (Phase je Aufgabe) · 2 Begleiter (Dauer/Wie/Womit hängt an seiner Aufgabe)
+   3 Reihenfolge (Ort → Stimmung → Vorspiel → Oral → Spielzeug → Fesseln → Ficken → Anal → Abschluss → Danach)
+   4 Steigerung (innerhalb einer Phase erst sanft, dann härter) · 5 Konflikte (zweiter Ort, zweites Finale)
+   6 Hygiene (nach Anal kurz abwischen, bevor es woanders weitergeht) · 7 Tabus (fliegen raus)
+   ===================================================================== */
+const LG_PH = [
+  {id:'ort', n:'Ort'}, {id:'art', n:'Stimmung & Regeln'}, {id:'vor', n:'Vorspiel'}, {id:'oral', n:'Oral'}, {id:'toy', n:'Spielzeug'},
+  {id:'bdsm', n:'Fesseln & Spiele'}, {id:'pos', n:'Ficken / Stellung'}, {id:'anal', n:'Anal'}, {id:'fin', n:'Abschluss'}, {id:'nach', n:'Danach'}];
+const LG_IDX = Object.fromEntries(LG_PH.map((p, i) => [p.id, i]));
+const LG_MOD = /^(wie lange|wie oft|dauer|wie streng|wie hart|wie fest|wie\s*\??$|womit|extra|wie viele|anzahl|tempo|stärke|intensität|zeit\b)/i;
+const LG_T = [   // Überschrift des Rades → Phase
+  ['nach', /spermaspiel|nachspiel|danach|aftercare|kuscheln/i], ['fin', /abschluss|abspritzen|finale|höhepunkt|orgasmus|kommen/i],
+  ['ort', /^wo\b|^ort|^orte\b|^raum/i], ['oral', /oral|blasen|lecken|deepthroat|maulfick/i], ['anal', /anal|arsch/i],
+  ['pos', /stellung|position|ficken|loch|^sex\b/i], ['toy', /spielzeug|toy|dildo|vibrator/i],
+  ['bdsm', /fessel|bdsm|haltung|aufgabe|strafe|spank|bestrafung|sklav/i], ['vor', /vorspiel|aufwärm|einstimm|anheizen/i],
+  ['art', /spielart|stimmung|rolle|regel|art\b|wer bestimmt/i]];
+const LG_X = [   // Text des Ergebnisses → Phase (wenn die Überschrift nichts sagt)
+  ['nach', /spermaspiel|kuscheln|aftercare|sauber ?lecken|danke sagen/i],
+  ['fin', /spritz|abspritz|ladung|sperma|creampie|kommen lassen|zum schluss|finale|orgasmus|höhepunkt/i],
+  ['anal', /\banal|in den arsch|arschfick|rimming|pegging|po ?plug|analplug/i],
+  ['oral', /blasen|blowjob|lecken|deepthroat|maulfick|\boral|69\b|kehle/i],
+  ['pos', /missionar|doggy|reiter|löffel|im stehen|schoß|tischkante|bauchlage|beine hoch|ficken|fick\b|stellung|von hinten/i],
+  ['toy', /vibrator|dildo|toy\b|spielzeug|womanizer|satisfyer|maschine/i],
+  ['bdsm', /fessel|festbind|handschellen|knebel|seil|augen verb|halsband|klemmen|wachs|paddel|gürtel|spank|klaps|schläge|knien|kniet/i],
+  ['vor', /küss|kuss|massage|strip|ausziehen|streichel|handarbeit|fingern|brüste|dirty talk|eiswürfel|edging|necken|duschen|füße/i],
+  ['art', /sanft|langsam|hart und wild|er bestimmt|sie bestimmt|rollenspiel|befehle|unterwerfung/i],
+  ['ort', /^(im |in der |auf dem |auf der |unter der |vor dem |draußen)|^(bett|sofa|dusche|küche|boden|spiegel|auto|treppe|flur|badewanne)$/i]];
+const LG_ORAL = ['oral_sie', 'oral_er', 'deep', 'maulfick', 'gagging'];
+function lgPhase(it) {
+  const t = String(it.t || '').trim(), x = String(it.x || '').trim(), q = String(it.q || '');
+  if (it.ph) return it.ph;
+  if (LG_MOD.test(t)) return 'mod';
+  if (q) {
+    const [c, id] = q.split('.');
+    if (c === 'vor') return LG_ORAL.includes(id) ? 'oral' : 'vor';
+    if (c === 'ort' || c === 'art' || c === 'toy' || c === 'fin') return c;
+    if (c === 'pos') return id === '69' ? 'oral' : 'pos';
+    if (c === 'bdsm') {
+      const g = (BD[id] || {}).g;
+      if (LG_ORAL.includes(id)) return 'oral';
+      if (/anal|rimming|pegging/.test(id)) return 'anal';
+      if (g === 'dom') return id === 'danke' ? 'nach' : 'art';
+      if (g === 'fick') return id === 'doppelt' || id === 'maschine' ? 'toy' : 'pos';
+      if (g === 'dreck') return /sperma|creampie/.test(id) ? 'fin' : 'bdsm';
+      if (g === 'kon') return id === 'danke' ? 'nach' : 'fin';
+      return 'bdsm';
+    }
+  }
+  for (const [p, re] of LG_T) if (re.test(t)) return p;
+  for (const [p, re] of LG_X) if (re.test(x)) return p;
+  return null;
+}
+const lgLvl = q => q ? (QLVL[q] || (q.startsWith('bdsm.') && BD[q.slice(5)] ? BD[q.slice(5)].x : 0)) : 0;
+const lgTrain = () => /Sklaven|Training/i.test(S.x.setName || '') || ROUND.items.some(x => x.kt);
+const lgOn = () => S.settings.logic !== false;
+// Kern: nimmt Aufgaben [{t,x,q}] und gibt sie geordnet zurück, mit Notizen, was die Agenten geändert haben
+function lgOrder(list, opt = {}) {
+  const notes = [], src = list.filter(x => x && (x.x || x.ph || opt.wheels));
+  let items = src;
+  if (!opt.wheels) {   // 7 Tabu-Agent
+    const tabu = items.filter(x => x.q && isTabu(x.q));
+    if (tabu.length) { items = items.filter(x => !tabu.includes(x)); notes.push('Tabu entfernt: ' + tabu.map(x => x.x).join(', ')); }
+  }
+  // 1 Einordner + 2 Begleiter: Gruppen aus Hauptaufgabe und ihren Zusätzen
+  const groups = []; let pend = [];
+  items.forEach((it, k) => {
+    const ph = lgPhase(it);
+    if (ph === 'mod') { if (groups.length) groups[groups.length - 1].mods.push(it); else pend.push(it); return; }
+    const prev = groups[groups.length - 1];
+    groups.push({main:it, ph:ph || (prev ? prev.ph : 'vor'), guess:!ph, mods:pend, k, lv:lgLvl(it.q)}); pend = [];
+  });
+  if (pend.length) { if (groups.length) groups[groups.length - 1].mods.push(...pend); else groups.push({main:pend[0], ph:'vor', guess:true, mods:pend.slice(1), k:0, lv:0}); }
+  // 5 Konflikt-Agent: zweiter Ort = Ortswechsel vor dem Ficken · zweites Finale = Runde 2
+  const orte = groups.filter(g => g.ph === 'ort');
+  orte.slice(1).forEach(g => { g.key = LG_IDX.pos - 0.5; g.pre = 'Ortswechsel'; });
+  if (orte.length > 1) notes.push('Zweiter Ort wird zum Ortswechsel vor dem Ficken');
+  const fins = groups.filter(g => g.ph === 'fin');
+  if (fins.length > 1 && fins.some(g => /spritz|sperma|ladung/i.test(g.main.x))) fins.slice(1).forEach(g => g.pre = 'Runde 2');
+  // 3 Reihenfolge + 4 Steigerung (stabil, gleiche Phase: erst sanft, dann härter)
+  groups.forEach(g => { if (g.key == null) g.key = LG_IDX[g.ph] ?? 2; });
+  const sorted = opt.keep ? groups.slice() : groups.slice().sort((a, b) => a.key - b.key || (a.lv && b.lv ? a.lv - b.lv : 0) || a.k - b.k);
+  const moved = sorted.some((g, i) => g !== groups[i]);
+  if (moved) {
+    const ph = [...new Set(sorted.map(g => (LG_PH[Math.floor(g.key)] || {}).n).filter(Boolean))];
+    notes.push('Logisch sortiert: ' + ph.join(' → '));
+  }
+  // 6 Hygiene-Agent: nach Anal nicht direkt in Fotze oder Mund
+  const out = []; let anal = false, wiped = false;
+  sorted.forEach(g => {
+    const txt = [g.main.x, ...g.mods.map(m => m.x)].join(' ');
+    const isAnal = g.ph === 'anal' || /\banal|arsch/i.test(txt) && g.ph === 'pos';
+    const front = !isAnal && (['oral', 'pos'].includes(g.ph) || g.ph === 'fin' && /mund|maul|lecken|blasen|fotze|muschi|schlucken/i.test(txt));
+    if (!opt.wheels && anal && front && !/abwisch|kondom/i.test(txt)) {
+      out.push({t:'Zwischendurch', x:'Kurz abwischen, Kondom wechseln oder waschen', syn:true, ph:'nach'});
+      if (!wiped) notes.push('Nach Anal: Abwischen eingefügt'); wiped = true; anal = false;
+    }
+    if (isAnal) anal = true;
+    out.push(g.pre ? Object.assign({}, g.main, {t:g.pre + (g.main.t ? ' · ' + g.main.t : '')}) : g.main, ...g.mods);
+  });
+  return {items:out, notes, moved, phases:sorted.map(g => g.ph)};
+}
+// Ergebnisse der aktuellen Runde in logischer Reihenfolge (Trainings behalten ihre feste Folge)
+function lgRound() {
+  const it = ROUND.items.filter(x => x.x);
+  if (!lgOn() || lgTrain() || it.length < 2) return {items:it, notes:[], moved:false};
+  return lgOrder(it, {keep:lgChained(visibleIdx())});   // feste Ketten (Themen, Abläufe) behalten ihre Reihenfolge
+}
+// Rad-Reihenfolge: Räder mit Folge-Verkettung behalten ihre Kette, sonst ordnen die Agenten die Räder
+function lgWheelItem(i) {
+  const w = S.wheels[i], t = String(w.title || '');
+  let ph = LG_MOD.test(t) ? 'mod' : lgPhase({t});
+  if (!ph) {   // Mehrheit der Felder entscheidet
+    const c = {}; w.fields.forEach(f => { const p = lgPhase({t:'', x:f.text, q:f.qid}); if (p && p !== 'mod') c[p] = (c[p] || 0) + 1; });
+    const best = Object.entries(c).sort((a, b) => b[1] - a[1])[0];
+    ph = best && best[1] >= Math.max(1, w.fields.length / 3) ? best[0] : null;
+  }
+  return {t, x:t, i, ph:ph || undefined};
+}
+const lgChained = vis => vis.some(i => S.wheels[i].fields.some(f => f.next >= 0 || f.card || f.kt || f.kstep));
+function roundOrder() {
+  const vis = visibleIdx();
+  if (!lgOn() || vis.length < 2 || isSlot() || lgChained(vis) || /Sklaven|Training/i.test(S.x.setName || '')) return vis;
+  return lgOrder(vis.map(lgWheelItem), {wheels:true}).items.map(x => x.i);
+}
+// Joker-Abfolgen: Schritte logisch ordnen
+function lgSeqSort(q) {
+  const its = q.steps.map((st, k) => {
+    if (st.t[0] === 'c') { const c = S.presets.find(x => x.id === st.t.slice(1)); const nm = c ? c.name : ''; return {t:nm, x:nm, st, ph:lgPhase({t:nm, x:nm}) || undefined}; }
+    return Object.assign(lgWheelItem(+st.t.slice(1) || 0), {st});
+  });
+  const r = lgOrder(its, {wheels:true});
+  q.steps = r.items.map(x => x.st); return r;
+}
+/* Alle Räder zusammen: erst drehen alle (nacheinander auslaufend), dann kommt EIN Ergebnis,
+   von den Ablauf-Agenten logisch geordnet. Verkettete Räder: die Kette wird vorher ausgewürfelt. */
+let ALLP = 0, CARDRUN = false;
+const spinAllOn = () => {
+  if (isSlot() || S.settings.spinAll === false || (typeof SEQ !== 'undefined' && SEQ.run) || CARDRUN) return false;
+  const vis = visibleIdx();
+  if (vis.length < 2 || /Sklaven|Training/i.test(S.x.setName || '')) return false;
+  return !vis.some(i => S.wheels[i].hold || S.wheels[i].fields.some(f => f.kt || f.kstep || f.steps));
+};
+function planAll() {
+  const vis = visibleIdx(), ord = roundOrder(), refd = new Set();
+  vis.forEach(i => S.wheels[i].fields.forEach(f => { if (f.next >= 0 && f.next !== i) refd.add(f.next); }));
+  const plan = [], seen = new Set(); let after = null;
+  const walk = (i, d) => {
+    const w = S.wheels[i]; if (!w || seen.has(i) || d >= MAX_CHAIN || !w.fields.length) return;
+    if (!w.enabled) { after = after || {wheel:i}; return; }   // verstecktes Folge-Rad läuft danach einzeln
+    seen.add(i); const t = pickWeighted(w.fields), f = w.fields[t]; plan.push({i, t});
+    if (f.card) { after = after || {card:f.card}; return; }
+    if (f.next >= 0 && f.next < MAX_WHEELS) walk(f.next, d + 1);
+  };
+  ord.filter(i => !refd.has(i)).forEach(i => walk(i, 0));
+  if (!plan.length) walk(ord[0], 0);
+  return {plan, after};
+}
+async function spinAll(secs = 0) {
+  if (busy) return;
+  const {plan, after} = planAll(); if (!plan.length) return;
+  busy = true; ac(); setBusy(true); closePanel(); cmdHide(); wBack(false); focus = null;
+  await tween(320, (t, now) => { ALLP = t; render(now); }); ALLP = 1;
+  const base = secs || S.settings.spinSec, n = plan.length, gap = Math.min(0.35, 2.2 / n);
+  const beatOff = spinBeat(); if (S.settings.tense !== false) tenseOn(base * (1 + gap * (n - 1)));
+  let alive = n;
+  const loop = now => { render(now); if (alive > 0) requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+  await Promise.all(plan.map((p, k) => spinAnim(S.wheels[p.i], () => {}, base * (1 + gap * k), p.t).then(() => { alive--; })));
+  beatOff(); tenseOff(); stopSound();
+  await tween(900, (t, now) => { plan.forEach(p => { const w = S.wheels[p.i]; w._hl = p.t; w._hlA = 0.5 * Math.abs(Math.sin(t * Math.PI * 3)); }); render(now); });
+  plan.forEach(p => { S.wheels[p.i]._hlA = 0.35; }); render();
+  // Ergebnisse eintragen (Verlauf, Merker, Runde, Fragebogen-Session)
+  LASTRUN.length = 0; ROUND.items = []; ROUND.idxs = []; ROUND.chain = 0;
+  const fs = plan.map(p => {
+    const w = S.wheels[p.i], f = w.fields[p.t], line = resultLine(w, f, p.t);
+    w.history = [line, ...(w.history || [])].slice(0, 5);
+    fieldFlags(f); gAfterSpin(p.i); quizLog(f);
+    LASTRUN.push(String(f.text || line).replace(/\n/g, ' '));
+    roundAdd(p.i, w, LASTRUN[LASTRUN.length - 1], 1);
+    return f;
+  });
+  ROUND.all = true; LASTW = plan[plan.length - 1].i;
+  save();
+  const lg = lgRound(), lines = lg.items.map(x => x.x), nl = lines.join('\n').split('\n').length;
+  const toy = fs.filter(f => f.toy && +f.toy.lvl > 0).sort((a, b) => b.toy.lvl - a.toy.lvl)[0];
+  let media = (fs.find(f => f.media) || {}).media || null;   // erstes eigenes Video, sonst das erste, dessen Kategorie ein Video hat
+  if (!media) for (let k = 0; k < fs.length && !media; k++) media = vlibPick(fs[k].vcat) || (!fs[k].vcat && vlibPick(S.wheels[plan[k].i].vcat)) || null;
+  const combo = {num:'', text:lines.join('\n'), media,
+    toy:toy ? toy.toy : {lvl:0, sec:5, pat:'konstant', dev:''}, _fs:nl > 2 ? `min(${Math.floor(62 / nl)}vh, ${Math.max(3, Math.floor(22 / nl))}vw)` : '',
+    card:after && after.card || null, next:after && after.wheel != null ? after.wheel : -1};
+  const pr = showResult({unit:'', title:'Ergebnis'}, 0, 0, combo);
+  if (lg.notes.length) { const u = $('#rUnit'); u.textContent = '🧠 ' + lg.notes.join(' · '); u.classList.add('lgN'); }
+  const next = await pr; $('#rUnit').classList.remove('lgN');
+  plan.forEach(p => { S.wheels[p.i]._hl = null; });
+  await tween(300, (t, now) => { ALLP = 1 - t; render(now); }); ALLP = 0;
+  render(); busy = false; setBusy(false); renderPanel(); updateRail();
+  if (next) { cmdShow(true); await runNext(next, 1); }
+  typAfterSpin();
+  const ord = roundOrder(); S.active = ord[0]; save(); render(); updateRail();
+  cmdShow(); if (!$('#cmdBar').className) wBack(false);
+}
+/* Ergebnis-Aufbau: von oben nach unten, von durchsichtig zu sichtbar */
+const bldOn = () => S.settings.build !== false && !reduceMotion;
+function bldLines(t0 = 0.15) {   // #rTxt Zeile für Zeile einblenden
+  const txt = $('#rTxt'), lines = txt.textContent.split('\n');
+  txt.innerHTML = lines.map((line, j) => `<span class="ln" style="animation-delay:${(t0 + 0.38 * j).toFixed(2)}s">${esc(line) || '&nbsp;'}${j < lines.length - 1 ? '\n' : ''}</span>`).join('');
+  return lines;
+}
+function bldSent(t) {
+  if (!bldOn()) return esc(t);
+  return String(t).split(/(?<=[.!?])\s+/).filter(Boolean).map((x, i) => `<span class="bl" style="animation-delay:${(0.35 + 0.42 * i).toFixed(2)}s">${esc(x)}</span>`).join(' ');
+}
+function bldStagger(b) {
+  if (!bldOn()) return;
+  let d = 0, sent = b.querySelectorAll('.cbD .bl').length;
+  [...b.children].forEach(el => { el.classList.add('bb'); el.style.animationDelay = d.toFixed(2) + 's';
+    if (el.classList.contains('cbD')) d += 0.42 * sent + 0.2;
+    else if (el.classList.contains('cbS')) { [...el.children].forEach((c, j) => { c.classList.add('bl'); c.style.animationDelay = (d + 0.18 * j).toFixed(2) + 's'; }); d += 0.18 * el.children.length + 0.2; }
+    else d += 0.3; });
+}
 /* Einfache Ansicht: der große DREHEN-Knopf nimmt danach automatisch das nächste Rad */
 let LASTW = 0;
 function advanceWheel() {
   if (isSlot()) return;
-  const v = visibleIdx(); if (v.length < 2) return;
+  const v = roundOrder(); if (v.length < 2) return;
   const k = v.indexOf(LASTW); if (k < 0) return;
   S.active = v[(k + 1) % v.length]; save(); render(); updateRail();
 }
@@ -1844,9 +2112,11 @@ async function slotSpin() {
   SLOT.bulbs = 0; SLOT.win = 1;
   await tween(900, (t, now) => { SLOT.winA = 0.45 * Math.abs(Math.sin(t * Math.PI * 3)); render(now); });
   SLOT.winA = 0.25; render();
-  const lines = wl.map((w, k) => { const f = w.fields[targets[k]], l = resultLine(w, f, targets[k]); w.history = [l, ...(w.history || [])].slice(0, 5); quizLog(f); return l; });
+  const lines0 = wl.map((w, k) => { const f = w.fields[targets[k]], l = resultLine(w, f, targets[k]); w.history = [l, ...(w.history || [])].slice(0, 5); quizLog(f); return l; });
   const fs = wl.map((w, k) => w.fields[targets[k]]);
-  S.settings.slotHist = [lines.join(' · '), ...(S.settings.slotHist || [])].slice(0, 5);
+  S.settings.slotHist = [lines0.join(' · '), ...(S.settings.slotHist || [])].slice(0, 5);
+  const lgS = lgOn() ? lgOrder(wl.map((w, k) => ({t:w.title, x:lines0[k], q:fs[k].qid || ''}))) : {items:lines0.map(x => ({x})), notes:[]};
+  const lines = lgS.items.map(x => x.x);
   save();
   // Folge-Rad nur, wenn es nicht schon im Slot mitgelaufen ist
   const act = fs.find(f => f.card || (f.next >= 0 && !wl.includes(S.wheels[f.next]))) || {};
@@ -1854,7 +2124,9 @@ async function slotSpin() {
   const toy = fs.filter(f => f.toy && +f.toy.lvl > 0).sort((a, b) => b.toy.lvl - a.toy.lvl)[0];
   const combo = {num:'', text:lines.join('\n'), media:(fs.find(f => f.media) || {}).media || null,
     toy:toy ? toy.toy : {lvl:0, sec:5, pat:'konstant', dev:''}, _fs:nl > 3 ? `min(${Math.floor(60 / nl)}vh, ${Math.max(3, Math.floor(21 / nl))}vw)` : '', card:act.card || null, next:act.card ? -1 : (act.next ?? -1)};
-  const next = await showResult({unit:''}, 0, 0, combo);
+  const prS = showResult({unit:''}, 0, 0, combo);
+  if (lgS.notes.length) { const u = $('#rUnit'); u.textContent = '🧠 ' + lgS.notes.join(' · '); u.classList.add('lgN'); }
+  const next = await prS; $('#rUnit').classList.remove('lgN');
   SLOT.win = -1; render(); busy = false; setBusy(false); renderPanel(); updateRail();
   if (next) await runNext(next, 1);
 }
@@ -1905,8 +2177,8 @@ function showResult(w, i, depth, fieldOverride) {
     if (f.kt) ktShow(f);
     else if (f.steps) stepsShow(f);
     else if (f.desc) { const t = fmtTask(f.desc); f = Object.assign({}, f, {kcmd:t}); $('#rTxt').textContent = (f.text ? f.text.toUpperCase() + '\n' : '') + t;
-      const L = $('#rTxt').textContent.length; $('#rTxt').style.fontSize = L > 140 ? 'min(5vh,3.4vw)' : L > 70 ? 'min(6.5vh,4.5vw)' : ''; if (document.body.classList.contains('sk')) requestAnimationFrame(skFit); }
-    { const g = f.media && galTags(f.media.id), el = $('#rVid'); el.textContent = g ? '🎬 ' + (g.desc || soDesc(g.tags)) : ''; el.classList.toggle('on', !!g); }
+      const L = $('#rTxt').textContent.length; $('#rTxt').style.fontSize = L > 140 ? 'min(5vh,3.4vw)' : L > 70 ? 'min(6.5vh,4.5vw)' : ''; if (bldOn()) bldLines(); if (document.body.classList.contains('sk')) requestAnimationFrame(skFit); }
+    { const g = f.media && galTags(f.media.id), el = $('#rVid'); el.innerHTML = g ? soActResult(g) : ''; el.classList.toggle('on', !!g); }
     const startCountdown = () => {
       if (!(target && left > 0)) return;
       const upd = () => { nx.innerHTML = label + '<br><small>(' + left + ')</small>'; };
@@ -2189,7 +2461,8 @@ function renderPanel() {
   P.innerHTML = `
   <details ${op('wheels')} data-sec="wheels"><summary>Räder (${visibleIdx().length} sichtbar)</summary>
     <div class="hint">Häkchen = Rad anzeigen (Lücken erlaubt). Antippen = bearbeiten.</div>
-    <div class="wgrid">${chips}</div></details>
+    <div class="wgrid">${chips}</div>
+    ${lgOn() && visibleIdx().length > 1 ? `<div class="hint">🧠 Ablauf-Agenten · Reihenfolge: ${roundOrder().map(i => esc(S.wheels[i].title || 'Rad ' + (i + 1))).join(' → ')}${lgChained(visibleIdx()) ? ' (feste Kette der Räder)' : ''}</div>` : ''}</details>
 
   <details ${op('joker')} data-sec="joker"><summary>★ Joker</summary>
     <div class="hint">Der Joker-Button oben rechts zeigt sein Video/Foto mit Text und startet danach das zugewiesene Rad oder gespeicherte Spiel.</div>
@@ -2201,6 +2474,7 @@ function renderPanel() {
          ${S.joker.media.type === 'video' ? '<button data-act="jtrim">✂ Schnitt</button>' : ''}
          <button data-act="jmedia">Ersetzen</button><button data-act="junmedia">🗑</button>`
       : '<button data-act="jmedia">📎 Video / Foto für Joker</button>'}</div>
+    ${jkPanel()}
     <div class="hint" style="margin-top:12px"><b style="color:#ffe08a">Joker-Überraschungen</b> – Beim Drücken des Jokers startet eine Überraschung (bei mehreren erscheint eine Auswahl). Jeder Schritt = Rad oder gespeichertes Spiel + Anzahl Drehungen. Ohne Überraschung gilt die Zuweisung oben.</div>
     ${S.joker.seqs.map((q, qi) => `<div class="card combo">
       <label style="margin:0">Name<input type="text" data-q="${qi}" data-qp="name" value="${esc(q.name)}"></label>
@@ -2208,7 +2482,7 @@ function renderPanel() {
         <span class="hint">${si + 1}.</span><select data-q="${qi}" data-s="${si}" data-stp="t">${stepOpts(st.t)}</select>
         <input type="number" min="1" max="50" data-q="${qi}" data-s="${si}" data-stp="n" value="${st.n}" title="Anzahl Drehungen">
         <button class="x" data-qa="delstep" data-q="${qi}" data-s="${si}">✕</button></div>`).join('') || '<div class="hint">Noch keine Schritte.</div>'}
-      <button data-qa="addstep" data-q="${qi}">+ Schritt</button><button class="go" data-qa="run" data-q="${qi}">▶ Starten</button><button data-qa="del" data-q="${qi}">🗑</button></div>`).join('')}
+      <button data-qa="addstep" data-q="${qi}">+ Schritt</button><button data-qa="lg" data-q="${qi}" title="Schritte logisch ordnen">🧠 Logisch ordnen</button><button class="go" data-qa="run" data-q="${qi}">▶ Starten</button><button data-qa="del" data-q="${qi}">🗑</button></div>`).join('')}
     <button class="b pri" data-act="addseq">+ Neue Joker-Überraschung</button></details>
 
   <details ${op('cards')} data-sec="cards"><summary>💾 Gespeicherte Spiele (${S.presets.length})</summary>
@@ -2325,6 +2599,9 @@ function renderPanel() {
     <label class="chk"><input type="checkbox" data-sp="stufeColors" ${S.settings.stufeColors !== false ? 'checked' : ''}> Radfarben passend zur Stufe (aus = eigene Farbe je Rad)</label>
     <label class="chk"><input type="checkbox" data-sp="amb" ${S.settings.amb !== false ? 'checked' : ''}> Stimmungs-Hintergrund (Herzen, Glut, Funken je Stufe)</label>
     <label class="chk"><input type="checkbox" data-sp="reveal" ${S.settings.reveal !== false ? 'checked' : ''}> Ergebnis enthüllen (Seidentuch, Wort für Wort)</label>
+    <label class="chk"><input type="checkbox" data-sp="build" ${S.settings.build !== false ? 'checked' : ''}> Ergebnis von oben nach unten aufbauen (durchsichtig → sichtbar)</label>
+    <label class="chk"><input type="checkbox" data-sp="spinAll" ${S.settings.spinAll !== false ? 'checked' : ''}> Alle Räder zusammen drehen, Ergebnis erst wenn alle stehen</label>
+    <label class="chk"><input type="checkbox" data-sp="logic" ${S.settings.logic !== false ? 'checked' : ''}> Logischer Ablauf: Ablauf-Agenten ordnen alle Aufgaben</label>
     <label class="chk"><input type="checkbox" data-sp="lines" ${S.settings.lines !== false ? 'checked' : ''}> Sprüche zum Ergebnis (je Stufe derber, Tabus bleiben draußen)</label>
     <label class="chk"><input type="checkbox" data-sp="night" ${S.settings.night ? 'checked' : ''}> Nachtmodus (gedimmt, rötlich, kein Aufblitzen)</label>
     <label class="chk"><input type="checkbox" data-sp="toyBeat" ${S.settings.toyBeat !== false ? 'checked' : ''}> Spielzeug pulsiert schon beim Drehen im Herzschlag</label>
@@ -2465,6 +2742,7 @@ function initPanelEvents() {
       const q = S.joker.seqs[+b.dataset.q], a = b.dataset.qa;
       if (a === 'addstep') q.steps.push({t:'w' + S.active, n:1});
       else if (a === 'delstep') q.steps.splice(+b.dataset.s, 1);
+      else if (a === 'lg') { const r = lgSeqSort(q); toast(r.moved ? '🧠 ' + r.notes.join(' · ') : '🧠 Reihenfolge passt schon', 3500); }
       else if (a === 'run') { if (q.steps.length) { closePanel(); runSeq(q); } else toast('Abfolge hat keine Schritte'); return; }
       else if (a === 'del') {
         if (!b.dataset.armed) { b.dataset.armed = 1; b.textContent = 'Löschen?'; setTimeout(() => { delete b.dataset.armed; b.textContent = '🗑'; }, 3000); return; }
@@ -2952,7 +3230,7 @@ const FAVD = () => (S.favDirs = Array.isArray(S.favDirs) && S.favDirs.length ? S
 const isFav = k => FAV().some(x => x.k === k);
 function favAdd(k, dir) { const L = FAV(); const e = L.find(x => x.k === k); if (e) { if (dir) e.dir = dir; } else L.unshift({k, dir:dir || GAL.fdir || FAVD()[0], at:Date.now()}); if (dir && !FAVD().includes(dir)) FAVD().push(dir); save(); }
 function favToggle(k) { const L = FAV(), i = L.findIndex(x => x.k === k); if (i >= 0) { L.splice(i, 1); save(); return false; } favAdd(k); return true; }
-const galTags = mid => { const g = S.gal.find(x => x.media.id === mid); return g && g.tags && g.tags.length ? g : null; };
+const galTags = mid => { const g = S.gal.find(x => x.media.id === mid); return g && (g.tags && g.tags.length || g.acts && g.acts.length) ? g : null; };
 const tagLabel = id => { const it = itemById(id); return it ? it.l : id; };
 /* ---------- Import-Ordner: alles Neue landet zuerst hier, das Einsortier-Tool ordnet es ein ---------- */
 const IMPORT = 'Import';
@@ -3031,8 +3309,88 @@ function dirWheel(d) {
   S.active = wi; save(); vgClose(); render(); renderPanel(); updateRail();
   toast(`🎡 Rad „${sub || top}“: ${fields.length} Felder, jedes spielt ein Video aus dem Ordner`, 4500);
 }
+/* ---------- Handlungen im Video: Oberkategorie → Handlungen der Reihe nach markieren ----------
+   Beispiel: Blowjob → Ins Maul spritzen → Sperma im Mund lassen → Sperma gurgeln → Sperma schlucken (5 Markierungen).
+   Handlungs-Agenten: Einordner (Rang je Handlung), Reihenfolge (neue Markierung rutscht an die logische Stelle),
+   Lücken-Agent (z. B. Sperma-Spiel ohne Abspritzen), Vorschlag-Agent (was passt als Nächstes, gelb umrandet). */
+const SO_ACT = [
+  {c:'Vorspiel', a:['Küssen', 'Ausziehen', 'Streicheln', 'Titten kneten', 'Fingern', 'Lecken', 'Rimming']},
+  {c:'Blowjob', a:['Blasen', 'Eier lecken', 'Deepthroat', 'Maulfick', 'Sabbern', 'Kehle halten']},
+  {c:'Ficken', a:['Missionar', 'Reiterin', 'Doggy', 'Löffelchen', 'Im Stehen', 'Hart rannehmen']},
+  {c:'Anal', a:['Arsch lecken', 'Anal eindringen', 'Anal hart', 'Arsch → Maul']},
+  {c:'Fesseln & Spiele', a:['Fesseln', 'Augen verbinden', 'Haare ziehen', 'Spanking', 'Knien lassen', 'Spielzeug']},
+  {c:'Abspritzen', a:['Wichsen bis kurz davor', 'Ins Maul spritzen', 'Ins Gesicht spritzen', 'Auf die Titten spritzen', 'Auf den Arsch spritzen', 'In die Fotze spritzen', 'In den Arsch spritzen']},
+  {c:'Sperma', a:['Sperma im Mund lassen', 'Sperma zeigen', 'Sperma gurgeln', 'Sperma im Gesicht verreiben', 'Sperma ausspucken', 'Sperma schlucken', 'Sauberlecken']}];
+// Fragebogen-Praktik je Handlung (damit Ordner, Tabus und Rad-Felder passen)
+const SO_ACTQ = {'Küssen':'vor.kuss', 'Ausziehen':'vor.strip', 'Streicheln':'vor.hand', 'Titten kneten':'vor.brust', 'Fingern':'vor.hand', 'Lecken':'vor.oral_er',
+  'Blasen':'vor.oral_sie', 'Deepthroat':'vor.deep', 'Missionar':'pos.missionar', 'Reiterin':'pos.reiter', 'Doggy':'pos.doggy', 'Löffelchen':'pos.loeffel', 'Im Stehen':'pos.stehend',
+  'Fesseln':'art.fessel', 'Augen verbinden':'art.augen', 'Haare ziehen':'art.haare', 'Spanking':'art.spank', 'Ins Maul spritzen':'fin.mund', 'Ins Gesicht spritzen':'fin.gesicht'};
+const soOwn = () => (S.x.soOwn = Array.isArray(S.x.soOwn) ? S.x.soOwn : []);
+function soActCats() { return SO_ACT.map((g, ci) => ({c:g.c, ci, a:[...g.a, ...soOwn().filter(o => o.c === g.c).map(o => o.l)]})); }
+function soActRank(l) {
+  for (const g of soActCats()) { const i = g.a.indexOf(l); if (i >= 0) return g.ci * 100 + (i < SO_ACT[g.ci].a.length ? i : 50); }
+  return 450;
+}
+const soActCat = l => (soActCats().find(g => g.a.includes(l)) || {}).c || '';
+// Reihenfolge-Agent: neue Markierung an die logische Stelle (gleicher Rang = hinten anstellen)
+function soActInsert(list, l) {
+  const r = soActRank(l); let k = list.length;
+  while (k > 0 && soActRank(list[k - 1]) > r) k--;
+  list.splice(k, 0, l); return list;
+}
+// Lücken- und Logik-Agent: Hinweise zur Folge
+function soActCheck(list) {
+  const n = [], has = c => list.some(l => soActCat(l) === c), idx = l => list.indexOf(l);
+  if (has('Sperma') && !has('Abspritzen')) n.push({t:'Sperma-Spiel ohne Abspritzen – „Ins Maul spritzen“ ergänzen?', add:'Ins Maul spritzen'});
+  if (list.some(l => /^Sperma (im Mund|gurgeln|ausspucken|schlucken)/.test(l)) && !list.includes('Ins Maul spritzen') && has('Abspritzen'))
+    n.push({t:'Sperma im Mund, aber nicht ins Maul gespritzt – ergänzen?', add:'Ins Maul spritzen'});
+  if (list.includes('Sperma schlucken') && list.includes('Sperma ausspucken')) n.push({t:'Schlucken und Ausspucken – nur eins davon kommt am Ende'});
+  const sorted = list.slice().sort((a, b) => soActRank(a) - soActRank(b));
+  if (sorted.join('|') !== list.join('|')) n.push({t:'Die Folge weicht von der üblichen Reihenfolge ab', sort:true});
+  if (list.includes('Anal eindringen') && list.some(l => soActCat(l) === 'Blowjob' && idx(l) > idx('Anal eindringen')) && !list.includes('Arsch → Maul'))
+    n.push({t:'Nach Anal direkt ins Maul – „Arsch → Maul“ markieren oder abwischen'});
+  return n;
+}
+// Vorschlag-Agent: was passt als Nächstes (gelernt aus eingeordneten Videos, sonst die nächste Oberkategorie)
+function soActNext(list) {
+  const last = list[list.length - 1]; if (!last) return ['Blasen', 'Küssen'];
+  const L = S.x.soSeqL = S.x.soSeqL || {}, sc = Object.entries(L[last] || {}).sort((a, b) => b[1] - a[1]).map(x => x[0]).filter(x => !list.includes(x));
+  if (sc.length) return sc.slice(0, 3);
+  const r = soActRank(last), C = soActCats(), ci = Math.floor(r / 100);
+  const nxt = {Blowjob:['Ins Maul spritzen', 'Ins Gesicht spritzen'], Abspritzen:['Sperma im Mund lassen', 'Sperma zeigen'], Ficken:['Anal eindringen', 'Ins Gesicht spritzen'], Anal:['Arsch → Maul', 'In den Arsch spritzen'], Vorspiel:['Blasen'], 'Fesseln & Spiele':['Blasen', 'Doggy']}[C[ci] ? C[ci].c : ''];
+  if (nxt) return nxt.filter(x => !list.includes(x));
+  return (C[ci] ? C[ci].a : []).filter(x => soActRank(x) > r && !list.includes(x)).slice(0, 3);
+}
+function soActDesc(list) {
+  if (!list.length) return '';
+  const lw = s => /^(Ins|In|Im|Auf|Anal|Hart|Wichsen)\b/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+  const parts = list.map((l, i) => i === 0 ? l : lw(l));
+  return `Im Video der Reihe nach: ${parts.length > 1 ? parts.slice(0, -1).join(', dann ') + ' und zum Schluss ' + parts[parts.length - 1] : parts[0]}. Genau so nachmachen.`;
+}
+function soActLearn(list) {
+  const L = S.x.soSeqL = S.x.soSeqL || {};
+  list.forEach((l, i) => { const n = list[i + 1]; if (!n) return; L[l] = L[l] || {}; L[l][n] = Math.min(50, (L[l][n] || 0) + 1); });
+}
+function soActHtml() {
+  const A = SO.acts, nx = soActNext(A), chk = soActCheck(A);
+  return `<div class="soCat">① Handlungen der Reihe nach markieren (mehrere möglich)</div>
+    <div class="soSeq">${A.length ? A.map((l, i) => `<span class="soS"><b>${i + 1}</b> ${esc(l)}${i ? `<button data-am="${i}" title="früher">◀</button>` : ''}<button data-ax="${i}" title="weg">✕</button></span>`).join('<i>→</i>') : '<small>Noch nichts markiert – z. B. Blasen, dann Ins Maul spritzen, dann Sperma gurgeln …</small>'}</div>
+    ${chk.length ? `<div class="soAg">${chk.map(c => `<div>🧠 ${esc(c.t)}${c.add ? ` <button data-aadd="${esc(c.add)}">+ ${esc(c.add)}</button>` : ''}${c.sort ? ' <button data-asort="1">🧠 Logisch ordnen</button>' : ''}</div>`).join('')}</div>` : ''}
+    ${soActCats().map(g => `<div class="soCat">${esc(g.c)}</div><div class="soChips">${g.a.map(l => `<button class="${A.includes(l) ? 'on' : ''} ${nx.includes(l) ? 'sug' : ''}" data-act2="${esc(l)}">${A.includes(l) ? (A.indexOf(l) + 1) + ' · ' : ''}${esc(l)}</button>`).join('')}</div>`).join('')}
+    <div class="soOwn"><select id="soOwnC">${SO_ACT.map(g => `<option>${esc(g.c)}</option>`).join('')}</select><input id="soOwnL" maxlength="40" placeholder="Eigene Handlung"><button data-aown="1">+ Handlung</button></div>`;
+}
+function soActRefresh() {
+  const box = $('#soActs'); if (box) box.innerHTML = soActHtml();
+  const ta = $('#soDesc'); if (ta && !ta.dataset.man) ta.value = SO.acts.length ? soActDesc(SO.acts) : soDesc(SO.tags);
+}
+// Ergebnis: Handlungen nacheinander von oben nach unten einblenden
+function soActResult(g) {
+  if (!g.acts || !g.acts.length) return '🎬 ' + esc(g.desc || soDesc(g.tags || []));
+  const b = typeof bldOn === 'function' && bldOn();
+  return '<span class="vaH">🎬 Im Video der Reihe nach</span>' + g.acts.map((l, i) => `<span class="va${b ? ' bl' : ''}" style="animation-delay:${(0.5 + 0.35 * i).toFixed(2)}s"><b>${i + 1}</b> ${esc(l)}</span>`).join('');
+}
 /* ---------- Einsortieren: Video für Video ansehen, Praktiken antippen → landet im passenden Ordner ---------- */
-const SO = {q:[], i:0, tags:[], dirs:[], done:0, v:null};
+const SO = {q:[], i:0, tags:[], dirs:[], acts:[], done:0, v:null};
 const SO_CATS = () => QUIZ.filter(c => c.id !== 'ort');
 const soTok = n => String(n || '').toLowerCase().replace(/\.[^.]+$/, '').split(/[^a-zäöüß0-9]+/).filter(t => t.length >= 3 && !/^\d+$/.test(t));
 function soSuggest(g) {
@@ -3072,18 +3430,20 @@ async function soRender() {
   if (!g) { X.innerHTML = `<button class="ovx" data-so="x">✕</button><div class="ovin"><h2 class="hTitle" style="font-size:44px">🧭 Fertig</h2>
     <p class="hMotto">${SO.done} von ${SO.q.length} Videos eingeordnet. ${importList().length ? importList().length + ' liegen noch im Import-Ordner.' : 'Der Import-Ordner ist leer.'}</p>
     <div class="soBtns"><button class="hbtn hGo" data-so="gal">🗂 Zur Galerie</button><button class="hbtn" data-so="x">Schließen</button></div></div>`; return; }
-  const sug = soSuggest(g); SO.tags = (g.tags || []).slice(); SO.dirs = []; SO.sug = sug;
+  const sug = soSuggest(g); SO.tags = (g.tags || []).slice(); SO.dirs = []; SO.sug = sug; SO.acts = (g.acts || []).slice();
   const allDirs = vcats().map(c => c.name).filter(n => n !== IMPORT);
   const chip = it => `<button class="${SO.tags.includes(it.id) ? 'on' : ''} ${sug.includes(it.id) ? 'sug' : ''}" data-tag="${esc(it.id)}">${esc(it.l)}</button>`;
   const auto = SO.q.slice(SO.i).filter(x => soSuggest(x).length).length;
   X.innerHTML = `<button class="ovx" data-so="x">✕</button><div class="ovin">
     <h2 class="hTitle" style="font-size:40px">🧭 Einsortieren · ${SO.i + 1} von ${SO.q.length}</h2>
-    <p class="hMotto">Video ansehen, antippen was passiert – es landet automatisch im passenden Ordner (z. B. „Vorspiel › Blasen“). Die App lernt mit und schlägt beim nächsten Mal selbst vor (gelb umrandet).</p>
+    <p class="hMotto">Video ansehen und der Reihe nach markieren, was passiert (z. B. Blasen → Ins Maul spritzen → Sperma im Mund lassen → gurgeln → schlucken). Die Agenten ordnen logisch, melden Lücken und schlagen das Nächste vor (gelb umrandet). Beim Ergebnis kommt das Video mit genau dieser Folge.</p>
     <div class="soGrid"><div><div class="soVid" id="soVid"></div><div class="soFr" id="soFr"></div>
       <div class="edLab" style="margin-top:10px">${esc(g.media.name)}</div>
-      <div class="soCat">Auswertung (wird zum Video gespeichert)</div><textarea id="soDesc" placeholder="Wird aus den angetippten Praktiken geschrieben – du kannst es ändern">${esc(g.desc || soDesc(SO.tags))}</textarea></div>
-    <div><div class="soPick">${sug.length ? `<div class="soCat">⭐ Vorschlag</div><div class="soChips">${sug.map(id => itemById(id)).filter(Boolean).map(chip).join('')}</div>` : ''}
-      ${SO_CATS().map(c => `<div class="soCat">${esc(c.name)}</div><div class="soChips">${quizItems(c).filter(it => textOk(it.l)).map(chip).join('')}</div>`).join('')}
+      <div class="soCat">Auswertung (wird zum Video gespeichert)</div><textarea id="soDesc" placeholder="Wird aus den Markierungen geschrieben – du kannst es ändern">${esc(g.desc || (SO.acts.length ? soActDesc(SO.acts) : soDesc(SO.tags)))}</textarea></div>
+    <div><div class="soPick"><div id="soActs">${soActHtml()}</div>
+      <details class="soMore" ${SO.tags.length && !SO.acts.length ? 'open' : ''}><summary>② Weitere Praktiken aus dem Fragebogen (${SO.tags.length} markiert)</summary>
+      ${sug.length ? `<div class="soCat">⭐ Vorschlag</div><div class="soChips">${sug.map(id => itemById(id)).filter(Boolean).map(chip).join('')}</div>` : ''}
+      ${SO_CATS().map(c => `<div class="soCat">${esc(c.name)}</div><div class="soChips">${quizItems(c).filter(it => textOk(it.l)).map(chip).join('')}</div>`).join('')}</details>
       <div class="soCat">Zusätzlich in Ordner</div><div class="soChips">${allDirs.map(n => `<button data-dir2="${esc(n)}">📁 ${esc(n)}</button>`).join('') || '<small>Noch keine eigenen Ordner</small>'}</div></div>
       <div class="soBtns"><button class="hbtn hGo" data-so="ok">✔ Einordnen & weiter</button><button class="hbtn" data-so="fav">${isFav('g:' + g.gid) ? '★ Vorgemerkt' : '☆ Vormerken'}</button>
         <button class="hbtn" data-so="skip">⏭ Überspringen</button>${auto >= 2 ? `<button class="hbtn" data-so="auto">⚡ ${auto} mit Vorschlag automatisch einordnen</button>` : ''}</div></div></div></div>`;
@@ -3093,12 +3453,16 @@ async function soRender() {
   $('#soVid').appendChild(v); v.play().catch(() => {});
   const fr = $('#soFr'); fr.dataset.u = u; soFrames(u, fr);
 }
-function soApply(g, tags, dirs, desc) {
-  g.tags = tags.slice(); g.desc = desc || soDesc(tags);
+function soApply(g, tags, dirs, desc, acts) {
+  acts = (acts || g.acts || []).slice();
+  tags = [...new Set([...tags, ...acts.map(l => SO_ACTQ[l]).filter(Boolean)])];
+  g.tags = tags.slice(); g.acts = acts; g.desc = desc || (acts.length ? soActDesc(acts) : soDesc(tags));
   S.vlib = S.vlib.filter(x => !(x.cat === IMPORT && x.media.id === g.media.id));
   const put = cat => { if (!S.vlib.some(x => x.cat === cat && x.media.id === g.media.id)) S.vlib.push({cat, media:{...g.media}}); };
   tags.forEach(t => { const f = soFolder(t); if (f) put(vcatAdd(f[0], f[1])); });
   dirs.forEach(put);
+  acts.forEach(l => { const c = soActCat(l); if (c) put(vcatAdd(c, l.replace(/\//g, '-'))); });   // Ordner „Oberkategorie › Handlung“
+  soActLearn(acts);
   const L = S.sortL = S.sortL || {};
   soTok(g.media.name).forEach(tk => tags.forEach(t => { L[tk] = L[tk] || {}; L[tk][t] = Math.min(50, (L[tk][t] || 0) + 1); }));
 }
@@ -3108,6 +3472,18 @@ $('#sorter').addEventListener('click', e => {
   if (d.tag) { const i = SO.tags.indexOf(d.tag); i >= 0 ? SO.tags.splice(i, 1) : SO.tags.push(d.tag);
     document.querySelectorAll(`#sorter [data-tag="${CSS.escape(d.tag)}"]`).forEach(x => x.classList.toggle('on', SO.tags.includes(d.tag)));
     const ta = $('#soDesc'); if (ta && (!ta.dataset.man)) ta.value = soDesc(SO.tags); return; }
+  if (d.act2 || d.ax || d.am || d.aadd || d.asort || d.aown) {   // Handlungen markieren
+    const A = SO.acts;
+    if (d.act2) { const i = A.indexOf(d.act2); i >= 0 ? A.splice(i, 1) : soActInsert(A, d.act2); }
+    else if (d.ax) A.splice(+d.ax, 1);
+    else if (d.am) { const i = +d.am; [A[i - 1], A[i]] = [A[i], A[i - 1]]; }
+    else if (d.aadd) { if (!A.includes(d.aadd)) soActInsert(A, d.aadd); }
+    else if (d.asort) A.sort((a, b) => soActRank(a) - soActRank(b));
+    else if (d.aown) { const l = ($('#soOwnL').value || '').trim().slice(0, 40), c = $('#soOwnC').value;
+      if (!l) { toast('Erst die Handlung eintippen'); return; }
+      if (!soActCats().some(g => g.a.includes(l))) soOwn().push({c, l});
+      if (!A.includes(l)) soActInsert(A, l); save(); }
+    soActRefresh(); return; }
   if (d.dir2) { const i = SO.dirs.indexOf(d.dir2); i >= 0 ? SO.dirs.splice(i, 1) : SO.dirs.push(d.dir2); b.classList.toggle('on', SO.dirs.includes(d.dir2)); return; }
   const next = () => { if (SO.v) { SO.v.pause(); SO.v = null; } SO.i++; save(); soRender(); };
   switch (d.so) {
@@ -3115,8 +3491,9 @@ $('#sorter').addEventListener('click', e => {
     case 'gal': soClose(); GAL.tab = 'dir'; GAL.dir = ''; vgOpen(null); break;
     case 'fav': favToggle('g:' + g.gid); b.textContent = isFav('g:' + g.gid) ? '★ Vorgemerkt' : '☆ Vormerken'; break;
     case 'skip': next(); break;
-    case 'ok': if (!SO.tags.length && !SO.dirs.length) { toast('Erst antippen, was im Video passiert – oder ⏭ Überspringen'); return; }
-      soApply(g, SO.tags, SO.dirs, $('#soDesc').value.trim()); SO.done++; toast(`✔ Eingeordnet: ${SO.tags.map(tagLabel).concat(SO.dirs).join(', ')}`, 2500); next(); break;
+    case 'ok': if (!SO.tags.length && !SO.dirs.length && !SO.acts.length) { toast('Erst markieren, was im Video passiert – oder ⏭ Überspringen'); return; }
+      soApply(g, SO.tags, SO.dirs, $('#soDesc').value.trim(), SO.acts); SO.done++;
+      toast(`✔ Eingeordnet: ${SO.acts.length ? SO.acts.join(' → ') : SO.tags.map(tagLabel).concat(SO.dirs).join(', ')}`, 3000); next(); break;
     case 'auto': { let n = 0; for (let j = SO.i; j < SO.q.length; j++) { const x = SO.q[j], sg = soSuggest(x); if (sg.length) { soApply(x, sg.slice(0, 3), [], ''); n++; } }
       SO.done += n; SO.i = SO.q.length; save(); toast(`⚡ ${n} Videos nach Vorschlag eingeordnet – in der Galerie kannst du jedes noch ändern`, 5000); soRender(); break; }
   }
@@ -3539,8 +3916,11 @@ async function runCard(id, depth = 0) {
   if (busy) return;
   const c = loadCard(id); if (!c) return;
   await sleep(400);
-  if (c.kind === 'single') await doSpin(S.active, depth);
-  else for (const x of c.data.slots) { if (S.wheels[x.slot].enabled) await doSpin(x.slot, depth); }
+  CARDRUN = true;
+  try {
+    if (c.kind === 'single') await doSpin(S.active, depth);
+    else for (const x of c.data.slots) { if (S.wheels[x.slot].enabled) await doSpin(x.slot, depth); }
+  } finally { CARDRUN = false; }
 }
 function undoCard() {
   if (!S.snapshot) return;
@@ -4484,6 +4864,95 @@ $('#bMode').onclick = () => setMode(isSlot() ? 'rad' : 'slot');
 // Joker: eigenes Video/Foto + Text zeigen, danach zugewiesenes Rad / Karte starten
 /* Joker-Abfolgen: mehrere gespeicherte Abläufe (Rad/Karte × Anzahl) */
 const SEQ = {run:false, abort:false};
+/* =====================================================================
+   Joker-Aufgaben: vorher hinterlegte Aufgaben – jede einzeln anhakbar.
+   Quellen: eigene Aufgaben, Felder aller Räder, gespeicherte Spiele, Joker-Überraschungen,
+   Fragebogen-Praktiken und „Nächstes Mal“-Merker. Beim Joker: auswählen oder Zufall.
+   ===================================================================== */
+const JK_OPEN = new Set(['own']);
+function jkGroups() {
+  const J = S.joker, g = [];
+  g.push({id:'own', n:'Eigene Aufgaben', items:J.tasks.map(t => ({k:'t:' + t.id, x:t.text, del:t.id}))});
+  const later = [...new Set((S.x.later || []).map(l => l.text))];
+  if (later.length) g.push({id:'later', n:'⏭ Fürs nächste Mal gemerkt', items:later.map(t => ({k:'l:' + t, x:t}))});
+  S.wheels.forEach((w, i) => {
+    if (!w.enabled && !J.sel.some(k => k.startsWith('f:' + i + ':'))) return;
+    const seen = new Set(), items = w.fields.map(f => String(f.text || '').trim()).filter(t => t && !seen.has(t) && seen.add(t)).map(t => ({k:'f:' + i + ':' + t, x:t.replace(/\n/g, ' · ')}));
+    if (items.length) g.push({id:'w' + i, n:'🎡 ' + (w.title || 'Rad ' + (i + 1)), items});
+  });
+  if (S.presets.length) g.push({id:'cards', n:'💾 Gespeicherte Spiele', items:S.presets.map(c => ({k:'c:' + c.id, x:c.name}))});
+  if (J.seqs.length) g.push({id:'seqs', n:'★ Joker-Überraschungen', items:J.seqs.map(q => ({k:'q:' + q.id, x:q.name}))});
+  QUIZ.forEach(c => g.push({id:'k' + c.id, n:'💞 ' + c.name, items:c.items.map(it => { const q = c.id + '.' + it[0]; return {k:'k:' + q, x:it[2] || it[1], tabu:isTabu(q)}; })}));
+  return g;
+}
+function jkResolve(k) {
+  const J = S.joker, a = k.indexOf(':'), typ = k.slice(0, a), v = k.slice(a + 1);
+  if (typ === 't') { const t = J.tasks.find(x => x.id === v); return t && {kind:'task', k, text:t.text}; }
+  if (typ === 'l') return {kind:'task', k, text:v};
+  if (typ === 'f') { const b = v.indexOf(':'), i = +v.slice(0, b), t = v.slice(b + 1), w = S.wheels[i];
+    const f = w && w.fields.find(x => String(x.text || '').trim() === t); return {kind:'task', k, text:t, field:f || null, wheel:w ? w.title : ''}; }
+  if (typ === 'c') { const c = S.presets.find(x => x.id === v); return c && {kind:'card', k, text:c.name, card:c.id}; }
+  if (typ === 'q') { const q = J.seqs.find(x => x.id === v); return q && q.steps.length && {kind:'seq', k, text:q.name, seq:q}; }
+  if (typ === 'k') { if (isTabu(v)) return null; const [c, id] = v.split('.'), C = QUIZ.find(x => x.id === c), it = C && C.items.find(x => x[0] === id);
+    return it && {kind:'task', k, text:it[2] || it[1], qid:v}; }
+  return null;
+}
+const jkList = () => S.joker.sel.map(jkResolve).filter(Boolean);
+function jkPick(L) {
+  return new Promise(res => {
+    const box = $('#jpick'), ic = {task:'✦', card:'💾', seq:'★'};
+    box.querySelector('.jt').textContent = '★ Joker – Aufgabe wählen';
+    $('#jpickList').innerHTML = `<button class="jbtn" data-pick="r">🎲 Zufall<small>Eine der ${L.length} angehakten Aufgaben</small></button>`
+      + L.map((x, i) => `<button class="jbtn" data-pick="${i}">${ic[x.kind]} ${esc(x.text)}${x.wheel ? `<small>${esc(x.wheel)}</small>` : x.kind === 'card' ? '<small>Gespeichertes Spiel</small>' : x.kind === 'seq' ? '<small>Joker-Überraschung</small>' : ''}</button>`).join('');
+    box.classList.add('show');
+    const fin = v => { box.classList.remove('show'); box.onclick = null; box.querySelector('.jt').textContent = '★ Joker – Abfolge wählen'; res(v); };
+    box.onclick = e => { const b = e.target.closest('[data-pick]');
+      if (b) fin(b.dataset.pick === 'r' ? pick(L) : L[+b.dataset.pick]); else if (e.target.id === 'jpickX' || e.target === box) fin(null); };
+  });
+}
+// Feld, das der Joker groß zeigt
+function jkField(it) {
+  const J = S.joker, f = it.field || {};
+  const o = Object.assign({}, J, {text:it.text, next:-1, card:null, media:f.media || J.media});
+  if (it.kind === 'card') o.card = it.card;
+  else if (f.next >= 0) o.next = f.next; else if (f.card) o.card = f.card;
+  ['qid', 'desc', 'vcat', 'steps'].forEach(q => { if (f[q]) o[q] = f[q]; });
+  if (it.qid) o.qid = it.qid;
+  if (f.toy && +f.toy.lvl > 0) o.toy = f.toy;
+  return o;
+}
+function jkPanel() {
+  const J = S.joker, on = k => J.sel.includes(k), G = jkGroups();
+  return `<div class="hint" style="margin-top:12px"><b style="color:#ffe08a">Aufgaben für den Joker</b> – Hinterlegte Aufgaben einzeln anhaken. Beim Joker kommt dann eine davon. Ist nichts angehakt, gilt die Zuweisung oben bzw. die Überraschung.</div>
+    <label>Beim Drücken des Jokers<select data-jk="jm"><option value="wahl" ${J.jm !== 'zufall' ? 'selected' : ''}>Liste zeigen, wir wählen selbst</option><option value="zufall" ${J.jm === 'zufall' ? 'selected' : ''}>Zufällig eine der angehakten</option></select></label>
+    <label>Neue Aufgabe hinterlegen<input type="text" id="jkNew" maxlength="200" placeholder="z. B. 5 Minuten nur küssen"></label>
+    <button class="b pri" data-jka="add">+ Aufgabe hinterlegen</button>
+    <div class="hint">Angehakt: <b>${J.sel.length}</b> ${J.sel.length ? '<button data-jka="clear">alle Haken weg</button>' : ''}</div>
+    ${G.map(g => `<details class="jkG" data-jg="${g.id}" ${JK_OPEN.has(g.id) ? 'open' : ''}><summary>${esc(g.n)} <small>(${g.items.filter(x => on(x.k)).length}/${g.items.length})</small></summary>
+      ${g.items.length ? `<div class="jkB"><button data-jka="all" data-g="${g.id}">alle anhaken</button><button data-jka="none" data-g="${g.id}">keine</button></div>` : ''}
+      ${g.items.map(x => `<div class="jkI"><label class="chk"><input type="checkbox" data-jsel="${esc(x.k)}" ${on(x.k) ? 'checked' : ''} ${x.tabu ? 'disabled' : ''}> ${esc(x.x)}${x.tabu ? ' <i>(tabu)</i>' : ''}</label>${x.del ? `<button class="x" data-jka="del" data-id="${esc(x.del)}">🗑</button>` : ''}</div>`).join('') || '<div class="hint">Noch keine eigenen Aufgaben – oben eintragen.</div>'}</details>`).join('')}`;
+}
+(() => {
+  const P = $('#panel');
+  P.addEventListener('toggle', e => { const d = e.target; if (d && d.dataset && d.dataset.jg) d.open ? JK_OPEN.add(d.dataset.jg) : JK_OPEN.delete(d.dataset.jg); }, true);
+  P.addEventListener('change', e => {
+    const el = e.target, J = S.joker;
+    if (el.dataset.jsel != null) { const k = el.dataset.jsel; J.sel = J.sel.filter(x => x !== k); if (el.checked) J.sel.push(k); save();
+      const s = el.closest('details').querySelector('summary small'); if (s) { const all = el.closest('details').querySelectorAll('[data-jsel]'); s.textContent = `(${[...all].filter(x => x.checked).length}/${all.length})`; } return; }
+    if (el.dataset.jk === 'jm') { J.jm = el.value; save(); }
+  });
+  P.addEventListener('click', e => {
+    const b = e.target.closest('[data-jka]'); if (!b) return;
+    const J = S.joker, a = b.dataset.jka; JK_OPEN.add('own');
+    if (a === 'add') { const inp = $('#jkNew'), t = inp && inp.value.trim(); if (!t) { toast('Erst eine Aufgabe eintippen'); return; }
+      const id = 'a' + uid(); J.tasks.push({id, text:t}); J.sel.push('t:' + id); toast('★ Aufgabe hinterlegt und angehakt'); }
+    else if (a === 'del') { J.tasks = J.tasks.filter(x => x.id !== b.dataset.id); J.sel = J.sel.filter(x => x !== 't:' + b.dataset.id); }
+    else if (a === 'clear') J.sel = [];
+    else { const g = jkGroups().find(x => x.id === b.dataset.g); if (!g) return; JK_OPEN.add(g.id);
+      const ks = g.items.filter(x => !x.tabu).map(x => x.k); J.sel = J.sel.filter(x => !ks.includes(x)); if (a === 'all') J.sel.push(...ks); }
+    save(); renderPanel();
+  });
+})();
 function pickSeq(seqs) {
   return new Promise(res => {
     const box = $('#jpick');
@@ -4514,13 +4983,21 @@ async function runSeq(q) {
 }
 $('#bJoker').onclick = async () => {
   if (busy || SEQ.run) return;
-  const seqs = S.joker.seqs.filter(q => q.steps.length);
-  let seq = null;
-  if (seqs.length === 1) seq = seqs[0];
-  else if (seqs.length > 1) { seq = await pickSeq(seqs); if (!seq) return; }
+  const L = jkList();
+  let seq = null, it = null;
+  if (L.length) {   // hinterlegte Aufgaben: auswählen oder Zufall
+    it = S.joker.jm === 'zufall' || L.length === 1 ? pick(L) : await jkPick(L); if (!it) return;
+    if (it.kind === 'seq') seq = it.seq;
+  } else {
+    const seqs = S.joker.seqs.filter(q => q.steps.length);
+    if (seqs.length === 1) seq = seqs[0];
+    else if (seqs.length > 1) { seq = await pickSeq(seqs); if (!seq) return; }
+  }
   busy = true; ac(); setBusy(true); closePanel();
   SEQ.run = !!seq;   // Stopp-Button schon beim Joker-Intro zeigen
-  const next = await showResult({unit:'', title:'Joker'}, 0, 0, Object.assign({}, S.joker, seq ? {next:-1, card:null} : {}));
+  const jf = seq ? Object.assign({}, S.joker, {next:-1, card:null}, it ? {text:S.joker.text + '\n' + it.text} : {}) : it ? jkField(it) : Object.assign({}, S.joker);
+  if (it && it.kind === 'task') quizLog(jf);
+  const next = await showResult({unit:'', title:'Joker'}, 0, 0, jf);
   SEQ.run = false; busy = false; setBusy(false); render();
   if (seq) { if (!SEQ.abort) await runSeq(seq); SEQ.abort = false; }
   else if (next) await runNext(next, 1);
@@ -4565,7 +5042,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110801;
+const APP_BUILD = 2026110901;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -4624,7 +5101,7 @@ $('#updReset').onclick = e => { const b = e.currentTarget; if (!updNative()) ret
 setTimeout(() => { if (navigator.onLine !== false) updCheck(true); }, 4000);
 
 seedFlows();
-window.SexRad = window.FickRad = {drawWheel, newWheel, vlibPick, pickWeighted, themeWheels, GAL, vgOpen, genBuild, genParse, fbOpen, THEMES, themePaths, loadTheme, flowPaths, flowSave, applyWheelSet, LASTRUN, get state() { return S; }, setStufe:(...a) => setStufe(...a), openQuiz:(...a) => openQuiz(...a), openLib:(...a) => openLib(...a), get G() { return G; }};
+window.SexRad = window.FickRad = {doSpin:(...a) => doSpin(...a), lgOrder, roundOrder, spinAll, openSetup:(...a) => openSetup(...a), drawWheel, newWheel, vlibPick, pickWeighted, themeWheels, GAL, vgOpen, genBuild, genParse, fbOpen, THEMES, themePaths, loadTheme, flowPaths, flowSave, applyWheelSet, LASTRUN, get state() { return S; }, setStufe:(...a) => setStufe(...a), openQuiz:(...a) => openQuiz(...a), openLib:(...a) => openLib(...a), get G() { return G; }};
 
 /* =====================================================================
    Abo über Google Play
@@ -4907,6 +5384,8 @@ function renderMenu() {
       <button class="mb" data-m="bdsm" ${stufeCap() < 4 ? 'style="opacity:.5"' : ''}>⛓ BDSM – Hart & schmutzig<small>Dominanz, Fesseln, Schmerz, Benutzen, Dreckig</small></button>
       <button class="mb" data-m="lib">📚 Vorlagen<small>Fertige und eigene Spiele</small></button>
       <button class="mb" data-m="mode">${isSlot() ? '🎡 Glücksrad' : '🎰 Slotmaschine'}<small>${isSlot() ? 'Ein Rad nach dem anderen drehen' : 'Alle Räder auf einmal ziehen'}</small></button>
+      <button class="mb" data-m="spinAll">🎡 Alle Räder zusammen: ${S.settings.spinAll !== false ? 'an' : 'aus'}<small>Erst drehen alle, dann kommt das Ergebnis</small></button>
+      <button class="mb" data-m="logic">🧠 Logischer Ablauf: ${S.settings.logic !== false ? 'an' : 'aus'}<small>Agenten ordnen die Aufgaben sinnvoll</small></button>
       <button class="mb" data-m="home">🏠 Startbildschirm<small>${open ? open + ' offene Gutscheine' : 'Was habt ihr heute vor?'}</small></button></div>
     <details class="hMore"><summary>Weitere Spielarten <span class="arr">▾</span></summary><div class="mGrid">
       <button class="mb" data-m="extrem">⛓ Extrem-Training<small>Nur Heavy Duty · Bondage, Anal, Kehle, Sperma</small></button>
@@ -4921,6 +5400,7 @@ function renderMenu() {
       <button class="mb" data-m="gal">🗂 Galerie & Ordner<small>Videos, Sequenzen, Favoriten, Zufall aus Ordnern</small></button>
       <button class="mb" data-m="sort">🧭 Videos einsortieren<small>Import-Ordner Video für Video auswerten und in Ordner legen</small></button>
       <button class="mb" data-m="cards">💾 Gespeicherte Spiele<small>Speichern, laden, teilen</small></button>
+      <button class="mb" data-m="joker">★ Joker-Aufgaben<small>Hinterlegte Aufgaben einzeln anhaken</small></button>
       <button class="mb" data-m="opts">🔧 Optionen<small>Ton, Drehdauer, Enthüllung, Sprüche, Export</small></button>
       <button class="mb ${nw ? 'new' : ''}" data-m="upd">⟳ Update<small>${nw ? 'Neue Version verfügbar!' : 'Neue Version suchen'}</small></button>
       <button class="mb" data-m="pro">🛠 Profi-Ansicht<small>Alle Knöpfe wie früher in der Leiste</small></button></div>` : ''}
@@ -4959,6 +5439,8 @@ $('#menu').addEventListener('click', e => {
     case 'gal': close(); vgOpen(null); break;
     case 'sort': close(); soOpen(false); break;
     case 'cards': openSetup('cards'); break;
+    case 'joker': openSetup('joker'); break;
+    case 'spinAll': case 'logic': S.settings[m] = S.settings[m] === false; save(); renderMenu(); toast((m === 'logic' ? '🧠 Logischer Ablauf ' : '🎡 Alle Räder zusammen ') + (S.settings[m] !== false ? 'an' : 'aus')); break;
     case 'opts': openSetup('opts'); break;
     case 'upd': close(); updOpen(); break;
     case 'nightm': S.settings.night = !S.settings.night; save(); applyStufe(); renderMenu(); break;
@@ -5250,8 +5732,12 @@ function kopfkino(f, w, L) {
 function resultDecor(w, f, i) {
   const R = $('#result'), txt = $('#rTxt'), L = curStufe();
   R.classList.toggle('reveal', !!S.settings.reveal);
+  R.classList.toggle('build', bldOn());
   let k = 0;
-  if (S.settings.reveal) {
+  if (bldOn()) {   // Zeile für Zeile von oben nach unten einblenden
+    const t0 = S.settings.reveal ? 0.75 : 0.15, lines = bldLines(t0);
+    [...$('#rText').children].forEach((el, j) => { el.style.animationDelay = el.id === 'rTxt' || el.id === 'rLine' || el.id === 'rDone' ? '' : (j < 2 ? t0 * 0.5 : t0 + 0.38 * lines.length).toFixed(2) + 's'; });
+  } else if (S.settings.reveal) {
     const t = txt.textContent;
     txt.innerHTML = t.split('\n').map(line => line.split(/\s+/).filter(Boolean)
       .map(wd => `<span class="wd" style="animation-delay:${(0.7 + 0.16 * k++).toFixed(2)}s">${esc(wd)}</span>`).join(' ')).join('<br>\n');
@@ -5260,7 +5746,7 @@ function resultDecor(w, f, i) {
   $('#rPre').textContent = truth ? 'Ehrlich antworten:' : S.settings.pre !== false && !(w && w.unit) ? pick(PRE[L]) : '';
   const line = S.settings.lines && !truth ? kopfkino(f, w, L) : '';
   const el = $('#rLine'); el.textContent = line; el.style.display = line ? '' : 'none';
-  el.style.animationDelay = (S.settings.reveal ? 0.9 + 0.16 * k : 0.4).toFixed(2) + 's';
+  el.style.animationDelay = (bldOn() ? (S.settings.reveal ? 0.75 : 0.15) + 0.38 * txt.children.length + 0.2 : S.settings.reveal ? 0.9 + 0.16 * k : 0.4).toFixed(2) + 's';
   RES.line = line;
   document.querySelectorAll('#rFeel button').forEach(b => b.classList.remove('on'));
   document.querySelectorAll('#rDone [data-done]').forEach(b => b.classList.remove('on'));
