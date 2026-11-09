@@ -3537,7 +3537,39 @@ async function soRender() {
       <div class="soBtns"><button class="hbtn hGo" data-so="ok">✔ Einordnen & weiter</button><button class="hbtn" data-so="fav">${isFav('g:' + g.gid) ? '★ Vorgemerkt' : '☆ Vormerken'}</button>
         <button class="hbtn" data-so="skip">⏭ Überspringen</button><button class="hbtn soDel" data-so="del">🗑 Video löschen</button>${auto >= 2 ? `<button class="hbtn" data-so="auto">⚡ ${auto} mit Vorschlag automatisch einordnen</button>` : ''}</div></div></div></div>`;
   const u = await mediaURL(g.media.id); if (!u || SO.q[SO.i] !== g) return;
-  if (g.media.type === 'image') { $('#soVid').innerHTML = `<img src="${u}" alt="">`; return; }
+  if (g.media.type === 'image') {
+    const sv = $('#soVid');
+    sv.innerHTML = `<img src="${u}" alt="" style="cursor:pointer" id="soImg">`;
+    const img = $('#soImg');
+    if (img) img.addEventListener('click', () => {
+      const m = document.createElement('div');
+      m.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center';
+      const cont = document.createElement('div');
+      cont.style.cssText = 'flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;width:100%';
+      const img2 = document.createElement('img');
+      img2.src = u;
+      img2.alt = '';
+      img2.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;cursor:grab';
+      cont.appendChild(img2);
+      const zoomCtl = document.createElement('div');
+      zoomCtl.style.cssText = 'width:90%;max-width:400px;padding:12px;background:#333;border-radius:8px;display:flex;align-items:center;gap:8px;margin-bottom:12px';
+      zoomCtl.innerHTML = `<small>🔍</small><input type="range" id="soZoom" min="100" max="300" value="100" style="flex:1"><small id="soZoomVal">100%</small>`;
+      m.appendChild(cont);
+      m.appendChild(zoomCtl);
+      const zoomIn = $('#soZoom');
+      if (zoomIn) zoomIn.addEventListener('input', (e) => {
+        const z = e.target.value;
+        img2.style.maxWidth = z + '%';
+        img2.style.maxHeight = z + '%';
+        $('#soZoomVal').textContent = z + '%';
+      });
+      m.addEventListener('click', (e) => { if (e.target === m || e.target === cont) m.remove(); });
+      document.body.appendChild(m);
+      const close = (e) => { if (e.key === 'Escape') { m.remove(); document.removeEventListener('keydown', close); } };
+      document.addEventListener('keydown', close);
+    });
+    return;
+  }
   const v = SO.v = document.createElement('video'); v.src = u; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.controls = true; v.setAttribute('playsinline', '');
   $('#soVid').appendChild(v); v.play().catch(() => {});
   SO.A = +g.media.start || 0; SO.B = +g.media.end || 0; SO.D = 0;
@@ -5171,7 +5203,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110905;
+const APP_BUILD = 2026110906;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
