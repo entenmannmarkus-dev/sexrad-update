@@ -412,7 +412,13 @@
   .soAg{margin:8px 0;padding:8px 10px;border-radius:10px;background:rgba(40,90,50,.18);border:1px solid #3c6a46;font:600 13px system-ui;color:#bfe6c8}
   .soAg div{margin:3px 0}.soAg button,.soOwn button{padding:4px 10px;border-radius:8px;border:1px solid #8a6a36;background:#1a0d0f;color:#f6e7c8;font:700 12px system-ui}
   .soOwn{display:flex;gap:6px;margin-top:10px}.soOwn input,.soOwn select{flex:1;min-width:0;padding:7px;border-radius:9px;border:1px solid #5a3a2a;background:#120809;color:#f6e7c8}
-  .soMore{margin-top:12px}.soMore summary{cursor:pointer;font:800 13px system-ui;color:#c9a24e;letter-spacing:.06em}
+  .soMore{margin-top:12px}
+  .soTrim{margin-top:8px}.soTrim .edRow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}.soTrim .edRow b{color:#ffe08a;font:700 14px system-ui}
+  .soTrim .edRow button{padding:7px 11px;border-radius:9px;border:1px solid #8a6a36;background:#1a0d0f;color:#f6e7c8;font:700 13px system-ui}
+  .soCatEd{margin-top:12px;padding:10px;border:1px solid #5a3a2a;border-radius:12px;background:rgba(0,0,0,.3)}
+  .soCE{margin:8px 0;padding:8px;border-radius:10px;background:rgba(26,13,15,.7)}
+  .soCEh{display:flex;gap:6px;align-items:center;margin-bottom:6px}.soCEh input{flex:1;min-width:0;padding:7px;border-radius:9px;border:1px solid #8a6a36;background:#120809;color:#ffe08a;font:800 15px system-ui}
+  .soCEh button{padding:6px 10px;border-radius:8px;border:1px solid #8a6a36;background:#1a0d0f;color:#f6e7c8;font:700 13px system-ui}.soMore summary{cursor:pointer;font:800 13px system-ui;color:#c9a24e;letter-spacing:.06em}
   #rVid .vaH{display:block;font-size:.8em;opacity:.8;margin-bottom:.4vh}
   #rVid .va{display:block}#rVid .va b{display:inline-block;min-width:1.4em;color:#e0464e}
   #rVid .bl{animation:blIn .6s ease-out both}
@@ -2462,6 +2468,7 @@ function renderPanel() {
   <details ${op('wheels')} data-sec="wheels"><summary>Räder (${visibleIdx().length} sichtbar)</summary>
     <div class="hint">Häkchen = Rad anzeigen (Lücken erlaubt). Antippen = bearbeiten.</div>
     <div class="wgrid">${chips}</div>
+    <label>🎡 Rad aus Kategorie hinzufügen<select id="soCatW"><option value="">Kategorie wählen …</option>${soActCats().filter(g => g.a.length >= 2).map(g => `<option>${esc(g.c)}</option>`).join('')}</select></label>
     ${lgOn() && visibleIdx().length > 1 ? `<div class="hint">🧠 Ablauf-Agenten · Reihenfolge: ${roundOrder().map(i => esc(S.wheels[i].title || 'Rad ' + (i + 1))).join(' → ')}${lgChained(visibleIdx()) ? ' (feste Kette der Räder)' : ''}</div>` : ''}</details>
 
   <details ${op('joker')} data-sec="joker"><summary>★ Joker</summary>
@@ -3326,11 +3333,65 @@ const SO_ACTQ = {'Küssen':'vor.kuss', 'Ausziehen':'vor.strip', 'Streicheln':'vo
   'Blasen':'vor.oral_sie', 'Deepthroat':'vor.deep', 'Missionar':'pos.missionar', 'Reiterin':'pos.reiter', 'Doggy':'pos.doggy', 'Löffelchen':'pos.loeffel', 'Im Stehen':'pos.stehend',
   'Fesseln':'art.fessel', 'Augen verbinden':'art.augen', 'Haare ziehen':'art.haare', 'Spanking':'art.spank', 'Ins Maul spritzen':'fin.mund', 'Ins Gesicht spritzen':'fin.gesicht'};
 const soOwn = () => (S.x.soOwn = Array.isArray(S.x.soOwn) ? S.x.soOwn : []);
-function soActCats() { return SO_ACT.map((g, ci) => ({c:g.c, ci, a:[...g.a, ...soOwn().filter(o => o.c === g.c).map(o => o.l)]})); }
-function soActRank(l) {
-  for (const g of soActCats()) { const i = g.a.indexOf(l); if (i >= 0) return g.ci * 100 + (i < SO_ACT[g.ci].a.length ? i : 50); }
-  return 450;
+// Oberkategorien und Handlungen sind frei erweiterbar (S.x.soCats); Start mit den Vorgaben + früheren eigenen Handlungen
+function soCatsData() {
+  if (!Array.isArray(S.x.soCats)) S.x.soCats = SO_ACT.map(g => ({c:g.c, a:[...g.a, ...soOwn().filter(o => o.c === g.c).map(o => o.l)]}));
+  return S.x.soCats;
 }
+function soActCats() { return soCatsData().map((g, ci) => ({c:g.c, ci, a:g.a})); }
+function soActRank(l) {
+  for (const g of soActCats()) { const i = g.a.indexOf(l); if (i >= 0) return g.ci * 100 + Math.min(i, 99); }
+  return 9900;
+}
+// neue Handlung/Kategorie sofort als Ordner anlegen → erscheint bei jedem Feld unter „🎲 zufällig aus Ordner“; Kategorie-Räder wachsen automatisch mit
+function soCatSync() {
+  soActCats().forEach(g => g.a.forEach(l => vcatAdd(g.c.replace(/\//g, '-'), l.replace(/\//g, '-'))));
+  let n = 0;
+  S.wheels.forEach(w => { if (!w.actCat) return; const g = soActCats().find(x => x.c === w.actCat); if (!g) return;
+    g.a.forEach(l => { if (w.fields.length < MAX_FIELDS && !w.fields.some(f => f.vcat === g.c + '/' + l || f.text === l)) { w.fields.push(Object.assign(newField(l), {vcat:g.c.replace(/\//g, '-') + '/' + l.replace(/\//g, '-')})); n++; } }); });
+  save(); if (n) { render(); renderPanel(); }
+  return n;
+}
+function soCatWheel(c) {
+  const g = soActCats().find(x => x.c === c); if (!g || g.a.length < 2) { toast('Für ein Rad braucht die Kategorie mindestens 2 Handlungen'); return; }
+  soCatSync();
+  let wi = S.wheels.findIndex(w => w.enabled && w.actCat === c);
+  if (wi < 0) wi = S.wheels.findIndex(w => !w.enabled); if (wi < 0) wi = S.active;
+  const cc = c.replace(/\//g, '-');
+  Object.assign(S.wheels[wi], {title:c.slice(0, 30), actCat:c, vcat:cc, enabled:true, history:[],
+    fields:g.a.slice(0, MAX_FIELDS).map(l => Object.assign(newField(l), {vcat:cc + '/' + l.replace(/\//g, '-')}))});
+  S.active = wi; save(); render(); renderPanel(); updateRail();
+  toast(`🎡 Rad „${c}“ mit ${Math.min(g.a.length, MAX_FIELDS)} Handlungen – jedes Feld spielt ein Video aus seinem Ordner. Neue Handlungen kommen automatisch dazu.`, 5000);
+}
+function soCatHtml() {
+  return `<div class="soCatEd"><div class="soCat">⚙ Kategorien & Handlungen bearbeiten</div>
+    ${soActCats().map((g, ci) => `<div class="soCE"><div class="soCEh"><input data-cren="${ci}" value="${esc(g.c)}" maxlength="30">
+      ${ci ? `<button data-cup="${ci}" title="nach oben">▲</button>` : ''}<button data-cwh="${ci}" title="Als Rad">🎡 Als Rad</button><button data-cdel="${ci}" title="Kategorie löschen">🗑</button></div>
+      <div class="soChips">${g.a.map((l, ai) => `<span class="soS">${esc(l)}<button data-adel="${ci}:${ai}">✕</button></span>`).join('')}</div>
+      <div class="soOwn"><input data-anew="${ci}" maxlength="40" placeholder="Neue Handlung in ${esc(g.c)}"><button data-aaddc="${ci}">+</button></div></div>`).join('')}
+    <div class="soOwn"><input id="soCatNew" maxlength="30" placeholder="Neue Oberkategorie, z. B. Stellung oder Spermaspiel"><button data-cnew="1">+ Kategorie</button></div>
+    <div class="hint">Jede Handlung wird ein Ordner „Kategorie › Handlung“ und steht sofort bei jedem Rad-Feld unter „🎲 zufällig aus Ordner“. „🎡 Als Rad“ macht ein Rad daraus, das bei neuen Handlungen automatisch mitwächst.</div></div>`;
+}
+function soCatClick(d, b) {
+  const C = soCatsData();
+  if (d.cnew) { const v = ($('#soCatNew').value || '').trim().slice(0, 30); if (!v) { toast('Erst einen Namen eintippen'); return false; }
+    if (C.some(g => g.c.toLowerCase() === v.toLowerCase())) { toast('Die Kategorie gibt es schon'); return false; } C.push({c:v, a:[]}); toast(`🏷 Kategorie „${v}“ angelegt – jetzt Handlungen dazu`); }
+  else if (d.cup) { const i = +d.cup; [C[i - 1], C[i]] = [C[i], C[i - 1]]; }
+  else if (d.cwh) { soCatWheel(C[+d.cwh].c); return false; }
+  else if (d.cdel) { if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Löschen?'; return false; } C.splice(+d.cdel, 1); toast('Kategorie entfernt – Ordner und Videos bleiben'); }
+  else if (d.adel) { const [ci, ai] = d.adel.split(':').map(Number); C[ci].a.splice(ai, 1); }
+  else if (d.aaddc) { const ci = +d.aaddc, inp = document.querySelector(`[data-anew="${ci}"]`), v = (inp && inp.value || '').trim().slice(0, 40);
+    if (!v) { toast('Erst die Handlung eintippen'); return false; } if (!C[ci].a.includes(v)) C[ci].a.push(v); }
+  else return null;
+  const n = soCatSync(); if (n) toast(`🎡 ${n} neue${n > 1 ? '' : 's'} Feld${n > 1 ? 'er' : ''} in den Kategorie-Rädern`, 3000);
+  return true;
+}
+function soCatOpen() {   // eigenständig aus dem Menü
+  closeHome(); $('#menu').classList.remove('show'); vgClose(); SO.edit = true; SO.only = true;
+  $('#sorter').classList.add('show'); soCatRender();
+}
+function soCatRender() { $('#sorter').innerHTML = `<button class="ovx" data-so="x">✕</button><div class="ovin"><h2 class="hTitle" style="font-size:40px">🏷 Kategorien & Handlungen</h2>
+  <p class="hMotto">Eigene Oberkategorien (z. B. Vorspiel, Stellung, Spermaspiel) und Handlungen anlegen. Sie stehen beim Einsortieren zum Markieren bereit und automatisch als Option an den Rädern.</p>${soCatHtml()}</div>`; }
 const soActCat = l => (soActCats().find(g => g.a.includes(l)) || {}).c || '';
 // Reihenfolge-Agent: neue Markierung an die logische Stelle (gleicher Rang = hinten anstellen)
 function soActInsert(list, l) {
@@ -3377,7 +3438,8 @@ function soActHtml() {
     <div class="soSeq">${A.length ? A.map((l, i) => `<span class="soS"><b>${i + 1}</b> ${esc(l)}${i ? `<button data-am="${i}" title="früher">◀</button>` : ''}<button data-ax="${i}" title="weg">✕</button></span>`).join('<i>→</i>') : '<small>Noch nichts markiert – z. B. Blasen, dann Ins Maul spritzen, dann Sperma gurgeln …</small>'}</div>
     ${chk.length ? `<div class="soAg">${chk.map(c => `<div>🧠 ${esc(c.t)}${c.add ? ` <button data-aadd="${esc(c.add)}">+ ${esc(c.add)}</button>` : ''}${c.sort ? ' <button data-asort="1">🧠 Logisch ordnen</button>' : ''}</div>`).join('')}</div>` : ''}
     ${soActCats().map(g => `<div class="soCat">${esc(g.c)}</div><div class="soChips">${g.a.map(l => `<button class="${A.includes(l) ? 'on' : ''} ${nx.includes(l) ? 'sug' : ''}" data-act2="${esc(l)}">${A.includes(l) ? (A.indexOf(l) + 1) + ' · ' : ''}${esc(l)}</button>`).join('')}</div>`).join('')}
-    <div class="soOwn"><select id="soOwnC">${SO_ACT.map(g => `<option>${esc(g.c)}</option>`).join('')}</select><input id="soOwnL" maxlength="40" placeholder="Eigene Handlung"><button data-aown="1">+ Handlung</button></div>`;
+    <div class="soOwn"><select id="soOwnC">${soActCats().map(g => `<option>${esc(g.c)}</option>`).join('')}</select><input id="soOwnL" maxlength="40" placeholder="Eigene Handlung"><button data-aown="1">+ Handlung</button><button data-cedit="1">⚙ Kategorien</button></div>
+    ${SO.edit ? soCatHtml() : ''}`;
 }
 function soActRefresh() {
   const box = $('#soActs'); if (box) box.innerHTML = soActHtml();
@@ -3414,7 +3476,7 @@ function soOpen(all) {
   if (!SO.q.length) { toast('Nichts einzusortieren – alle Videos liegen schon in Ordnern', 4000); return; }
   vgClose(); $('#menu').classList.remove('show'); closeHome(); $('#sorter').classList.add('show'); soRender();
 }
-function soClose() { if (SO.v) { SO.v.pause(); SO.v.removeAttribute('src'); SO.v.load(); SO.v = null; } $('#sorter').classList.remove('show'); save(); }
+function soClose() { SO.only = false; SO.edit = false; if (SO.v) { SO.v.pause(); SO.v.removeAttribute('src'); SO.v.load(); SO.v = null; } $('#sorter').classList.remove('show'); save(); }
 async function soFrames(u, box) {
   try { const v = document.createElement('video'); v.muted = true; v.preload = 'auto'; v.src = u; v.playsInline = true;
     await new Promise((r, j) => { v.onloadedmetadata = r; v.onerror = j; setTimeout(j, 8000); });
@@ -3437,7 +3499,11 @@ async function soRender() {
   X.innerHTML = `<button class="ovx" data-so="x">✕</button><div class="ovin">
     <h2 class="hTitle" style="font-size:40px">🧭 Einsortieren · ${SO.i + 1} von ${SO.q.length}</h2>
     <p class="hMotto">Video ansehen und der Reihe nach markieren, was passiert (z. B. Blasen → Ins Maul spritzen → Sperma im Mund lassen → gurgeln → schlucken). Die Agenten ordnen logisch, melden Lücken und schlagen das Nächste vor (gelb umrandet). Beim Ergebnis kommt das Video mit genau dieser Folge.</p>
-    <div class="soGrid"><div><div class="soVid" id="soVid"></div><div class="soFr" id="soFr"></div>
+    <div class="soGrid"><div><div class="soVid" id="soVid"></div>
+      ${g.media.type === 'video' ? `<div class="soTrim"><div class="soCat">✂ Schnitt – nur dieser Teil wird später gezeigt</div>
+        <div class="trim"><i class="trk"></i><i class="rng" id="soRng"></i><input id="soA" type="range" min="0" max="1" step="0.1" value="0"><input id="soB" type="range" min="0" max="1" step="0.1" value="1"></div>
+        <div class="edRow"><button class="b" data-trim="a">⟦ Anfang = jetzt</button><b id="soAB">0:00 – 0:00</b><button class="b" data-trim="b">Ende = jetzt ⟧</button><button class="b" data-trim="all">↺ Ganz</button><button class="b" data-trim="play">▶ Ausschnitt</button></div></div>` : ''}
+      <div class="soFr" id="soFr"></div>
       <div class="edLab" style="margin-top:10px">${esc(g.media.name)}</div>
       <div class="soCat">Auswertung (wird zum Video gespeichert)</div><textarea id="soDesc" placeholder="Wird aus den Markierungen geschrieben – du kannst es ändern">${esc(g.desc || (SO.acts.length ? soActDesc(SO.acts) : soDesc(SO.tags)))}</textarea></div>
     <div><div class="soPick"><div id="soActs">${soActHtml()}</div>
@@ -3451,9 +3517,31 @@ async function soRender() {
   if (g.media.type === 'image') { $('#soVid').innerHTML = `<img src="${u}" alt="">`; return; }
   const v = SO.v = document.createElement('video'); v.src = u; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.controls = true; v.setAttribute('playsinline', '');
   $('#soVid').appendChild(v); v.play().catch(() => {});
+  SO.A = +g.media.start || 0; SO.B = +g.media.end || 0; SO.D = 0;
+  v.addEventListener('loadedmetadata', () => { SO.D = v.duration || 0; if (!(SO.B > SO.A)) SO.B = SO.D; SO.A = Math.min(SO.A, SO.D); soTrimUi(); if (SO.A) v.currentTime = SO.A; });
+  v.addEventListener('timeupdate', () => { if (SO.D && SO.B < SO.D - 0.2 && v.currentTime > SO.B) v.currentTime = SO.A; });
   const fr = $('#soFr'); fr.dataset.u = u; soFrames(u, fr);
 }
+function soTrimUi(fromInput) {
+  const a = $('#soA'), b = $('#soB'); if (!a || !SO.D) return;
+  a.max = b.max = SO.D.toFixed(1); if (!fromInput) { a.value = SO.A; b.value = SO.B; }
+  $('#soAB').textContent = `${mmss(SO.A)} – ${mmss(SO.B)} (${Math.round(SO.B - SO.A)} s)`;
+  const r = $('#soRng'); if (r) { r.style.left = (SO.A / SO.D * 100) + '%'; r.style.width = ((SO.B - SO.A) / SO.D * 100) + '%'; }
+  if (fromInput && SO.v) SO.v.currentTime = fromInput && document.activeElement === b ? Math.max(SO.A, SO.B - 2) : SO.A;
+}
+function soTrim(k) {
+  const v = SO.v; if (!v || !SO.D) return;
+  if (k === 'a') SO.A = Math.min(v.currentTime, SO.B - 0.5);
+  else if (k === 'b') SO.B = Math.max(v.currentTime, SO.A + 0.5);
+  else if (k === 'all') { SO.A = 0; SO.B = SO.D; }
+  else if (k === 'play') { v.currentTime = SO.A; v.play().catch(() => {}); return; }
+  soTrimUi();
+}
 function soApply(g, tags, dirs, desc, acts) {
+  if (SO.D && SO.q[SO.i] === g) {   // Schnitt übernehmen (Galerie + alle Ordner-Einträge dieses Videos)
+    const full = SO.A < 0.3 && SO.B > SO.D - 0.3, set = m => { if (full) { delete m.start; delete m.end; } else { m.start = +SO.A.toFixed(1); m.end = +SO.B.toFixed(1); } };
+    set(g.media); S.vlib.forEach(x => { if (x.media.id === g.media.id) set(x.media); });
+  }
   acts = (acts || g.acts || []).slice();
   tags = [...new Set([...tags, ...acts.map(l => SO_ACTQ[l]).filter(Boolean)])];
   g.tags = tags.slice(); g.acts = acts; g.desc = desc || (acts.length ? soActDesc(acts) : soDesc(tags));
@@ -3469,6 +3557,9 @@ function soApply(g, tags, dirs, desc, acts) {
 $('#sorter').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) { const im = e.target.closest('#soFr img'); if (im && SO.v) { SO.v.currentTime = +im.dataset.t; SO.v.play().catch(() => {}); } return; }
   const g = SO.q[SO.i], d = b.dataset;
+  if (d.cedit) { SO.edit = !SO.edit; soActRefresh(); return; }
+  if (d.cnew || d.cup || d.cwh || d.cdel || d.adel || d.aaddc) { const r = soCatClick(d, b); if (r) { SO.only ? soCatRender() : soActRefresh(); } return; }
+  if (d.trim) { soTrim(d.trim); return; }
   if (d.tag) { const i = SO.tags.indexOf(d.tag); i >= 0 ? SO.tags.splice(i, 1) : SO.tags.push(d.tag);
     document.querySelectorAll(`#sorter [data-tag="${CSS.escape(d.tag)}"]`).forEach(x => x.classList.toggle('on', SO.tags.includes(d.tag)));
     const ta = $('#soDesc'); if (ta && (!ta.dataset.man)) ta.value = soDesc(SO.tags); return; }
@@ -3481,8 +3572,8 @@ $('#sorter').addEventListener('click', e => {
     else if (d.asort) A.sort((a, b) => soActRank(a) - soActRank(b));
     else if (d.aown) { const l = ($('#soOwnL').value || '').trim().slice(0, 40), c = $('#soOwnC').value;
       if (!l) { toast('Erst die Handlung eintippen'); return; }
-      if (!soActCats().some(g => g.a.includes(l))) soOwn().push({c, l});
-      if (!A.includes(l)) soActInsert(A, l); save(); }
+      const G = soCatsData().find(g => g.c === c); if (G && !soActCats().some(g => g.a.includes(l))) G.a.push(l);
+      if (!A.includes(l)) soActInsert(A, l); soCatSync(); }
     soActRefresh(); return; }
   if (d.dir2) { const i = SO.dirs.indexOf(d.dir2); i >= 0 ? SO.dirs.splice(i, 1) : SO.dirs.push(d.dir2); b.classList.toggle('on', SO.dirs.includes(d.dir2)); return; }
   const next = () => { if (SO.v) { SO.v.pause(); SO.v = null; } SO.i++; save(); soRender(); };
@@ -3498,7 +3589,11 @@ $('#sorter').addEventListener('click', e => {
       SO.done += n; SO.i = SO.q.length; save(); toast(`⚡ ${n} Videos nach Vorschlag eingeordnet – in der Galerie kannst du jedes noch ändern`, 5000); soRender(); break; }
   }
 });
-$('#sorter').addEventListener('input', e => { if (e.target.id === 'soDesc') e.target.dataset.man = 1; });
+$('#sorter').addEventListener('input', e => { if (e.target.id === 'soDesc') e.target.dataset.man = 1;
+  if (e.target.id === 'soA' || e.target.id === 'soB') { const v = +e.target.value; if (e.target.id === 'soA') SO.A = Math.min(v, SO.B - 0.5); else SO.B = Math.max(v, SO.A + 0.5); soTrimUi(true); } });
+$('#sorter').addEventListener('change', e => { const ci = e.target.dataset.cren; if (ci == null) return;
+  const v = e.target.value.trim().slice(0, 30), C = soCatsData(); if (!v) { e.target.value = C[+ci].c; return; }
+  const old = C[+ci].c; C[+ci].c = v; S.wheels.forEach(w => { if (w.actCat === old) { w.actCat = v; if (w.title === old) w.title = v.slice(0, 30); } }); soCatSync(); toast(`🏷 „${old}“ heißt jetzt „${v}“`); });
 $('#vgSort').onclick = () => soOpen(false);
 /* ---------- Ordner-Ansicht: eigene Ordner und Unterordner, Zufall daraus ---------- */
 const starH = x => { const g = x.k[0] === 'g' && x.it.tags && x.it.tags.length ? x.it : null;
@@ -4934,6 +5029,7 @@ function jkPanel() {
 }
 (() => {
   const P = $('#panel');
+  P.addEventListener('change', e => { if (e.target.id === 'soCatW' && e.target.value) soCatWheel(e.target.value); });
   P.addEventListener('toggle', e => { const d = e.target; if (d && d.dataset && d.dataset.jg) d.open ? JK_OPEN.add(d.dataset.jg) : JK_OPEN.delete(d.dataset.jg); }, true);
   P.addEventListener('change', e => {
     const el = e.target, J = S.joker;
@@ -5042,7 +5138,7 @@ if (!NATIVE && 'serviceWorker' in navigator && /^https?:$/.test(location.protoco
    Update: neue Version der App aus dem Update-Speicher laden
    (in der Android-App lädt der native Teil die Datei; Daten bleiben erhalten)
    ===================================================================== */
-const APP_BUILD = 2026110901;
+const APP_BUILD = 2026110902;
 const UPD_BASE = 'https://raw.githubusercontent.com/entenmannmarkus-dev/sexrad-update/main/';
 const UPD = { remote: null, busy: false };
 const updNative = () => window.AndroidApp && typeof AndroidApp.updateCheck === 'function';
@@ -5398,7 +5494,8 @@ function renderMenu() {
     ${menuTab === 'set' ? `<div class="hLab">Einrichten</div><div class="mGrid">
       <button class="mb" data-m="setup">⚙ Felder & Räder<small>Texte, Videos, wie oft, danach weiter mit</small></button>
       <button class="mb" data-m="gal">🗂 Galerie & Ordner<small>Videos, Sequenzen, Favoriten, Zufall aus Ordnern</small></button>
-      <button class="mb" data-m="sort">🧭 Videos einsortieren<small>Import-Ordner Video für Video auswerten und in Ordner legen</small></button>
+      <button class="mb" data-m="sort">🧭 Videos einsortieren<small>Handlungen markieren, schneiden, in Ordner legen</small></button>
+      <button class="mb" data-m="acats">🏷 Kategorien & Handlungen<small>Eigene anlegen, automatisch als Rad-Option</small></button>
       <button class="mb" data-m="cards">💾 Gespeicherte Spiele<small>Speichern, laden, teilen</small></button>
       <button class="mb" data-m="joker">★ Joker-Aufgaben<small>Hinterlegte Aufgaben einzeln anhaken</small></button>
       <button class="mb" data-m="opts">🔧 Optionen<small>Ton, Drehdauer, Enthüllung, Sprüche, Export</small></button>
@@ -5438,6 +5535,7 @@ $('#menu').addEventListener('click', e => {
     case 'setup': openSetup('fields'); break;
     case 'gal': close(); vgOpen(null); break;
     case 'sort': close(); soOpen(false); break;
+    case 'acats': close(); soCatOpen(); break;
     case 'cards': openSetup('cards'); break;
     case 'joker': openSetup('joker'); break;
     case 'spinAll': case 'logic': S.settings[m] = S.settings[m] === false; save(); renderMenu(); toast((m === 'logic' ? '🧠 Logischer Ablauf ' : '🎡 Alle Räder zusammen ') + (S.settings[m] !== false ? 'an' : 'aus')); break;
